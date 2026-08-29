@@ -14,6 +14,7 @@ import {
 } from "@/lib/expiry-calculator";
 import { CATEGORY_LABELS, STORAGE_LABELS, type WasteReason } from "@/lib/types";
 import ExpiryBadge from "@/components/ExpiryBadge";
+import IngredientThumb from "@/components/IngredientThumb";
 import DiscardModal from "@/components/DiscardModal";
 import EmptyState from "@/components/EmptyState";
 import RecipeCard from "@/components/RecipeCard";
@@ -79,7 +80,7 @@ export default function IngredientDetailPage({
       </button>
 
       <div className="card overflow-hidden">
-        {/* 이미지 슬롯 (1:1 비율 유지용 상단 영역) */}
+        {/* 식재료 이미지 (1:1) */}
         <div
           className={`flex items-center gap-5 p-6 ${
             level === "urgent" || level === "expired"
@@ -89,9 +90,12 @@ export default function IngredientDetailPage({
                 : "bg-fresh-50"
           }`}
         >
-          <span className="grid aspect-square w-24 shrink-0 place-items-center rounded-3xl bg-white/80 text-5xl shadow-soft">
-            {ingredient.emoji}
-          </span>
+          <IngredientThumb
+            name={ingredient.name}
+            emoji={ingredient.emoji}
+            className="w-24 rounded-3xl bg-white/80 text-5xl shadow-soft"
+            sizes="96px"
+          />
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-[22px] font-extrabold text-ink-900">{ingredient.name}</h1>

@@ -71,9 +71,19 @@ src/
     stats.ts            # 절약/낭비 통계
     store.tsx           # 전역 상태 + localStorage 영속화
 public/images/
-  ingredients/          # 식재료 이미지 슬롯 (1:1)
-  recipes/              # 레시피 대표이미지 슬롯 (4:3 / 16:9)
+  ingredients/          # 식재료 이미지 34종 (512×512, 1:1)
+  recipes/              # 레시피 대표이미지 16종 (512×512, 4:3 / 16:9 슬롯에 배치)
 ```
+
+## 이미지 에셋
+
+식재료 34종·레시피 16종의 이미지가 `public/images/` 에 포함되어 있습니다.
+
+- 파일명은 ASCII 슬러그(`tofu.png`, `tofu-mushroom-jeongol.png`)를 쓰고, 한글 식재료명 ↔ 슬러그 매핑은 `src/lib/images.ts`에서 관리합니다.
+- 식재료 이미지는 이름 기준으로 매칭되므로, 사용자가 새로 등록한 식재료도 이름이 맞으면 자동으로 이미지가 붙습니다. 매칭되는 이미지가 없으면 이모지로 폴백합니다.
+- 이미지는 흰 배경이라 상태 컬러 타일 위에서 `mix-blend-multiply`로 자연스럽게 얹힙니다.
+
+새 이미지를 추가하려면 파일을 해당 폴더에 넣고 `src/lib/images.ts`의 매핑에 한 줄 추가하면 됩니다.
 
 ## Supabase 연동 계획
 

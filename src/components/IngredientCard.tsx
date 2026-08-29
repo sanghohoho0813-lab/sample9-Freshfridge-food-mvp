@@ -5,6 +5,7 @@ import type { Ingredient } from "@/lib/types";
 import { STORAGE_LABELS } from "@/lib/types";
 import { expiryLevel, friendlyExpiryText } from "@/lib/expiry-calculator";
 import ExpiryBadge from "./ExpiryBadge";
+import IngredientThumb from "./IngredientThumb";
 
 const TILE_BG: Record<string, string> = {
   expired: "bg-coral-50",
@@ -21,12 +22,12 @@ export default function IngredientCard({ ingredient }: { ingredient: Ingredient 
       href={`/ingredient/${ingredient.id}`}
       className="card card-hover flex items-center gap-3.5 p-3.5"
     >
-      <span
-        className={`grid h-14 w-14 shrink-0 place-items-center rounded-2xl text-[26px] ${TILE_BG[level]}`}
-        aria-hidden
-      >
-        {ingredient.emoji}
-      </span>
+      <IngredientThumb
+        name={ingredient.name}
+        emoji={ingredient.emoji}
+        className={`h-14 w-14 text-[26px] ${TILE_BG[level]}`}
+        sizes="56px"
+      />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <p className="truncate text-[15px] font-bold text-ink-900">{ingredient.name}</p>

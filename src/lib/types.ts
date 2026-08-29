@@ -44,6 +44,8 @@ export interface Recipe {
   id: string;
   name: string;
   emoji: string;
+  /** 대표이미지 슬러그 (/public/images/recipes/{slug}.png) */
+  image: string;
   minutes: number;
   difficulty: "쉬움" | "보통" | "어려움";
   servings: number;

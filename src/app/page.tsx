@@ -16,6 +16,7 @@ import { recommendRecipes } from "@/lib/recommendation-engine";
 import { rankRecipes } from "@/lib/recipe-matcher";
 import { weeklySavings } from "@/lib/stats";
 import ExpiryBadge from "@/components/ExpiryBadge";
+import IngredientThumb from "@/components/IngredientThumb";
 import SectionHeader from "@/components/SectionHeader";
 import RecipeCard from "@/components/RecipeCard";
 import EmptyState from "@/components/EmptyState";
@@ -108,11 +109,13 @@ export default function HomePage() {
             {urgent.slice(0, 4).map((ing) => (
               <div key={ing.id} className="card card-hover p-4">
                 <div className="flex items-center gap-3.5">
-                  <Link
-                    href={`/ingredient/${ing.id}`}
-                    className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-coral-50 text-[26px]"
-                  >
-                    {ing.emoji}
+                  <Link href={`/ingredient/${ing.id}`} className="shrink-0">
+                    <IngredientThumb
+                      name={ing.name}
+                      emoji={ing.emoji}
+                      className="h-14 w-14 bg-coral-50 text-[26px]"
+                      sizes="56px"
+                    />
                   </Link>
                   <Link href={`/ingredient/${ing.id}`} className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">

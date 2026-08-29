@@ -1,19 +1,28 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Clock3, Gauge } from "lucide-react";
 import type { RecipeMatch } from "@/lib/recipe-matcher";
 import { dDayLabel } from "@/lib/expiry-calculator";
+import { recipeImage } from "@/lib/images";
 
 export default function RecipeCard({ match }: { match: RecipeMatch }) {
   const { recipe, matchPercent, missing, urgentOwned } = match;
   return (
-    <Link href={`/recipes/${recipe.id}`} className="card card-hover flex flex-col overflow-hidden">
-      {/* 이미지 슬롯 (4:3) — 추후 실제 이미지 삽입 */}
+    <Link
+      href={`/recipes/${recipe.id}`}
+      className="card card-hover group flex flex-col overflow-hidden"
+    >
+      {/* 레시피 대표이미지 (4:3) */}
       <div className="relative aspect-[4/3] w-full bg-gradient-to-br from-fresh-50 via-mint-50 to-cream">
-        <span className="absolute inset-0 grid place-items-center text-5xl" aria-hidden>
-          {recipe.emoji}
-        </span>
+        <Image
+          src={recipeImage(recipe.image)}
+          alt={recipe.name}
+          fill
+          sizes="(max-width: 640px) 100vw, 340px"
+          className="object-contain p-3 transition-transform duration-300 group-hover:scale-105"
+        />
         <span className="absolute left-3 top-3 rounded-chip bg-white/90 px-2.5 py-1 text-[11px] font-bold text-fresh-600 shadow-soft">
           보유 재료 {matchPercent}%
         </span>

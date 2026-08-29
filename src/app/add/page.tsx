@@ -16,6 +16,7 @@ import {
   recognizeIngredientsFromImage,
   type RecognizedIngredient,
 } from "@/lib/image-recognition";
+import IngredientThumb from "@/components/IngredientThumb";
 
 const QUICK_ITEMS: {
   name: string;
@@ -175,13 +176,19 @@ export default function AddIngredientPage() {
                   key={q.name}
                   type="button"
                   onClick={() => applyQuick(q)}
-                  className={`chip border ${
+                  className={`chip border py-1 pl-1 pr-3 ${
                     name === q.name
                       ? "border-fresh-400 bg-fresh-50 text-fresh-700"
                       : "border-ink-300/30 bg-white text-ink-600 hover:border-fresh-200 hover:bg-fresh-50/50"
                   }`}
                 >
-                  {q.emoji} {q.name}
+                  <IngredientThumb
+                    name={q.name}
+                    emoji={q.emoji}
+                    className="h-7 w-7 rounded-lg"
+                    sizes="28px"
+                  />
+                  {q.name}
                 </button>
               ))}
             </div>
@@ -408,9 +415,12 @@ export default function AddIngredientPage() {
                     key={r.name}
                     className="flex items-center gap-3 rounded-2xl bg-warmwhite p-3"
                   >
-                    <span className="grid h-11 w-11 place-items-center rounded-xl bg-fresh-50 text-xl">
-                      {r.emoji}
-                    </span>
+                    <IngredientThumb
+                      name={r.name}
+                      emoji={r.emoji}
+                      className="h-11 w-11 rounded-xl bg-fresh-50 text-xl"
+                      sizes="44px"
+                    />
                     <div className="flex-1">
                       <p className="text-[14px] font-bold text-ink-900">{r.name}</p>
                       <p className="text-[11.5px] text-ink-400">

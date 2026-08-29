@@ -18,7 +18,7 @@ export default function RecipesPage() {
     return (
       <div className="mx-auto max-w-3xl space-y-4">
         <div className="skeleton h-10 w-1/2" />
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="skeleton aspect-[4/3] w-full" />
           ))}
@@ -46,7 +46,7 @@ export default function RecipesPage() {
           ctaHref="/shopping"
         />
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {good.map((m) => (
             <RecipeCard key={m.recipe.id} match={m} />
           ))}
@@ -58,7 +58,7 @@ export default function RecipesPage() {
           <h2 className="mb-3 text-[16px] font-extrabold text-ink-900">
             재료를 조금 더 사면 만들 수 있어요 🛒
           </h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {others.map((m) => (
               <RecipeCard key={m.recipe.id} match={m} />
             ))}

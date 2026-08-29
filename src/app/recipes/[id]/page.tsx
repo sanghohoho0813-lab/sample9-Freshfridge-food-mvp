@@ -2,6 +2,7 @@
 
 import { use, useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -16,6 +17,7 @@ import { useFridge, useStore } from "@/lib/store";
 import { RECIPES } from "@/lib/demo-data";
 import { matchRecipe } from "@/lib/recipe-matcher";
 import { dDayLabel } from "@/lib/expiry-calculator";
+import { ingredientImage, recipeImage } from "@/lib/images";
 import EmptyState from "@/components/EmptyState";
 
 export default function RecipeDetailPage({
@@ -76,11 +78,16 @@ export default function RecipeDetailPage({
       </button>
 
       <div className="card overflow-hidden">
-        {/* 대표 이미지 슬롯 (16:9) */}
+        {/* 레시피 대표이미지 (16:9) */}
         <div className="relative aspect-video w-full bg-gradient-to-br from-fresh-50 via-mint-50 to-cream">
-          <span className="absolute inset-0 grid place-items-center text-7xl" aria-hidden>
-            {recipe.emoji}
-          </span>
+          <Image
+            src={recipeImage(recipe.image)}
+            alt={recipe.name}
+            fill
+            priority
+            sizes="(max-width: 768px) 100vw, 672px"
+            className="object-contain p-4"
+          />
           <span className="absolute left-4 top-4 rounded-chip bg-white/90 px-3 py-1 text-[12px] font-bold text-fresh-600 shadow-soft">
             보유 재료 {match.matchPercent}%
           </span>
@@ -122,12 +129,27 @@ export default function RecipeDetailPage({
                           : "bg-warmwhite"
                     }`}
                   >
-                    <span
-                      className={`grid h-7 w-7 shrink-0 place-items-center rounded-full ${
-                        m.owned ? "bg-fresh-500 text-white" : "bg-ink-300/20 text-ink-400"
-                      }`}
-                    >
-                      <Check size={15} strokeWidth={3} />
+                    <span className="relative grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-xl bg-white">
+                      {ingredientImage(m.name) ? (
+                        <Image
+                          src={ingredientImage(m.name)!}
+                          alt={m.name}
+                          fill
+                          sizes="44px"
+                          className={`object-contain p-1 ${
+                            m.owned ? "" : "opacity-40 grayscale"
+                          }`}
+                        />
+                      ) : (
+                        <span className="text-lg">🧺</span>
+                      )}
+                      <span
+                        className={`absolute -bottom-0.5 -right-0.5 grid h-5 w-5 place-items-center rounded-full border-2 border-white ${
+                          m.owned ? "bg-fresh-500 text-white" : "bg-ink-300/50 text-white"
+                        }`}
+                      >
+                        <Check size={11} strokeWidth={3.5} />
+                      </span>
                     </span>
                     <div className="min-w-0 flex-1">
                       <p className="text-[14px] font-bold text-ink-900">

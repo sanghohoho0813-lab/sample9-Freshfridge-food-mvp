@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useStore } from "@/lib/store";
 import { formatKoreanDate } from "@/lib/expiry-calculator";
+import IngredientThumb from "@/components/IngredientThumb";
 import EmptyState from "@/components/EmptyState";
 import SkeletonList from "@/components/SkeletonList";
 
@@ -87,13 +88,14 @@ export default function HistoryPage() {
               <ul className="space-y-2">
                 {items.map((l) => (
                   <li key={l.id} className="card flex items-center gap-3 p-3.5">
-                    <span
-                      className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl text-xl ${
+                    <IngredientThumb
+                      name={l.ingredientName}
+                      emoji={l.emoji}
+                      className={`h-11 w-11 rounded-xl text-xl ${
                         l.type === "consumed" ? "bg-fresh-50" : "bg-coral-50"
-                      }`}
-                    >
-                      {l.emoji}
-                    </span>
+                      } ${l.type === "discarded" ? "opacity-60 grayscale" : ""}`}
+                      sizes="44px"
+                    />
                     <div className="min-w-0 flex-1">
                       <p className="text-[14px] font-bold text-ink-900">{l.ingredientName}</p>
                       <p className="text-[11.5px] text-ink-400">
