@@ -46,7 +46,7 @@ export default function FridgePage() {
 
   if (!ready) {
     return (
-      <div className="mx-auto max-w-3xl space-y-4">
+      <div className="mx-auto max-w-6xl space-y-4">
         <div className="skeleton h-10 w-1/2" />
         <SkeletonList rows={6} />
       </div>
@@ -54,16 +54,16 @@ export default function FridgePage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl animate-fade-up space-y-5">
+    <div className="mx-auto max-w-6xl animate-fade-up space-y-5">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-[22px] font-extrabold tracking-tight text-ink-900">내 냉장고 🧊</h1>
-          <p className="mt-1 text-[13.5px] text-ink-500">
+          <h1 className="text-[28.6px] font-extrabold tracking-tight text-ink-900">내 냉장고 🧊</h1>
+          <p className="mt-1 text-[17.6px] text-ink-500">
             총 {fridge.length}개의 식재료를 보관 중이에요.
           </p>
         </div>
         <Link href="/add" className="btn-primary shrink-0">
-          <Plus size={17} />
+          <Plus size={22} />
           추가
         </Link>
       </div>
@@ -75,7 +75,7 @@ export default function FridgePage() {
             key={t.key}
             type="button"
             onClick={() => setStorageTab(t.key)}
-            className={`flex-1 rounded-xl py-2 text-[13.5px] font-bold transition-all duration-200 ${
+            className={`flex-1 rounded-xl py-2 text-[17.6px] font-bold transition-all duration-200 ${
               storageTab === t.key
                 ? "bg-white text-fresh-700 shadow-soft"
                 : "text-ink-500 hover:text-ink-700"

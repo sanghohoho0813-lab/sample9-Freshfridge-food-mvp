@@ -22,7 +22,7 @@ export default function MyPage() {
   const report = monthlyReport(state.logs);
 
   if (!ready) {
-    return <div className="mx-auto max-w-2xl"><div className="skeleton h-40 w-full" /></div>;
+    return <div className="mx-auto max-w-5xl"><div className="skeleton h-40 w-full" /></div>;
   }
 
   const menu = [
@@ -35,17 +35,17 @@ export default function MyPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-2xl animate-fade-up space-y-6">
-      <h1 className="text-[22px] font-extrabold tracking-tight text-ink-900">마이페이지</h1>
+    <div className="mx-auto max-w-5xl animate-fade-up space-y-6">
+      <h1 className="text-[28.6px] font-extrabold tracking-tight text-ink-900">마이페이지</h1>
 
       {/* 프로필 */}
       <section className="card flex items-center gap-4 p-5">
-        <span className="grid h-16 w-16 shrink-0 place-items-center rounded-3xl bg-fresh-100 text-3xl">
+        <span className="grid h-20 w-20 shrink-0 place-items-center rounded-3xl bg-fresh-100 text-3xl">
           🧑‍🍳
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-[17px] font-extrabold text-ink-900">{state.userName}님</p>
-          <p className="mt-0.5 text-[12.5px] text-ink-500">
+          <p className="text-[22.1px] font-extrabold text-ink-900">{state.userName}님</p>
+          <p className="mt-0.5 text-[16.2px] text-ink-500">
             버리기 전에 먼저 먹는 습관을 만드는 중이에요 🌱
           </p>
         </div>
@@ -59,8 +59,8 @@ export default function MyPage() {
           { label: "폐기율", value: `${report.wasteRate}%` },
         ].map((s) => (
           <div key={s.label} className="card p-4 text-center">
-            <p className="text-[11.5px] text-ink-400">{s.label}</p>
-            <p className="mt-0.5 text-[16px] font-extrabold text-ink-900">{s.value}</p>
+            <p className="text-[15px] text-ink-400">{s.label}</p>
+            <p className="mt-0.5 text-[20.8px] font-extrabold text-ink-900">{s.value}</p>
           </div>
         ))}
       </section>
@@ -73,14 +73,14 @@ export default function MyPage() {
             href={href}
             className="flex items-center gap-3.5 rounded-2xl p-3.5 transition-colors hover:bg-fresh-50/60"
           >
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-fresh-50 text-fresh-600">
-              <Icon size={19} />
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-fresh-50 text-fresh-600">
+              <Icon size={25} />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-[14px] font-bold text-ink-900">{label}</p>
-              <p className="text-[11.5px] text-ink-400">{desc}</p>
+              <p className="text-[18.2px] font-bold text-ink-900">{label}</p>
+              <p className="text-[15px] text-ink-400">{desc}</p>
             </div>
-            <ChevronRight size={17} className="shrink-0 text-ink-300" />
+            <ChevronRight size={22} className="shrink-0 text-ink-300" />
           </Link>
         ))}
       </section>
@@ -94,7 +94,7 @@ export default function MyPage() {
         }}
         className="btn-ghost w-full"
       >
-        <RefreshCcw size={16} />
+        <RefreshCcw size={21} />
         데모 데이터 초기화
       </button>
 
@@ -106,7 +106,7 @@ export default function MyPage() {
           height={36}
           className="h-9 w-auto rounded-lg"
         />
-        <p className="text-center text-[11px] leading-relaxed text-ink-400">
+        <p className="text-center text-[14.3px] leading-relaxed text-ink-400">
           FreshFridge는 미래에이아이랩의 MVP 샘플 서비스입니다.
           <br />
           표시된 소비기한·유통기한 정보를 확인해주세요. 보관상태가 좋지 않다면 섭취하지 않는 것이

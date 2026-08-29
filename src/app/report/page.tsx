@@ -30,7 +30,7 @@ export default function ReportPage() {
 
   if (!ready) {
     return (
-      <div className="mx-auto max-w-2xl space-y-4">
+      <div className="mx-auto max-w-5xl space-y-4">
         <div className="skeleton h-10 w-1/2" />
         <div className="skeleton h-40 w-full" />
         <div className="skeleton h-40 w-full" />
@@ -42,31 +42,31 @@ export default function ReportPage() {
   const maxCatCount = Math.max(1, ...byCategory.map((c) => c.count));
 
   return (
-    <div className="mx-auto max-w-2xl animate-fade-up space-y-6">
+    <div className="mx-auto max-w-5xl animate-fade-up space-y-6">
       <div>
-        <h1 className="text-[22px] font-extrabold tracking-tight text-ink-900">절약 리포트 🌱</h1>
-        <p className="mt-1 text-[13.5px] text-ink-500">
+        <h1 className="text-[28.6px] font-extrabold tracking-tight text-ink-900">절약 리포트 🌱</h1>
+        <p className="mt-1 text-[17.6px] text-ink-500">
           버리지 않고 먹은 만큼, 식비가 절약돼요.
         </p>
       </div>
 
       {/* 이번 달 요약 */}
       <section className="card bg-gradient-to-br from-fresh-50 via-white to-mint-50 p-5">
-        <p className="text-[13px] font-bold text-fresh-700">이번 달 예상 절약</p>
-        <p className="mt-1 text-[32px] font-extrabold tracking-tight text-ink-900">
+        <p className="text-[16.9px] font-bold text-fresh-700">이번 달 예상 절약</p>
+        <p className="mt-1 text-[41.6px] font-extrabold tracking-tight text-ink-900">
           {formatWon(report.savedAmount)}
         </p>
-        <p className="mt-1 flex items-center gap-1 text-[12.5px] font-semibold">
+        <p className="mt-1 flex items-center gap-1 text-[16.2px] font-semibold">
           {improved ? (
             <>
-              <TrendingDown size={15} className="text-fresh-600" />
+              <TrendingDown size={20} className="text-fresh-600" />
               <span className="text-fresh-600">
                 폐기율이 지난달보다 {Math.abs(report.wasteRateDelta)}%p 줄었어요
               </span>
             </>
           ) : (
             <>
-              <TrendingUp size={15} className="text-coral-500" />
+              <TrendingUp size={20} className="text-coral-500" />
               <span className="text-coral-500">
                 폐기율이 지난달보다 {report.wasteRateDelta}%p 늘었어요
               </span>
@@ -80,8 +80,8 @@ export default function ReportPage() {
             { label: "폐기율", value: `${report.wasteRate}%`, tone: "text-ink-900" },
           ].map((s) => (
             <div key={s.label} className="rounded-2xl bg-white/80 p-3 text-center shadow-soft">
-              <p className="text-[11.5px] text-ink-400">{s.label}</p>
-              <p className={`mt-0.5 text-[17px] font-extrabold ${s.tone}`}>{s.value}</p>
+              <p className="text-[15px] text-ink-400">{s.label}</p>
+              <p className={`mt-0.5 text-[22.1px] font-extrabold ${s.tone}`}>{s.value}</p>
             </div>
           ))}
         </div>
@@ -89,26 +89,26 @@ export default function ReportPage() {
 
       {/* 이번 주 */}
       <section className="card p-5">
-        <p className="text-[14.5px] font-bold text-ink-900">
+        <p className="text-[18.9px] font-bold text-ink-900">
           이번 주 {weekly.usedCount}개의 식재료를 알뜰하게 사용했어요 👏
         </p>
-        <p className="mt-0.5 text-[12.5px] text-ink-500">
+        <p className="mt-0.5 text-[16.2px] text-ink-500">
           예상 절약 {formatWon(weekly.savedAmount)}
         </p>
       </section>
 
       {/* 낭비 분석 */}
       <section>
-        <h2 className="mb-3 text-[16px] font-extrabold text-ink-900">가장 많이 버린 식재료</h2>
+        <h2 className="mb-3 text-[20.8px] font-extrabold text-ink-900">가장 많이 버린 식재료</h2>
         {byCategory.length === 0 ? (
-          <div className="card p-5 text-center text-[13.5px] text-ink-500">
+          <div className="card p-5 text-center text-[17.6px] text-ink-500">
             폐기 기록이 없어요. 완벽한 냉장고예요! 🎉
           </div>
         ) : (
           <div className="card space-y-3.5 p-5">
             {byCategory.slice(0, 4).map((c, i) => (
               <div key={c.category}>
-                <div className="mb-1 flex items-center justify-between text-[13px]">
+                <div className="mb-1 flex items-center justify-between text-[16.9px]">
                   <p className="font-bold text-ink-700">
                     {i + 1}. {c.label}
                   </p>
@@ -131,7 +131,7 @@ export default function ReportPage() {
       {/* 폐기 이유 */}
       {reasons.length > 0 && (
         <section>
-          <h2 className="mb-3 text-[16px] font-extrabold text-ink-900">버리게 된 이유</h2>
+          <h2 className="mb-3 text-[20.8px] font-extrabold text-ink-900">버리게 된 이유</h2>
           <div className="flex flex-wrap gap-2">
             {reasons.map((r) => (
               <span key={r.reason} className="chip bg-white text-ink-600 shadow-soft">
@@ -145,8 +145,8 @@ export default function ReportPage() {
       {/* 개선 제안 */}
       {byCategory.length > 0 && (
         <section className="card border-amberish-100 bg-amberish-50/50 p-5">
-          <p className="text-[13px] font-extrabold text-amberish-600">💡 개선 제안</p>
-          <p className="mt-1.5 text-[13.5px] leading-relaxed text-ink-700">
+          <p className="text-[16.9px] font-extrabold text-amberish-600">💡 개선 제안</p>
+          <p className="mt-1.5 text-[17.6px] leading-relaxed text-ink-700">
             {IMPROVEMENT_TIPS[byCategory[0].category] ??
               `${byCategory[0].label} 재료의 폐기가 가장 많아요. 구매량을 조금 줄이거나 냉동 보관을 활용해보세요.`}
           </p>

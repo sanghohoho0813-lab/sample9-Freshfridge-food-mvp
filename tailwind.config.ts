@@ -4,6 +4,20 @@ const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
+      // 기본 텍스트 스케일 1.3배 (가독성 우선 설정)
+      fontSize: {
+        xs: ["15.6px", { lineHeight: "20.8px" }],
+        sm: ["18.2px", { lineHeight: "26px" }],
+        base: ["20.8px", { lineHeight: "31.2px" }],
+        lg: ["23.4px", { lineHeight: "36.4px" }],
+        xl: ["26px", { lineHeight: "36.4px" }],
+        "2xl": ["31.2px", { lineHeight: "41.6px" }],
+        "3xl": ["39px", { lineHeight: "46.8px" }],
+        "4xl": ["46.8px", { lineHeight: "52px" }],
+        "5xl": ["62.4px", { lineHeight: "1" }],
+        "6xl": ["78px", { lineHeight: "1" }],
+        "7xl": ["93.6px", { lineHeight: "1" }],
+      },
       colors: {
         fresh: {
           50: "#f2f9f2",

@@ -23,19 +23,19 @@ export default function RecipeCard({ match }: { match: RecipeMatch }) {
           sizes="(max-width: 640px) 100vw, 340px"
           className="object-contain p-3 transition-transform duration-300 group-hover:scale-105"
         />
-        <span className="absolute left-3 top-3 rounded-chip bg-white/90 px-2.5 py-1 text-[11px] font-bold text-fresh-600 shadow-soft">
+        <span className="absolute left-3 top-3 rounded-chip bg-white/90 px-2.5 py-1 text-[14.3px] font-bold text-fresh-600 shadow-soft">
           보유 재료 {matchPercent}%
         </span>
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">
         <div>
-          <p className="text-[15.5px] font-bold text-ink-900">{recipe.name}</p>
-          <p className="mt-0.5 flex items-center gap-2.5 text-[12px] text-ink-500">
+          <p className="text-[20.2px] font-bold text-ink-900">{recipe.name}</p>
+          <p className="mt-0.5 flex items-center gap-2.5 text-[15.6px] text-ink-500">
             <span className="inline-flex items-center gap-1">
-              <Clock3 size={13} /> {recipe.minutes}분
+              <Clock3 size={17} /> {recipe.minutes}분
             </span>
             <span className="inline-flex items-center gap-1">
-              <Gauge size={13} /> {recipe.difficulty}
+              <Gauge size={17} /> {recipe.difficulty}
             </span>
           </p>
         </div>
@@ -49,7 +49,7 @@ export default function RecipeCard({ match }: { match: RecipeMatch }) {
         </div>
 
         {urgentOwned.length > 0 && (
-          <p className="text-[12px] font-medium text-amberish-600">
+          <p className="text-[15.6px] font-medium text-amberish-600">
             먼저 소비:{" "}
             {urgentOwned
               .slice(0, 2)
@@ -58,11 +58,11 @@ export default function RecipeCard({ match }: { match: RecipeMatch }) {
           </p>
         )}
         {missing.length > 0 ? (
-          <p className="truncate text-[12px] text-ink-400">
+          <p className="truncate text-[15.6px] text-ink-400">
             추가 필요: {missing.map((m) => m.name).join(", ")}
           </p>
         ) : (
-          <p className="text-[12px] font-medium text-fresh-600">재료가 모두 있어요 ✓</p>
+          <p className="text-[15.6px] font-medium text-fresh-600">재료가 모두 있어요 ✓</p>
         )}
       </div>
     </Link>

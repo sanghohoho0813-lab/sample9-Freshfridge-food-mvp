@@ -22,8 +22,8 @@ export default function ExpiryBadge({
     size === "lg"
       ? "px-3 py-1 text-base font-extrabold"
       : size === "sm"
-        ? "px-2 py-0.5 text-[11px] font-bold"
-        : "px-2.5 py-0.5 text-[13px] font-bold";
+        ? "px-2 py-0.5 text-[14.3px] font-bold"
+        : "px-2.5 py-0.5 text-[16.9px] font-bold";
   return (
     <span className={`inline-flex items-center rounded-chip transition-colors duration-200 ${sizeClass} ${STYLES[level]}`}>
       {dDayLabel(expiresAt)}

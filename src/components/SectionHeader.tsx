@@ -17,16 +17,16 @@ export default function SectionHeader({
   return (
     <div className="mb-3 flex items-end justify-between gap-3">
       <div>
-        <h2 className="text-[17px] font-extrabold tracking-tight text-ink-900">{title}</h2>
-        {sub && <p className="mt-0.5 text-[12.5px] text-ink-500">{sub}</p>}
+        <h2 className="text-[22.1px] font-extrabold tracking-tight text-ink-900">{title}</h2>
+        {sub && <p className="mt-0.5 text-[16.2px] text-ink-500">{sub}</p>}
       </div>
       {moreHref && (
         <Link
           href={moreHref}
-          className="inline-flex shrink-0 items-center gap-0.5 text-[13px] font-semibold text-fresh-600 transition-colors hover:text-fresh-700"
+          className="inline-flex shrink-0 items-center gap-0.5 text-[16.9px] font-semibold text-fresh-600 transition-colors hover:text-fresh-700"
         >
           {moreLabel}
-          <ChevronRight size={15} />
+          <ChevronRight size={20} />
         </Link>
       )}
     </div>

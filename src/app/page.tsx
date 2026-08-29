@@ -62,7 +62,7 @@ export default function HomePage() {
 
   if (!ready) {
     return (
-      <div className="mx-auto max-w-3xl space-y-4">
+      <div className="mx-auto max-w-6xl space-y-4">
         <div className="skeleton h-16 w-2/3" />
         <SkeletonList rows={4} />
       </div>
@@ -70,21 +70,21 @@ export default function HomePage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl animate-fade-up space-y-8">
+    <div className="mx-auto max-w-6xl animate-fade-up space-y-8">
       {/* 인사 */}
       <section className="flex items-end justify-between gap-3">
         <div>
-          <h1 className="text-[22px] font-extrabold tracking-tight text-ink-900">
+          <h1 className="text-[28.6px] font-extrabold tracking-tight text-ink-900">
             안녕하세요, {state.userName}님 👋
           </h1>
-          <p className="mt-1 text-[13.5px] text-ink-500">
+          <p className="mt-1 text-[17.6px] text-ink-500">
             {urgent.length > 0
               ? `오늘 먼저 먹어야 할 재료가 ${urgent.length}개 있어요.`
               : "오늘 냉장고는 여유로워요."}
           </p>
         </div>
         <Link href="/add" className="btn-primary hidden shrink-0 sm:inline-flex">
-          <Plus size={17} />
+          <Plus size={22} />
           식재료 추가
         </Link>
       </section>
@@ -113,16 +113,16 @@ export default function HomePage() {
                     <IngredientThumb
                       name={ing.name}
                       emoji={ing.emoji}
-                      className="h-14 w-14 bg-coral-50 text-[26px]"
+                      className="h-[70px] w-[70px] bg-coral-50 text-[33.8px]"
                       sizes="56px"
                     />
                   </Link>
                   <Link href={`/ingredient/${ing.id}`} className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="truncate text-[15.5px] font-bold text-ink-900">{ing.name}</p>
+                      <p className="truncate text-[20.2px] font-bold text-ink-900">{ing.name}</p>
                       <ExpiryBadge expiresAt={ing.expiresAt} />
                     </div>
-                    <p className="mt-0.5 text-[12.5px] text-ink-500">
+                    <p className="mt-0.5 text-[16.2px] text-ink-500">
                       {ing.quantity}
                       {ing.unit} · {STORAGE_LABELS[ing.storage]} ·{" "}
                       <span className="font-medium text-coral-500">
@@ -140,11 +140,11 @@ export default function HomePage() {
                     }}
                     className="btn-soft flex-1"
                   >
-                    <Check size={16} />
+                    <Check size={21} />
                     먹었어요
                   </button>
                   <Link href={recipeForIngredient(ing.name)} className="btn-ghost flex-1">
-                    <ChefHat size={16} />
+                    <ChefHat size={21} />
                     레시피 보기
                   </Link>
                 </div>
@@ -165,10 +165,10 @@ export default function HomePage() {
             { label: "냉동 보관", value: summary.frozen, unit: "개", tone: "text-mint-600" },
           ].map((s) => (
             <div key={s.label} className="card p-4">
-              <p className="text-[12px] font-medium text-ink-500">{s.label}</p>
-              <p className={`mt-1 text-[22px] font-extrabold ${s.tone}`}>
+              <p className="text-[15.6px] font-medium text-ink-500">{s.label}</p>
+              <p className={`mt-1 text-[28.6px] font-extrabold ${s.tone}`}>
                 {s.value}
-                <span className="ml-0.5 text-[13px] font-semibold text-ink-400">{s.unit}</span>
+                <span className="ml-0.5 text-[16.9px] font-semibold text-ink-400">{s.unit}</span>
               </p>
             </div>
           ))}
@@ -205,14 +205,14 @@ export default function HomePage() {
           href="/report"
           className="card card-hover flex items-center gap-4 bg-gradient-to-br from-fresh-50 via-white to-mint-50 p-5"
         >
-          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-fresh-100 text-2xl">
-            <Sparkles className="text-fresh-600" size={22} />
+          <span className="grid h-15 w-15 shrink-0 place-items-center rounded-2xl bg-fresh-100 text-2xl">
+            <Sparkles className="text-fresh-600" size={29} />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-[14.5px] font-bold text-ink-900">
+            <p className="text-[18.9px] font-bold text-ink-900">
               이번 주 {savings.usedCount}개의 식재료를 버리지 않고 사용했어요
             </p>
-            <p className="mt-0.5 text-[12.5px] text-ink-500">
+            <p className="mt-0.5 text-[16.2px] text-ink-500">
               예상 절약{" "}
               <span className="font-extrabold text-fresh-600">{formatWon(savings.savedAmount)}</span>{" "}
               · 절약 리포트 보기

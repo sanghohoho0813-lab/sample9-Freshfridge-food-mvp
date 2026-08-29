@@ -34,10 +34,10 @@ export default function DiscardModal({
       >
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="text-[17px] font-extrabold text-ink-900">
+            <h3 className="text-[22.1px] font-extrabold text-ink-900">
               {ingredientName}, 버리게 된 이유가 있나요?
             </h3>
-            <p className="mt-1 text-[12.5px] text-ink-500">
+            <p className="mt-1 text-[16.2px] text-ink-500">
               기록해두면 다음 장보기에서 낭비를 줄일 수 있어요.
             </p>
           </div>
@@ -45,9 +45,9 @@ export default function DiscardModal({
             type="button"
             aria-label="닫기"
             onClick={onClose}
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-ink-400 hover:bg-fresh-50"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-ink-400 hover:bg-fresh-50"
           >
-            <X size={18} />
+            <X size={23} />
           </button>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">

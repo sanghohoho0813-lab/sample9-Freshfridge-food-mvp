@@ -32,7 +32,7 @@ export default function HistoryPage() {
 
   if (!ready) {
     return (
-      <div className="mx-auto max-w-2xl space-y-4">
+      <div className="mx-auto max-w-5xl space-y-4">
         <div className="skeleton h-10 w-1/2" />
         <SkeletonList rows={5} />
       </div>
@@ -40,10 +40,10 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl animate-fade-up space-y-5">
+    <div className="mx-auto max-w-5xl animate-fade-up space-y-5">
       <div>
-        <h1 className="text-[22px] font-extrabold tracking-tight text-ink-900">소비 기록 📒</h1>
-        <p className="mt-1 text-[13.5px] text-ink-500">
+        <h1 className="text-[28.6px] font-extrabold tracking-tight text-ink-900">소비 기록 📒</h1>
+        <p className="mt-1 text-[17.6px] text-ink-500">
           먹은 재료와 버린 재료를 한눈에 확인해요.
         </p>
       </div>
@@ -59,7 +59,7 @@ export default function HistoryPage() {
             key={t.key}
             type="button"
             onClick={() => setTab(t.key)}
-            className={`flex-1 rounded-xl py-2 text-[13.5px] font-bold transition-all duration-200 ${
+            className={`flex-1 rounded-xl py-2 text-[17.6px] font-bold transition-all duration-200 ${
               tab === t.key ? "bg-white text-fresh-700 shadow-soft" : "text-ink-500"
             }`}
           >
@@ -82,7 +82,7 @@ export default function HistoryPage() {
         <div className="space-y-5">
           {grouped.map(([date, items]) => (
             <section key={date}>
-              <h2 className="mb-2 text-[13px] font-bold text-ink-400">
+              <h2 className="mb-2 text-[16.9px] font-bold text-ink-400">
                 {formatKoreanDate(date)}
               </h2>
               <ul className="space-y-2">
@@ -91,21 +91,21 @@ export default function HistoryPage() {
                     <IngredientThumb
                       name={l.ingredientName}
                       emoji={l.emoji}
-                      className={`h-11 w-11 rounded-xl text-xl ${
+                      className={`h-14 w-14 rounded-xl text-xl ${
                         l.type === "consumed" ? "bg-fresh-50" : "bg-coral-50"
                       } ${l.type === "discarded" ? "opacity-60 grayscale" : ""}`}
                       sizes="44px"
                     />
                     <div className="min-w-0 flex-1">
-                      <p className="text-[14px] font-bold text-ink-900">{l.ingredientName}</p>
-                      <p className="text-[11.5px] text-ink-400">
+                      <p className="text-[18.2px] font-bold text-ink-900">{l.ingredientName}</p>
+                      <p className="text-[15px] text-ink-400">
                         {l.type === "consumed"
                           ? (l.via ?? "사용 완료")
                           : (l.reason ?? "폐기")}
                       </p>
                     </div>
                     <span
-                      className={`rounded-chip px-2.5 py-1 text-[11px] font-bold ${
+                      className={`rounded-chip px-2.5 py-1 text-[14.3px] font-bold ${
                         l.type === "consumed"
                           ? "bg-fresh-50 text-fresh-600"
                           : "bg-coral-50 text-coral-500"

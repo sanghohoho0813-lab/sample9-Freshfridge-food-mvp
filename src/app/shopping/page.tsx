@@ -36,7 +36,7 @@ export default function ShoppingPage() {
 
   if (!ready) {
     return (
-      <div className="mx-auto max-w-2xl space-y-4">
+      <div className="mx-auto max-w-5xl space-y-4">
         <div className="skeleton h-10 w-1/2" />
         <SkeletonList rows={4} />
       </div>
@@ -44,12 +44,12 @@ export default function ShoppingPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl animate-fade-up space-y-5">
+    <div className="mx-auto max-w-5xl animate-fade-up space-y-5">
       <div>
-        <h1 className="text-[22px] font-extrabold tracking-tight text-ink-900">
+        <h1 className="text-[28.6px] font-extrabold tracking-tight text-ink-900">
           장보기 리스트 🛒
         </h1>
-        <p className="mt-1 text-[13.5px] text-ink-500">
+        <p className="mt-1 text-[17.6px] text-ink-500">
           냉장고에 없는 재료만 골라 담아 중복 구매를 막아요.
         </p>
       </div>
@@ -65,7 +65,7 @@ export default function ShoppingPage() {
           }}
         />
         <button type="button" onClick={add} className="btn-primary shrink-0">
-          <Plus size={17} />
+          <Plus size={22} />
           추가
         </button>
       </div>
@@ -87,18 +87,18 @@ export default function ShoppingPage() {
                   type="button"
                   aria-label="구매 완료"
                   onClick={() => toggleShoppingItem(item.id)}
-                  className="grid h-7 w-7 shrink-0 place-items-center rounded-full border-2 border-ink-300/50 text-transparent transition-all duration-200 hover:border-fresh-400 active:scale-90"
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-full border-2 border-ink-300/50 text-transparent transition-all duration-200 hover:border-fresh-400 active:scale-90"
                 >
-                  <Check size={15} strokeWidth={3} />
+                  <Check size={20} strokeWidth={3} />
                 </button>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[14.5px] font-bold text-ink-900">{item.name}</p>
+                  <p className="text-[18.9px] font-bold text-ink-900">{item.name}</p>
                   <div className="flex flex-wrap items-center gap-1.5">
                     {item.fromRecipe && (
-                      <p className="text-[11.5px] text-ink-400">‘{item.fromRecipe}’에 필요해요</p>
+                      <p className="text-[15px] text-ink-400">‘{item.fromRecipe}’에 필요해요</p>
                     )}
                     {alreadyHave(item.name) && (
-                      <span className="rounded-chip bg-amberish-50 px-2 py-0.5 text-[10.5px] font-bold text-amberish-600">
+                      <span className="rounded-chip bg-amberish-50 px-2 py-0.5 text-[13.7px] font-bold text-amberish-600">
                         이미 냉장고에 있어요
                       </span>
                     )}
@@ -108,9 +108,9 @@ export default function ShoppingPage() {
                   type="button"
                   aria-label="삭제"
                   onClick={() => removeShoppingItem(item.id)}
-                  className="grid h-9 w-9 place-items-center rounded-xl text-ink-300 transition-colors hover:bg-coral-50 hover:text-coral-500"
+                  className="grid h-11 w-11 place-items-center rounded-xl text-ink-300 transition-colors hover:bg-coral-50 hover:text-coral-500"
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={21} />
                 </button>
               </li>
             ))}
@@ -118,7 +118,7 @@ export default function ShoppingPage() {
 
           {checked.length > 0 && (
             <section>
-              <h2 className="mb-2.5 text-[13px] font-bold text-ink-400">
+              <h2 className="mb-2.5 text-[16.9px] font-bold text-ink-400">
                 구매 완료 {checked.length}개
               </h2>
               <ul className="space-y-2.5">
@@ -131,20 +131,20 @@ export default function ShoppingPage() {
                       type="button"
                       aria-label="구매 완료 해제"
                       onClick={() => toggleShoppingItem(item.id)}
-                      className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-fresh-500 text-white transition-all active:scale-90"
+                      className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-fresh-500 text-white transition-all active:scale-90"
                     >
-                      <Check size={15} strokeWidth={3} />
+                      <Check size={20} strokeWidth={3} />
                     </button>
-                    <p className="flex-1 text-[14.5px] font-bold text-ink-500 line-through">
+                    <p className="flex-1 text-[18.9px] font-bold text-ink-500 line-through">
                       {item.name}
                     </p>
                     <button
                       type="button"
                       aria-label="삭제"
                       onClick={() => removeShoppingItem(item.id)}
-                      className="grid h-9 w-9 place-items-center rounded-xl text-ink-300 transition-colors hover:bg-coral-50 hover:text-coral-500"
+                      className="grid h-11 w-11 place-items-center rounded-xl text-ink-300 transition-colors hover:bg-coral-50 hover:text-coral-500"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={21} />
                     </button>
                   </li>
                 ))}

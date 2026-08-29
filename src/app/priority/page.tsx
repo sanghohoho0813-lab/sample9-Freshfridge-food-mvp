@@ -42,7 +42,7 @@ export default function PriorityPage() {
 
   if (!ready) {
     return (
-      <div className="mx-auto max-w-3xl space-y-4">
+      <div className="mx-auto max-w-6xl space-y-4">
         <div className="skeleton h-10 w-1/2" />
         <SkeletonList rows={5} />
       </div>
@@ -53,12 +53,12 @@ export default function PriorityPage() {
   const isEmpty = GROUP_ORDER.every((g) => groups[g].length === 0);
 
   return (
-    <div className="mx-auto max-w-3xl animate-fade-up space-y-6">
+    <div className="mx-auto max-w-6xl animate-fade-up space-y-6">
       <div>
-        <h1 className="text-[22px] font-extrabold tracking-tight text-ink-900">
+        <h1 className="text-[28.6px] font-extrabold tracking-tight text-ink-900">
           먼저 먹어주세요 ⏰
         </h1>
-        <p className="mt-1 text-[13.5px] text-ink-500">
+        <p className="mt-1 text-[17.6px] text-ink-500">
           {totalUrgent > 0
             ? `${totalUrgent}개의 재료가 기다리고 있어요. 버리기 전에 맛있게 먹어요.`
             : "이번 주 안에 먹으면 좋은 재료를 모아 보여드려요."}
@@ -81,9 +81,9 @@ export default function PriorityPage() {
           return (
             <section key={g}>
               <div className="mb-3 flex items-center gap-2.5">
-                <span className={`h-2.5 w-2.5 rounded-full ${GROUP_ACCENT[g]}`} />
-                <h2 className="text-[16px] font-extrabold text-ink-900">{meta.title}</h2>
-                <span className="text-[12px] text-ink-400">{meta.sub}</span>
+                <span className={`h-3 w-3 rounded-full ${GROUP_ACCENT[g]}`} />
+                <h2 className="text-[20.8px] font-extrabold text-ink-900">{meta.title}</h2>
+                <span className="text-[15.6px] text-ink-400">{meta.sub}</span>
               </div>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {list.map((ing) => (

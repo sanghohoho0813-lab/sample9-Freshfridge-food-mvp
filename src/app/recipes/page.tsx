@@ -16,7 +16,7 @@ export default function RecipesPage() {
 
   if (!ready) {
     return (
-      <div className="mx-auto max-w-3xl space-y-4">
+      <div className="mx-auto max-w-6xl space-y-4">
         <div className="skeleton h-10 w-1/2" />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -28,10 +28,10 @@ export default function RecipesPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl animate-fade-up space-y-7">
+    <div className="mx-auto max-w-6xl animate-fade-up space-y-7">
       <div>
-        <h1 className="text-[22px] font-extrabold tracking-tight text-ink-900">레시피 추천 🍳</h1>
-        <p className="mt-1 text-[13.5px] text-ink-500">
+        <h1 className="text-[28.6px] font-extrabold tracking-tight text-ink-900">레시피 추천 🍳</h1>
+        <p className="mt-1 text-[17.6px] text-ink-500">
           지금 냉장고에 있는 재료로 만들 수 있는 요리를 골라봤어요. 유통기한이 임박한 재료를
           쓰는 요리가 먼저 나와요.
         </p>
@@ -55,7 +55,7 @@ export default function RecipesPage() {
 
       {others.length > 0 && (
         <section>
-          <h2 className="mb-3 text-[16px] font-extrabold text-ink-900">
+          <h2 className="mb-3 text-[20.8px] font-extrabold text-ink-900">
             재료를 조금 더 사면 만들 수 있어요 🛒
           </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

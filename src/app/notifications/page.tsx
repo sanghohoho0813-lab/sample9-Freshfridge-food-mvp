@@ -17,7 +17,7 @@ export default function NotificationsPage() {
 
   if (!ready) {
     return (
-      <div className="mx-auto max-w-2xl space-y-4">
+      <div className="mx-auto max-w-5xl space-y-4">
         <div className="skeleton h-10 w-1/2" />
         <SkeletonList rows={4} />
       </div>
@@ -25,11 +25,11 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl animate-fade-up space-y-5">
+    <div className="mx-auto max-w-5xl animate-fade-up space-y-5">
       <div className="flex items-end justify-between gap-3">
         <div>
-          <h1 className="text-[22px] font-extrabold tracking-tight text-ink-900">알림 🔔</h1>
-          <p className="mt-1 text-[13.5px] text-ink-500">
+          <h1 className="text-[28.6px] font-extrabold tracking-tight text-ink-900">알림 🔔</h1>
+          <p className="mt-1 text-[17.6px] text-ink-500">
             {unread > 0 ? `읽지 않은 알림이 ${unread}개 있어요.` : "모든 알림을 확인했어요."}
           </p>
         </div>
@@ -37,7 +37,7 @@ export default function NotificationsPage() {
           <button
             type="button"
             onClick={markAllNotificationsRead}
-            className="shrink-0 text-[13px] font-semibold text-fresh-600 hover:text-fresh-700"
+            className="shrink-0 text-[16.9px] font-semibold text-fresh-600 hover:text-fresh-700"
           >
             모두 읽음
           </button>
@@ -58,18 +58,18 @@ export default function NotificationsPage() {
                 }`}
               >
                 <div className="flex items-start gap-3">
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-fresh-50 text-lg">
+                  <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-fresh-50 text-lg">
                     {KIND_EMOJI[n.kind]}
                   </span>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="text-[14px] font-bold text-ink-900">{n.title}</p>
+                      <p className="text-[18.2px] font-bold text-ink-900">{n.title}</p>
                       {!n.read && (
-                        <span className="h-2 w-2 shrink-0 rounded-full bg-coral-500" />
+                        <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-coral-500" />
                       )}
                     </div>
-                    <p className="mt-0.5 text-[12.5px] leading-relaxed text-ink-500">{n.body}</p>
-                    <p className="mt-1 text-[11px] text-ink-300">{formatKoreanDate(n.date)}</p>
+                    <p className="mt-0.5 text-[16.2px] leading-relaxed text-ink-500">{n.body}</p>
+                    <p className="mt-1 text-[14.3px] text-ink-300">{formatKoreanDate(n.date)}</p>
                   </div>
                 </div>
               </button>

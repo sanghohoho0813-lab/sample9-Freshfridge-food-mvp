@@ -25,20 +25,20 @@ export default function IngredientCard({ ingredient }: { ingredient: Ingredient 
       <IngredientThumb
         name={ingredient.name}
         emoji={ingredient.emoji}
-        className={`h-14 w-14 text-[26px] ${TILE_BG[level]}`}
+        className={`h-[70px] w-[70px] text-[33.8px] ${TILE_BG[level]}`}
         sizes="56px"
       />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <p className="truncate text-[15px] font-bold text-ink-900">{ingredient.name}</p>
+          <p className="truncate text-[19.5px] font-bold text-ink-900">{ingredient.name}</p>
           <ExpiryBadge expiresAt={ingredient.expiresAt} size="sm" />
         </div>
-        <p className="mt-0.5 text-[12.5px] text-ink-500">
+        <p className="mt-0.5 text-[16.2px] text-ink-500">
           {ingredient.quantity}
           {ingredient.unit} · {STORAGE_LABELS[ingredient.storage]}
         </p>
         <p
-          className={`mt-0.5 text-[12px] font-medium ${
+          className={`mt-0.5 text-[15.6px] font-medium ${
             level === "urgent" || level === "expired"
               ? "text-coral-500"
               : level === "soon"

@@ -20,8 +20,8 @@ export default function EmptyState({
       <span className="text-4xl" aria-hidden>
         {emoji}
       </span>
-      <p className="text-[15px] font-bold text-ink-700">{title}</p>
-      {description && <p className="text-[13px] text-ink-400">{description}</p>}
+      <p className="text-[19.5px] font-bold text-ink-700">{title}</p>
+      {description && <p className="text-[16.9px] text-ink-400">{description}</p>}
       {ctaLabel && ctaHref && (
         <Link href={ctaHref} className="btn-primary mt-3">
           {ctaLabel}
