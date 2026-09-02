@@ -99,12 +99,13 @@ export default function MyPage() {
       </button>
 
       <div className="flex flex-col items-center gap-2 pb-4 pt-2">
+        {/* 데스크톱에는 푸터에 로고가 있으므로 모바일에서만 노출 */}
         <Image
-          src="/images/mirae-ai-lab-logo.jpg"
-          alt="미래에이아이랩"
-          width={120}
-          height={36}
-          className="h-9 w-auto rounded-lg"
+          src="/images/mirae-ai-lab-logo.png"
+          alt="미래에이아이랩 (MIRAE AI LAB)"
+          width={755}
+          height={147}
+          className="h-11 w-auto lg:hidden"
         />
         <p className="text-center text-[14.3px] leading-relaxed text-ink-400">
           FreshFridge는 미래에이아이랩의 MVP 샘플 서비스입니다.

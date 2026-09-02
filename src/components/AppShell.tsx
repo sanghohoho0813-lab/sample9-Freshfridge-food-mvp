@@ -68,18 +68,26 @@ function Logo({ compact = false }: { compact?: boolean }) {
 
 function MvpBanner() {
   return (
-    <div className="flex items-center justify-center gap-2 bg-ink-900 px-4 py-1.5 text-center">
-      <Image
-        src="/images/mirae-ai-lab-logo.jpg"
-        alt="미래에이아이랩 로고"
-        width={66}
-        height={20}
-        className="h-5 w-auto rounded-[4px]"
-        priority
-      />
-      <p className="text-[14.3px] font-medium text-white/90 sm:text-xs">
-        이 서비스는 <span className="font-bold text-mint-300">미래에이아이랩</span>의 MVP 샘플입니다
-      </p>
+    <div className="border-b border-fresh-100 bg-gradient-to-r from-white via-fresh-50/60 to-white">
+      <div className="mx-auto flex max-w-[1720px] items-center justify-center gap-3 px-4 py-2.5 sm:gap-4">
+        <Image
+          src="/images/mirae-ai-lab-logo.png"
+          alt="미래에이아이랩 (MIRAE AI LAB)"
+          width={755}
+          height={147}
+          className="h-7 w-auto sm:h-9"
+          priority
+        />
+        <span className="h-6 w-px shrink-0 bg-fresh-200 sm:h-7" aria-hidden />
+        <p className="text-[14.5px] font-semibold leading-tight text-ink-600 sm:text-[16.5px]">
+          <span className="hidden sm:inline">미래에이아이랩이 만든 </span>
+          <span className="font-extrabold text-fresh-600">FreshFridge</span>
+          <span className="hidden sm:inline"> · </span>
+          <span className="ml-1.5 inline-flex items-center rounded-chip bg-fresh-500 px-2 py-0.5 text-[12.5px] font-bold text-white sm:ml-0 sm:text-[13.5px]">
+            MVP Sample
+          </span>
+        </p>
+      </div>
     </div>
   );
 }
@@ -125,20 +133,20 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               );
             })}
           </nav>
-          <div className="rounded-card bg-gradient-to-br from-fresh-50 to-mint-50 p-4">
+          <div className="rounded-card border border-fresh-100 bg-gradient-to-br from-fresh-50 to-mint-50 p-4">
             <p className="text-xs font-semibold text-fresh-700">음식 낭비를 줄여요! 🌱</p>
             <p className="mt-1 text-[14.3px] leading-relaxed text-ink-500">
               버리기 전에 먼저 먹는 습관, FreshFridge가 도와드려요.
             </p>
-            <div className="mt-3 flex items-center gap-1.5 border-t border-fresh-100 pt-3">
+            <div className="mt-3 border-t border-fresh-200/70 pt-3">
+              <p className="text-[12.5px] font-semibold text-ink-400">Made by</p>
               <Image
-                src="/images/mirae-ai-lab-logo.jpg"
-                alt="미래에이아이랩"
-                width={80}
-                height={24}
-                className="h-6 w-auto rounded"
+                src="/images/mirae-ai-lab-logo.png"
+                alt="미래에이아이랩 (MIRAE AI LAB)"
+                width={755}
+                height={147}
+                className="mt-1.5 h-8 w-auto"
               />
-              <span className="text-[13px] font-medium text-ink-400">MVP Sample</span>
             </div>
           </div>
         </aside>
@@ -204,15 +212,17 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             {children}
           </main>
 
-          <footer className="hidden items-center justify-center gap-2 pb-8 text-[14.3px] text-ink-400 lg:flex">
+          <footer className="hidden flex-col items-center gap-2.5 pb-10 pt-4 lg:flex">
             <Image
-              src="/images/mirae-ai-lab-logo.jpg"
-              alt="미래에이아이랩"
-              width={66}
-              height={20}
-              className="h-5 w-auto rounded"
+              src="/images/mirae-ai-lab-logo.png"
+              alt="미래에이아이랩 (MIRAE AI LAB)"
+              width={755}
+              height={147}
+              className="h-9 w-auto opacity-90"
             />
-            <span>© 미래에이아이랩 · FreshFridge MVP Sample</span>
+            <span className="text-[14.3px] text-ink-400">
+              © 미래에이아이랩 · FreshFridge MVP Sample
+            </span>
           </footer>
         </div>
       </div>
