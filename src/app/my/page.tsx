@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import {
   Bell,
   ChevronRight,
@@ -98,22 +97,11 @@ export default function MyPage() {
         데모 데이터 초기화
       </button>
 
-      <div className="flex flex-col items-center gap-2 pb-4 pt-2">
-        {/* 데스크톱에는 푸터에 로고가 있으므로 모바일에서만 노출 */}
-        <Image
-          src="/images/mirae-ai-lab-logo.png"
-          alt="미래에이아이랩 (MIRAE AI LAB)"
-          width={755}
-          height={147}
-          className="h-11 w-auto lg:hidden"
-        />
-        <p className="text-center text-[14.3px] leading-relaxed text-ink-400">
-          FreshFridge는 미래에이아이랩의 MVP 샘플 서비스입니다.
-          <br />
-          표시된 소비기한·유통기한 정보를 확인해주세요. 보관상태가 좋지 않다면 섭취하지 않는 것이
-          좋습니다.
-        </p>
-      </div>
+      {/* 제작사 안내는 하단 공통 CTA가 담당하므로 여기서는 식품 안전 안내만 남긴다 */}
+      <p className="pb-2 pt-1 text-center text-[14.3px] leading-relaxed text-ink-400">
+        표시된 소비기한·유통기한 정보를 확인해주세요. 보관상태가 좋지 않다면 섭취하지 않는 것이
+        좋습니다.
+      </p>
     </div>
   );
 }

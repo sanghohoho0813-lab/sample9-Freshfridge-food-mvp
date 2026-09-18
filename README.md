@@ -90,17 +90,55 @@ public/images/
 
 제작사 로고(`public/images/mirae-ai-lab-logo.png`)는 **배경이 투명한 원본**을 여백만 제거해 사용합니다(755×147).
 
-노출 위치는 다음 5곳으로, 과하지 않게 유지합니다.
+로고 노출은 다음 3곳으로 제한하고, 페이지 하단의 브랜드 메시지는 공통 CTA가 담당합니다.
 
 | 위치 | 표시 | 비고 |
 |---|---|---|
 | 상단 브랜드 바 | 로고 + "미래에이아이랩이 만든 FreshFridge · MVP Sample" | 전 페이지 공통, 밝은 배경 |
 | 데스크톱 사이드바 하단 | "Made by" + 로고 | |
 | 데스크톱 푸터 | 로고 + 저작권 문구 | |
-| 홈 하단 브랜드 카드 | 로고 + 제작 안내 | |
-| 마이페이지 하단 | 로고 + 서비스 안내 | 모바일 전용(데스크톱은 푸터와 중복이라 숨김) |
+| 하단 공통 CTA | 브랜드명 + 소개 문구 (로고 없음) | 아래 SampleBridgeCTA 참고 |
 
 로고가 어두운 색이라 **밝은 배경 위에만** 올립니다. 어두운 영역에 넣어야 한다면 별도의 화이트 버전이 필요합니다.
+
+## 샘플 공통 CTA (SampleBridgeCTA)
+
+샘플을 다 본 사용자를 **상담 / 다른 샘플 / 홈페이지**로 연결하는 공통 브릿지 CTA입니다.
+`src/components/AppShell.tsx`의 `<main>` 안, 페이지 콘텐츠 바로 아래에 한 번만 삽입되어
+**모든 라우트 하단에 동일하게** 노출됩니다.
+
+```
+src/components/SampleBridgeCTA.tsx   # CTA 컴포넌트
+src/lib/mirae-brand.ts               # 링크 + 문구 상수
+```
+
+### 링크 수정 위치
+
+`src/lib/mirae-brand.ts` 의 `MIRAE_LINKS` 한 곳만 고치면 됩니다.
+
+| 키 | 용도 | 현재 주소 |
+|---|---|---|
+| `consult` | 메인 CTA `우리 회사도 만들어보기` | https://miraeailab.com/business-diagnosis |
+| `samples` | `다른 샘플 더 보기` | https://miraeailab.com/business-services |
+| `home` | `미래AI랩 홈페이지` | https://miraeailab.com/ |
+
+특정 페이지에서만 다른 주소를 쓰려면 props로 덮어씁니다.
+
+```tsx
+<SampleBridgeCTA consultHref="..." samplesHref="..." homeHref="..." />
+```
+
+### CTA 문구 수정 위치
+
+`src/lib/mirae-brand.ts` 의 `MIRAE_CTA_COPY` 한 곳에서 관리합니다
+(`badge` / `eyebrow` / `headline` / `description` / `primary` / `primaryHint` / `samples` / `home`).
+메인 CTA 문구 `primary`는 전 샘플 공통으로 **"우리 회사도 만들어보기"**를 유지합니다.
+
+### 애니메이션
+
+- 메인 버튼 위를 **6초에 한 번, 약 0.9초 동안** 지나가는 약한 light sweep (`animate-cta-sheen`)
+- 배지의 작은 점에 은은한 `animate-soft-pulse`
+- hover 시 살짝 떠오르며 그림자만 강해지고, `motion-reduce` 환경에서는 sweep을 숨기고 이동 효과를 끕니다
 
 ## 이미지 에셋
 

@@ -20,6 +20,7 @@ import {
 import { useStore } from "@/lib/store";
 import ToastHost from "./ToastHost";
 import LiveClock from "./LiveClock";
+import SampleBridgeCTA from "./SampleBridgeCTA";
 
 /** 메뉴별 아이콘 색상 — 각 메뉴를 색으로 빠르게 구분할 수 있게 한다. */
 const NAV_ITEMS = [
@@ -210,6 +211,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
           <main className="w-full flex-1 px-4 pb-28 pt-5 sm:px-5 lg:pb-12">
             {children}
+
+            {/* 샘플 공통 브릿지 CTA — 모든 페이지 하단에 동일하게 노출 */}
+            <SampleBridgeCTA className="mx-auto mt-12 max-w-6xl" />
           </main>
 
           <footer className="hidden flex-col items-center gap-2.5 pb-10 pt-4 lg:flex">

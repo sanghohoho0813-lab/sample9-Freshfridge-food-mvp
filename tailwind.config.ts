@@ -105,12 +105,24 @@ const config: Config = {
           "0%": { backgroundPosition: "-400px 0" },
           "100%": { backgroundPosition: "400px 0" },
         },
+        // CTA 버튼 위를 6초에 한 번, 0.9초 동안만 지나가는 아주 약한 빛 (나머지 시간은 정지)
+        "cta-sheen": {
+          "0%": { transform: "translateX(-160%) skewX(-14deg)" },
+          "15%": { transform: "translateX(420%) skewX(-14deg)" },
+          "100%": { transform: "translateX(420%) skewX(-14deg)" },
+        },
+        "soft-pulse": {
+          "0%, 100%": { opacity: "0.4" },
+          "50%": { opacity: "1" },
+        },
       },
       animation: {
         "fade-up": "fade-up 0.28s ease-out both",
         "pop-in": "pop-in 0.26s ease-out both",
         "toast-in": "toast-in 0.24s ease-out both",
         shimmer: "shimmer 1.4s linear infinite",
+        "cta-sheen": "cta-sheen 6s ease-in-out infinite",
+        "soft-pulse": "soft-pulse 3.2s ease-in-out infinite",
       },
     },
   },

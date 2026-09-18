@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useMemo } from "react";
 import { Check, ChefHat, Plus, Sparkles } from "lucide-react";
 import { useFridge, useStore } from "@/lib/store";
@@ -222,20 +221,6 @@ export default function HomePage() {
         </Link>
       </section>
 
-      {/* 제작사 브랜드 */}
-      <section className="flex flex-col items-center gap-3 rounded-card border border-fresh-100 bg-white/70 px-5 py-7 text-center">
-        <Image
-          src="/images/mirae-ai-lab-logo.png"
-          alt="미래에이아이랩 (MIRAE AI LAB)"
-          width={755}
-          height={147}
-          className="h-10 w-auto sm:h-12"
-        />
-        <p className="text-[16.2px] leading-relaxed text-ink-500">
-          FreshFridge는 <span className="font-bold text-ink-700">미래에이아이랩</span>이 제작한
-          <span className="font-bold text-fresh-600"> MVP 샘플 서비스</span>입니다.
-        </p>
-      </section>
     </div>
   );
 }
