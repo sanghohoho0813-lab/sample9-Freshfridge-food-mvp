@@ -136,8 +136,8 @@ export default function AddIngredientPage() {
   return (
     <div className="mx-auto max-w-5xl animate-fade-up space-y-5">
       <div>
-        <h1 className="text-[28.6px] font-extrabold tracking-tight text-ink-900">식재료 추가 🧺</h1>
-        <p className="mt-1 text-[17.6px] text-ink-500">
+        <h1 className="text-[28.5px] font-extrabold tracking-tight text-ink-900">식재료 추가 🧺</h1>
+        <p className="mt-1 text-[17.5px] text-ink-500">
           냉장고 속 재료를 알면 장보기도 쉬워져요.
         </p>
       </div>
@@ -154,7 +154,7 @@ export default function AddIngredientPage() {
             key={t.key}
             type="button"
             onClick={() => setTab(t.key)}
-            className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2.5 text-[17.6px] font-bold transition-all duration-200 ${
+            className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2.5 text-[17.5px] font-bold transition-all duration-200 ${
               tab === t.key ? "bg-white text-fresh-700 shadow-soft" : "text-ink-500"
             }`}
           >
@@ -168,8 +168,8 @@ export default function AddIngredientPage() {
         <div className="space-y-5">
           {/* 빠른 등록 */}
           <div className="card p-4">
-            <p className="text-[16.9px] font-bold text-ink-700">빠른 등록</p>
-            <p className="mt-0.5 text-[15px] text-ink-400">자주 쓰는 재료를 눌러 바로 채워요.</p>
+            <p className="text-[16.5px] font-bold text-ink-700">빠른 등록</p>
+            <p className="mt-0.5 text-[15.5px] text-ink-400">자주 쓰는 재료를 눌러 바로 채워요.</p>
             <div className="mt-3 flex flex-wrap gap-2">
               {QUICK_ITEMS.map((q) => (
                 <button
@@ -197,7 +197,7 @@ export default function AddIngredientPage() {
           {/* 직접 입력 폼 */}
           <div className="card space-y-4 p-5">
             <div>
-              <label htmlFor="ing-name" className="mb-1.5 block text-[16.9px] font-bold text-ink-700">
+              <label htmlFor="ing-name" className="mb-1.5 block text-[16.5px] font-bold text-ink-700">
                 식재료명 <span className="text-coral-500">*</span>
               </label>
               <input
@@ -211,7 +211,7 @@ export default function AddIngredientPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label htmlFor="ing-qty" className="mb-1.5 block text-[16.9px] font-bold text-ink-700">
+                <label htmlFor="ing-qty" className="mb-1.5 block text-[16.5px] font-bold text-ink-700">
                   수량
                 </label>
                 <div className="flex items-center gap-2">
@@ -242,7 +242,7 @@ export default function AddIngredientPage() {
                 </div>
               </div>
               <div>
-                <label htmlFor="ing-unit" className="mb-1.5 block text-[16.9px] font-bold text-ink-700">
+                <label htmlFor="ing-unit" className="mb-1.5 block text-[16.5px] font-bold text-ink-700">
                   단위
                 </label>
                 <select
@@ -261,7 +261,7 @@ export default function AddIngredientPage() {
             </div>
 
             <div>
-              <p className="mb-1.5 text-[16.9px] font-bold text-ink-700">카테고리</p>
+              <p className="mb-1.5 text-[16.5px] font-bold text-ink-700">카테고리</p>
               <div className="flex flex-wrap gap-2">
                 {(Object.keys(CATEGORY_LABELS) as IngredientCategory[]).map((c) => (
                   <button
@@ -281,7 +281,7 @@ export default function AddIngredientPage() {
             </div>
 
             <div>
-              <p className="mb-1.5 text-[16.9px] font-bold text-ink-700">보관 위치</p>
+              <p className="mb-1.5 text-[16.5px] font-bold text-ink-700">보관 위치</p>
               <div className="flex gap-2">
                 {(Object.keys(STORAGE_LABELS) as StorageType[]).map((s) => (
                   <button
@@ -302,7 +302,7 @@ export default function AddIngredientPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label htmlFor="ing-bought" className="mb-1.5 block text-[16.9px] font-bold text-ink-700">
+                <label htmlFor="ing-bought" className="mb-1.5 block text-[16.5px] font-bold text-ink-700">
                   구매일
                 </label>
                 <input
@@ -314,7 +314,7 @@ export default function AddIngredientPage() {
                 />
               </div>
               <div>
-                <label htmlFor="ing-expiry" className="mb-1.5 block text-[16.9px] font-bold text-ink-700">
+                <label htmlFor="ing-expiry" className="mb-1.5 block text-[16.5px] font-bold text-ink-700">
                   유통기한
                 </label>
                 <input
@@ -333,7 +333,7 @@ export default function AddIngredientPage() {
                   key={d}
                   type="button"
                   onClick={() => setExpiresAt(toISODate(addDays(todayStart(), d)))}
-                  className="chip border border-ink-300/30 bg-white text-[15.6px] text-ink-500 hover:border-fresh-200 hover:bg-fresh-50/50"
+                  className="chip border border-ink-300/30 bg-white text-[15.5px] text-ink-500 hover:border-fresh-200 hover:bg-fresh-50/50"
                 >
                   +{d}일
                 </button>
@@ -341,7 +341,7 @@ export default function AddIngredientPage() {
             </div>
 
             <div>
-              <label htmlFor="ing-memo" className="mb-1.5 block text-[16.9px] font-bold text-ink-700">
+              <label htmlFor="ing-memo" className="mb-1.5 block text-[16.5px] font-bold text-ink-700">
                 메모 <span className="font-normal text-ink-400">(선택)</span>
               </label>
               <input
@@ -353,7 +353,7 @@ export default function AddIngredientPage() {
               />
             </div>
 
-            <button type="button" onClick={submit} className="btn-primary w-full py-3 text-[19.5px]">
+            <button type="button" onClick={submit} className="btn-primary w-full py-3 text-[20.5px]">
               <Plus size={22} />
               냉장고에 추가
             </button>
@@ -371,11 +371,11 @@ export default function AddIngredientPage() {
                 <ImagePlus size={39} />
               </span>
               <div className="text-center">
-                <p className="text-[19.5px] font-bold text-ink-900">식재료 사진으로 등록</p>
-                <p className="mt-1 text-[16.2px] text-ink-500">
+                <p className="text-[20.5px] font-bold text-ink-900">식재료 사진으로 등록</p>
+                <p className="mt-1 text-[16.5px] text-ink-500">
                   영수증이나 식재료 사진을 올리면 자동으로 인식해요.
                 </p>
-                <p className="mt-2 rounded-chip bg-amberish-50 px-3 py-1 text-[14.3px] font-semibold text-amberish-600">
+                <p className="mt-2 rounded-chip bg-amberish-50 px-3 py-1 text-[14.5px] font-semibold text-amberish-600">
                   데모 모드 — 예시 인식 결과가 표시돼요
                 </p>
               </div>
@@ -395,17 +395,17 @@ export default function AddIngredientPage() {
           {recognizing && (
             <div className="card flex flex-col items-center gap-3 px-6 py-14">
               <Loader2 className="animate-spin text-fresh-500" size={42} />
-              <p className="text-[18.2px] font-bold text-ink-700">사진 속 식재료를 인식하고 있어요…</p>
+              <p className="text-[18.5px] font-bold text-ink-700">사진 속 식재료를 인식하고 있어요…</p>
             </div>
           )}
 
           {recognized && (
             <div className="card animate-pop-in space-y-4 p-5">
               <div>
-                <p className="text-[19.5px] font-bold text-ink-900">
+                <p className="text-[20.5px] font-bold text-ink-900">
                   다음 식재료가 감지되었습니다 ✨
                 </p>
-                <p className="mt-0.5 text-[16.2px] text-ink-500">
+                <p className="mt-0.5 text-[16.5px] text-ink-500">
                   수량을 확인하고 냉장고에 추가해주세요.
                 </p>
               </div>
@@ -422,8 +422,8 @@ export default function AddIngredientPage() {
                       sizes="44px"
                     />
                     <div className="flex-1">
-                      <p className="text-[18.2px] font-bold text-ink-900">{r.name}</p>
-                      <p className="text-[15px] text-ink-400">
+                      <p className="text-[18.5px] font-bold text-ink-900">{r.name}</p>
+                      <p className="text-[15.5px] text-ink-400">
                         {CATEGORY_LABELS[r.category]} · 권장 소비 {r.suggestedExpiryDays}일
                       </p>
                     </div>
@@ -436,7 +436,7 @@ export default function AddIngredientPage() {
                       >
                         <Minus size={18} />
                       </button>
-                      <span className="min-w-10 text-center text-[17.6px] font-bold">
+                      <span className="min-w-10 text-center text-[17.5px] font-bold">
                         {r.quantity}
                         {r.unit}
                       </span>

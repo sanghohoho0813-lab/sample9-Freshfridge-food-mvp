@@ -1,12 +1,13 @@
 import type {
-  AppNotification,
   AppState,
   ConsumptionLog,
+  CookLog,
   Ingredient,
   IngredientCategory,
   Recipe,
   ShoppingItem,
   StorageType,
+  WasteReason,
 } from "./types";
 import { addDays, toISODate, todayStart } from "./expiry-calculator";
 
@@ -434,103 +435,177 @@ export const RECIPES: Recipe[] = [
   },
 ];
 
-export function buildDemoLogs(): ConsumptionLog[] {
-  const today = todayStart();
-  const mk = (
-    daysAgo: number,
-    name: string,
-    emoji: string,
-    category: ConsumptionLog["category"],
-    type: ConsumptionLog["type"],
-    price: number,
-    reason?: ConsumptionLog["reason"],
-    via?: string
-  ): ConsumptionLog => ({
-    id: id("log"),
-    ingredientName: name,
-    emoji,
-    category,
-    type,
-    date: toISODate(addDays(today, -daysAgo)),
-    price,
-    reason,
-    via,
-  });
+/* ------------------------------------------------------------------ */
+/* 식재료 기본값 카탈로그 — 장보기에서 산 재료를 냉장고에 넣을 때 기본값으로 쓴다 */
+/* ------------------------------------------------------------------ */
 
-  return [
-    mk(1, "우유", "🥛", "dairy", "consumed", 3100, undefined, "그대로 먹었어요"),
-    mk(1, "느타리버섯", "🍄", "vegetable", "consumed", 2600, undefined, "버섯전"),
-    mk(2, "상추", "🥗", "vegetable", "discarded", 2500, "보관 실패"),
-    mk(2, "계란", "🥚", "egg", "consumed", 800, undefined, "계란말이"),
-    mk(3, "닭가슴살", "🍗", "meat", "consumed", 3300, undefined, "닭가슴살 샐러드"),
-    mk(4, "바나나", "🍌", "fruit", "consumed", 1000, undefined, "바나나 요거트볼"),
-    mk(5, "애호박", "🥒", "vegetable", "consumed", 1900, undefined, "된장찌개"),
-    mk(6, "두부", "🧈", "processed", "consumed", 2400, undefined, "두부조림"),
-    mk(8, "깻잎", "🌿", "vegetable", "discarded", 2000, "유통기한 지남"),
-    mk(10, "요거트", "🍶", "dairy", "consumed", 1500, undefined, "그대로 먹었어요"),
-    mk(12, "토마토", "🍅", "vegetable", "consumed", 1500, undefined, "토마토 계란볶음"),
-    mk(14, "블루베리", "🫐", "fruit", "discarded", 5500, "먹을 기회 없음"),
-    mk(16, "식빵", "🍞", "processed", "consumed", 3400, undefined, "프렌치토스트"),
-    mk(18, "우유", "🥛", "dairy", "discarded", 3200, "유통기한 지남"),
-    mk(21, "시금치", "🥬", "vegetable", "consumed", 3500, undefined, "시금치 두부무침"),
-    mk(24, "돼지고기 앞다리살", "🥩", "meat", "consumed", 8900, undefined, "돼지고기 김치찌개"),
-    mk(26, "당근", "🥕", "vegetable", "discarded", 1600, "너무 많이 구매"),
-  ];
+export interface IngredientDefaults {
+  name: string;
+  emoji: string;
+  category: IngredientCategory;
+  storage: StorageType;
+  unit: string;
+  shelfDays: number | null;
+  price: number;
+}
+
+const EXTRA_CATALOG: IngredientDefaults[] = [
+  { name: "깻잎", emoji: "🌿", category: "vegetable", storage: "fridge", unit: "봉", shelfDays: 5, price: 2000 },
+  { name: "양배추", emoji: "🥬", category: "vegetable", storage: "fridge", unit: "통", shelfDays: 14, price: 3500 },
+  { name: "고춧가루", emoji: "🌶️", category: "sauce", storage: "pantry", unit: "봉", shelfDays: 180, price: 6000 },
+  { name: "올리브오일", emoji: "🫒", category: "sauce", storage: "pantry", unit: "병", shelfDays: 365, price: 9000 },
+];
+
+const CATALOG: IngredientDefaults[] = [
+  ...INGREDIENT_SEEDS.map((s) => ({
+    name: s.name,
+    emoji: s.emoji,
+    category: s.cat,
+    storage: s.storage,
+    unit: s.unit,
+    shelfDays: s.expiresIn === null ? null : s.expiresIn + s.boughtAgo,
+    price: s.price,
+  })),
+  ...EXTRA_CATALOG,
+];
+
+/** 이름으로 기본값을 찾는다. 모르는 재료는 무난한 값으로 채운다. */
+export function ingredientDefaults(name: string): IngredientDefaults {
+  const exact = CATALOG.find((c) => c.name === name);
+  if (exact) return exact;
+  const partial = CATALOG.find((c) => name.includes(c.name) || c.name.includes(name));
+  if (partial) return { ...partial, name };
+  return { name, emoji: "🧺", category: "etc", storage: "fridge", unit: "개", shelfDays: 7, price: 3000 };
+}
+
+/* ------------------------------------------------------------------ */
+/* 데모 기록 — 먹었어요 / 버렸어요 / 요리했어요 이벤트로 구성                */
+/* 최근 30일과 그 이전 30일을 모두 넣어 "지난달 대비"가 실제 계산되게 한다     */
+/* ------------------------------------------------------------------ */
+
+type LogItem = [name: string, amount: number, price: number, dLeft: number | null];
+
+type DemoEvent =
+  | { daysAgo: number; kind: "eat"; item: LogItem }
+  | { daysAgo: number; kind: "discard"; item: LogItem; reason: WasteReason }
+  | { daysAgo: number; kind: "cook"; recipeId: string; items: LogItem[] };
+
+const DEMO_EVENTS: DemoEvent[] = [
+  // ── 최근 30일: 요리로 임박 재료를 많이 살린 달 ──
+  { daysAgo: 1, kind: "eat", item: ["우유", 1, 3100, 0] },
+  { daysAgo: 1, kind: "cook", recipeId: "recipe_tomato_egg", items: [["토마토", 2, 2950, 2], ["계란", 3, 1950, 12]] },
+  { daysAgo: 2, kind: "discard", item: ["상추", 1, 2500, -1], reason: "보관 실패" },
+  { daysAgo: 2, kind: "cook", recipeId: "recipe_egg_roll", items: [["계란", 4, 2600, 11]] },
+  { daysAgo: 3, kind: "cook", recipeId: "recipe_chicken_salad", items: [["닭가슴살", 1, 3300, 20], ["토마토", 1, 1480, 3]] },
+  { daysAgo: 4, kind: "cook", recipeId: "recipe_banana_yogurt", items: [["바나나", 1, 1000, 1], ["요거트", 1, 1500, 2]] },
+  { daysAgo: 5, kind: "eat", item: ["애호박", 1, 1900, 2] },
+  { daysAgo: 6, kind: "cook", recipeId: "recipe_tofu_jorim", items: [["두부", 1, 2400, 1], ["대파", 0.25, 450, 4]] },
+  { daysAgo: 8, kind: "discard", item: ["깻잎", 1, 2000, -2], reason: "유통기한 지남" },
+  { daysAgo: 10, kind: "eat", item: ["요거트", 1, 1500, 3] },
+  { daysAgo: 12, kind: "cook", recipeId: "recipe_tomato_egg", items: [["토마토", 2, 2950, 1], ["계란", 3, 1950, 9]] },
+  { daysAgo: 14, kind: "discard", item: ["블루베리", 1, 5500, -1], reason: "먹을 기회 없음" },
+  { daysAgo: 16, kind: "cook", recipeId: "recipe_french_toast", items: [["식빵", 0.5, 1700, 2], ["우유", 0.5, 1600, 4], ["계란", 2, 1300, 14]] },
+  { daysAgo: 21, kind: "cook", recipeId: "recipe_spinach_tofu_muchim", items: [["시금치", 1, 3500, 1], ["두부", 0.5, 1200, 3]] },
+  { daysAgo: 24, kind: "cook", recipeId: "recipe_pork_kimchi_jjigae", items: [["돼지고기 앞다리살", 200, 4450, 2], ["두부", 0.5, 1200, 4]] },
+  { daysAgo: 26, kind: "discard", item: ["당근", 1, 800, -3], reason: "너무 많이 구매" },
+
+  // ── 그 이전 30일: 버리는 재료가 더 많았던 달 (비교 기준) ──
+  { daysAgo: 32, kind: "discard", item: ["시금치", 1, 3500, -2], reason: "유통기한 지남" },
+  { daysAgo: 33, kind: "cook", recipeId: "recipe_kimchi_fried_rice", items: [["계란", 1, 650, 10], ["대파", 0.25, 450, 3]] },
+  { daysAgo: 35, kind: "discard", item: ["우유", 1, 3200, -1], reason: "유통기한 지남" },
+  { daysAgo: 36, kind: "eat", item: ["사과", 1, 2300, 8] },
+  { daysAgo: 38, kind: "discard", item: ["상추", 1, 2500, -2], reason: "먹을 기회 없음" },
+  { daysAgo: 40, kind: "cook", recipeId: "recipe_potato_stirfry", items: [["감자", 2, 1600, 6], ["양파", 0.5, 450, 9]] },
+  { daysAgo: 42, kind: "discard", item: ["대파", 1, 1800, -3], reason: "너무 많이 구매" },
+  { daysAgo: 44, kind: "eat", item: ["요거트", 1, 1500, 1] },
+  { daysAgo: 45, kind: "discard", item: ["토마토", 2, 2950, -1], reason: "보관 실패" },
+  { daysAgo: 47, kind: "cook", recipeId: "recipe_mackerel_gui", items: [["고등어", 1, 3750, 15]] },
+  { daysAgo: 49, kind: "discard", item: ["바나나", 2, 2000, -1], reason: "먹을 기회 없음" },
+  { daysAgo: 51, kind: "cook", recipeId: "recipe_tofu_jorim", items: [["두부", 1, 2400, 2]] },
+  { daysAgo: 53, kind: "eat", item: ["우유", 1, 3200, 3] },
+  { daysAgo: 55, kind: "discard", item: ["애호박", 1, 1900, -2], reason: "유통기한 지남" },
+  { daysAgo: 57, kind: "eat", item: ["바나나", 1, 1000, 2] },
+];
+
+/** 임박(D-0~D-2) 재료를 버리기 전에 먹은 것인지 */
+export function isRescue(dLeft: number | null | undefined): boolean {
+  return dLeft !== null && dLeft !== undefined && dLeft >= 0 && dLeft <= 2;
+}
+
+function buildDemoHistory(): { logs: ConsumptionLog[]; cooks: CookLog[] } {
+  const today = todayStart();
+  const logs: ConsumptionLog[] = [];
+  const cooks: CookLog[] = [];
+
+  const toLog = (
+    item: LogItem,
+    date: string,
+    type: ConsumptionLog["type"],
+    extra: Partial<ConsumptionLog> = {}
+  ): ConsumptionLog => {
+    const [name, amount, price, dLeft] = item;
+    const d = ingredientDefaults(name);
+    return {
+      id: id("log"),
+      ingredientName: name,
+      emoji: d.emoji,
+      category: d.category,
+      type,
+      date,
+      price,
+      amount,
+      unit: d.unit,
+      dLeft,
+      ...extra,
+    };
+  };
+
+  for (const ev of DEMO_EVENTS) {
+    const date = toISODate(addDays(today, -ev.daysAgo));
+    if (ev.kind === "eat") {
+      logs.push(toLog(ev.item, date, "consumed"));
+    } else if (ev.kind === "discard") {
+      logs.push(toLog(ev.item, date, "discarded", { reason: ev.reason }));
+    } else {
+      const recipe = RECIPES.find((r) => r.id === ev.recipeId);
+      const recipeName = recipe?.name ?? "요리";
+      const cookId = id("cook");
+      for (const item of ev.items) {
+        logs.push(toLog(item, date, "consumed", { via: recipeName, cookId }));
+      }
+      cooks.push({
+        id: cookId,
+        recipeId: ev.recipeId,
+        recipeName,
+        date,
+        usedCount: ev.items.length,
+        savedAmount: ev.items.reduce((sum, it) => sum + it[2], 0),
+        rescuedCount: ev.items.filter((it) => isRescue(it[3])).length,
+      });
+    }
+  }
+
+  const byDateDesc = (a: { date: string }, b: { date: string }) => b.date.localeCompare(a.date);
+  return { logs: logs.sort(byDateDesc), cooks: cooks.sort(byDateDesc) };
 }
 
 export function buildDemoShopping(): ShoppingItem[] {
   return [
-    { id: id("shop"), name: "고춧가루", checked: false },
     { id: id("shop"), name: "양배추", checked: false },
+    { id: id("shop"), name: "고춧가루", checked: false, fromRecipe: "돼지고기 김치찌개" },
     { id: id("shop"), name: "올리브오일", checked: true },
   ];
 }
 
-export function buildDemoNotifications(): AppNotification[] {
-  const today = todayStart();
-  return [
-    {
-      id: id("noti"),
-      title: "우유의 유통기한이 내일이에요",
-      body: "냉장실의 우유 1팩, 내일까지 드시는 게 좋아요.",
-      date: toISODate(today),
-      read: false,
-      kind: "expiry",
-    },
-    {
-      id: id("noti"),
-      title: "오늘 저녁 추천: 버섯 두부전골",
-      body: "두부와 새송이버섯으로 오늘 저녁을 만들어보세요.",
-      date: toISODate(today),
-      read: false,
-      kind: "recipe",
-    },
-    {
-      id: id("noti"),
-      title: "냉동 닭가슴살 보관 12일째",
-      body: "냉동 보관 중인 닭가슴살, 잊지 말고 활용해보세요.",
-      date: toISODate(addDays(today, -1)),
-      read: false,
-      kind: "tip",
-    },
-    {
-      id: id("noti"),
-      title: "지난주 절약 리포트가 도착했어요",
-      body: "지난주 6개의 식재료를 버리지 않고 사용했어요.",
-      date: toISODate(addDays(today, -2)),
-      read: true,
-      kind: "tip",
-    },
-  ];
-}
-
 export function buildInitialState(): AppState {
+  const { logs, cooks } = buildDemoHistory();
   return {
     userName: "지현",
     ingredients: buildDemoIngredients(),
-    logs: buildDemoLogs(),
+    logs,
     shopping: buildDemoShopping(),
-    notifications: buildDemoNotifications(),
+    cooks,
+    readNotificationIds: [],
     seededAt: toISODate(todayStart()),
   };
 }

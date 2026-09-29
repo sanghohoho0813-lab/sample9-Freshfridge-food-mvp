@@ -18,7 +18,7 @@ import { monthlyReport } from "@/lib/stats";
 export default function MyPage() {
   const { ready, state, resetDemo, showToast } = useStore();
   const fridge = useFridge();
-  const report = monthlyReport(state.logs);
+  const report = monthlyReport(state.logs, state.cooks).current;
 
   if (!ready) {
     return <div className="mx-auto max-w-5xl"><div className="skeleton h-40 w-full" /></div>;
@@ -35,7 +35,7 @@ export default function MyPage() {
 
   return (
     <div className="mx-auto max-w-5xl animate-fade-up space-y-6">
-      <h1 className="text-[28.6px] font-extrabold tracking-tight text-ink-900">마이페이지</h1>
+      <h1 className="text-[28.5px] font-extrabold tracking-tight text-ink-900">마이페이지</h1>
 
       {/* 프로필 */}
       <section className="card flex items-center gap-4 p-5">
@@ -43,8 +43,8 @@ export default function MyPage() {
           🧑‍🍳
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-[22.1px] font-extrabold text-ink-900">{state.userName}님</p>
-          <p className="mt-0.5 text-[16.2px] text-ink-500">
+          <p className="text-[22px] font-extrabold text-ink-900">{state.userName}님</p>
+          <p className="mt-0.5 text-[16.5px] text-ink-500">
             버리기 전에 먼저 먹는 습관을 만드는 중이에요 🌱
           </p>
         </div>
@@ -58,8 +58,8 @@ export default function MyPage() {
           { label: "폐기율", value: `${report.wasteRate}%` },
         ].map((s) => (
           <div key={s.label} className="card p-4 text-center">
-            <p className="text-[15px] text-ink-400">{s.label}</p>
-            <p className="mt-0.5 text-[20.8px] font-extrabold text-ink-900">{s.value}</p>
+            <p className="text-[15.5px] text-ink-400">{s.label}</p>
+            <p className="mt-0.5 text-[20.5px] font-extrabold text-ink-900">{s.value}</p>
           </div>
         ))}
       </section>
@@ -76,8 +76,8 @@ export default function MyPage() {
               <Icon size={25} />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-[18.2px] font-bold text-ink-900">{label}</p>
-              <p className="text-[15px] text-ink-400">{desc}</p>
+              <p className="text-[18.5px] font-bold text-ink-900">{label}</p>
+              <p className="text-[15.5px] text-ink-400">{desc}</p>
             </div>
             <ChevronRight size={22} className="shrink-0 text-ink-300" />
           </Link>
@@ -98,7 +98,7 @@ export default function MyPage() {
       </button>
 
       {/* 제작사 안내는 하단 공통 CTA가 담당하므로 여기서는 식품 안전 안내만 남긴다 */}
-      <p className="pb-2 pt-1 text-center text-[14.3px] leading-relaxed text-ink-400">
+      <p className="pb-2 pt-1 text-center text-[14.5px] leading-relaxed text-ink-400">
         표시된 소비기한·유통기한 정보를 확인해주세요. 보관상태가 좋지 않다면 섭취하지 않는 것이
         좋습니다.
       </p>

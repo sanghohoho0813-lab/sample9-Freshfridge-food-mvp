@@ -6,8 +6,16 @@ import { Clock3, Gauge } from "lucide-react";
 import type { RecipeMatch } from "@/lib/recipe-matcher";
 import { dDayLabel } from "@/lib/expiry-calculator";
 import { recipeImage } from "@/lib/images";
+import { relativeDay } from "@/lib/stats";
 
-export default function RecipeCard({ match }: { match: RecipeMatch }) {
+export default function RecipeCard({
+  match,
+  lastCooked,
+}: {
+  match: RecipeMatch;
+  /** 마지막으로 만든 날짜 (있으면 "3일 전 만들었어요") */
+  lastCooked?: string;
+}) {
   const { recipe, matchPercent, missing, urgentOwned } = match;
   return (
     <Link
@@ -15,7 +23,7 @@ export default function RecipeCard({ match }: { match: RecipeMatch }) {
       className="card card-hover group flex flex-col overflow-hidden"
     >
       {/* 레시피 대표이미지 (4:3) */}
-      <div className="relative aspect-[4/3] w-full bg-gradient-to-br from-fresh-50 via-mint-50 to-cream">
+      <div className="relative aspect-[4/3] w-full bg-cream">
         <Image
           src={recipeImage(recipe.image)}
           alt={recipe.name}
@@ -23,14 +31,19 @@ export default function RecipeCard({ match }: { match: RecipeMatch }) {
           sizes="(max-width: 640px) 100vw, 340px"
           className="object-contain p-3 transition-transform duration-300 group-hover:scale-105"
         />
-        <span className="absolute left-3 top-3 rounded-chip bg-white/90 px-2.5 py-1 text-[14.3px] font-bold text-fresh-600 shadow-soft">
+        <span className="absolute left-3 top-3 rounded-chip bg-white/90 px-2.5 py-1 text-[14.5px] font-bold text-ink-700 shadow-soft">
           보유 재료 {matchPercent}%
         </span>
+        {lastCooked && (
+          <span className="absolute bottom-3 left-3 rounded-chip bg-ink-900/75 px-2.5 py-1 text-[13px] font-semibold text-white">
+            {relativeDay(lastCooked)} 만들었어요
+          </span>
+        )}
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">
         <div>
-          <p className="text-[20.2px] font-bold text-ink-900">{recipe.name}</p>
-          <p className="mt-0.5 flex items-center gap-2.5 text-[15.6px] text-ink-500">
+          <p className="text-[20.5px] font-bold text-ink-900">{recipe.name}</p>
+          <p className="mt-0.5 flex items-center gap-2.5 text-[15.5px] text-ink-500">
             <span className="inline-flex items-center gap-1">
               <Clock3 size={17} /> {recipe.minutes}분
             </span>
@@ -49,7 +62,7 @@ export default function RecipeCard({ match }: { match: RecipeMatch }) {
         </div>
 
         {urgentOwned.length > 0 && (
-          <p className="text-[15.6px] font-medium text-amberish-600">
+          <p className="text-[15.5px] font-medium text-amberish-600">
             먼저 소비:{" "}
             {urgentOwned
               .slice(0, 2)
@@ -58,11 +71,11 @@ export default function RecipeCard({ match }: { match: RecipeMatch }) {
           </p>
         )}
         {missing.length > 0 ? (
-          <p className="truncate text-[15.6px] text-ink-400">
+          <p className="truncate text-[15.5px] text-ink-400">
             추가 필요: {missing.map((m) => m.name).join(", ")}
           </p>
         ) : (
-          <p className="text-[15.6px] font-medium text-fresh-600">재료가 모두 있어요 ✓</p>
+          <p className="text-[15.5px] font-medium text-fresh-600">재료가 모두 있어요 ✓</p>
         )}
       </div>
     </Link>

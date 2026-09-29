@@ -37,8 +37,8 @@ export default function SearchPage() {
   return (
     <div className="mx-auto max-w-5xl animate-fade-up space-y-6">
       <div>
-        <h1 className="text-[28.6px] font-extrabold tracking-tight text-ink-900">검색 🔍</h1>
-        <p className="mt-1 text-[17.6px] text-ink-500">
+        <h1 className="text-[28.5px] font-extrabold tracking-tight text-ink-900">검색 🔍</h1>
+        <p className="mt-1 text-[17.5px] text-ink-500">
           내 냉장고의 식재료와 레시피를 한 번에 찾아요.
         </p>
       </div>
@@ -80,7 +80,7 @@ export default function SearchPage() {
         <div className="space-y-7">
           {matchedIngredients.length > 0 && (
             <section>
-              <h2 className="mb-3 text-[20.8px] font-extrabold text-ink-900">
+              <h2 className="mb-3 text-[20.5px] font-extrabold text-ink-900">
                 내 냉장고 <span className="text-fresh-600">{matchedIngredients.length}</span>
               </h2>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -92,7 +92,7 @@ export default function SearchPage() {
           )}
           {matchedRecipes.length > 0 && (
             <section>
-              <h2 className="mb-3 text-[20.8px] font-extrabold text-ink-900">
+              <h2 className="mb-3 text-[20.5px] font-extrabold text-ink-900">
                 레시피 <span className="text-fresh-600">{matchedRecipes.length}</span>
               </h2>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

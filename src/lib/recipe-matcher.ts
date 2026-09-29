@@ -5,6 +5,8 @@ export interface MatchedIngredient extends RecipeIngredient {
   owned: boolean;
   ingredient?: Ingredient;
   dLeft: number | null;
+  /** 가지고는 있지만 레시피 분량보다 적은 경우 */
+  short: boolean;
 }
 
 export interface RecipeMatch {
@@ -32,6 +34,7 @@ export function matchRecipe(recipe: Recipe, fridge: Ingredient[]): RecipeMatch {
       owned: Boolean(owned),
       ingredient: owned,
       dLeft: owned ? daysLeft(owned.expiresAt) : null,
+      short: Boolean(owned && ri.consume > 0 && owned.quantity < ri.consume),
     };
   });
 

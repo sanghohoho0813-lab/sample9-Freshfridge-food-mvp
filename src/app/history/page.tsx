@@ -1,34 +1,53 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { formatKoreanDate } from "@/lib/expiry-calculator";
+import { RECIPES, isRescue } from "@/lib/demo-data";
+import { formatKoreanDate, formatWon } from "@/lib/expiry-calculator";
+import { recipeImage } from "@/lib/images";
+import { formatAmount } from "@/lib/quantity";
+import { periodSummary, relativeDay } from "@/lib/stats";
+import type { ConsumptionLog } from "@/lib/types";
 import IngredientThumb from "@/components/IngredientThumb";
 import EmptyState from "@/components/EmptyState";
 import SkeletonList from "@/components/SkeletonList";
+
+type Row =
+  | { kind: "single"; log: ConsumptionLog }
+  | { kind: "cook"; cookId: string; recipeName: string; logs: ConsumptionLog[] };
+
+const amountText = (l: ConsumptionLog) =>
+  l.amount !== undefined ? formatAmount(l.amount, l.unit ?? "") : "";
 
 export default function HistoryPage() {
   const { ready, state } = useStore();
   const [tab, setTab] = useState<"consumed" | "discarded">("consumed");
 
-  const logs = useMemo(
-    () =>
-      state.logs
-        .filter((l) => l.type === tab)
-        .slice()
-        .sort((a, b) => b.date.localeCompare(a.date)),
-    [state.logs, tab]
-  );
+  const summary = useMemo(() => periodSummary(state.logs, state.cooks, 0, 29), [state.logs, state.cooks]);
 
+  // 날짜별 → 같은 요리에서 나온 기록은 한 줄로 묶기
   const grouped = useMemo(() => {
-    const map = new Map<string, typeof logs>();
+    const logs = state.logs
+      .filter((l) => l.type === tab)
+      .slice()
+      .sort((a, b) => b.date.localeCompare(a.date));
+    const byDate = new Map<string, Row[]>();
     for (const l of logs) {
-      const arr = map.get(l.date) ?? [];
-      arr.push(l);
-      map.set(l.date, arr);
+      const rows = byDate.get(l.date) ?? [];
+      if (l.cookId) {
+        const existing = rows.find((r) => r.kind === "cook" && r.cookId === l.cookId);
+        if (existing && existing.kind === "cook") existing.logs.push(l);
+        else rows.push({ kind: "cook", cookId: l.cookId, recipeName: l.via ?? "요리", logs: [l] });
+      } else {
+        rows.push({ kind: "single", log: l });
+      }
+      byDate.set(l.date, rows);
     }
-    return [...map.entries()];
-  }, [logs]);
+    return [...byDate.entries()];
+  }, [state.logs, tab]);
 
   if (!ready) {
     return (
@@ -42,25 +61,27 @@ export default function HistoryPage() {
   return (
     <div className="mx-auto max-w-5xl animate-fade-up space-y-5">
       <div>
-        <h1 className="text-[28.6px] font-extrabold tracking-tight text-ink-900">소비 기록 📒</h1>
-        <p className="mt-1 text-[17.6px] text-ink-500">
-          먹은 재료와 버린 재료를 한눈에 확인해요.
+        <h1 className="text-[28.5px] font-extrabold tracking-tight text-ink-900">소비 기록 📒</h1>
+        <p className="mt-1 text-[17.5px] text-ink-500">
+          최근 30일 먹은 재료 {summary.usedCount}개 · 버린 재료 {summary.wastedCount}개
         </p>
       </div>
 
-      <div className="flex gap-1.5 rounded-2xl bg-fresh-50 p-1.5">
+      <div className="flex gap-1.5 rounded-2xl bg-ink-300/15 p-1.5" role="tablist">
         {(
           [
-            { key: "consumed", label: "사용" },
-            { key: "discarded", label: "폐기" },
+            { key: "consumed", label: "먹은 기록" },
+            { key: "discarded", label: "버린 기록" },
           ] as const
         ).map((t) => (
           <button
             key={t.key}
             type="button"
+            role="tab"
+            aria-selected={tab === t.key}
             onClick={() => setTab(t.key)}
-            className={`flex-1 rounded-xl py-2 text-[17.6px] font-bold transition-all duration-200 ${
-              tab === t.key ? "bg-white text-fresh-700 shadow-soft" : "text-ink-500"
+            className={`flex-1 rounded-xl py-2.5 text-[17.5px] font-bold transition-all duration-200 ${
+              tab === t.key ? "bg-white text-ink-900 shadow-soft" : "text-ink-500"
             }`}
           >
             {t.label}
@@ -71,55 +92,97 @@ export default function HistoryPage() {
       {grouped.length === 0 ? (
         <EmptyState
           emoji={tab === "consumed" ? "🍽️" : "🗑️"}
-          title={tab === "consumed" ? "아직 사용 기록이 없어요" : "폐기 기록이 없어요"}
-          description={
-            tab === "consumed"
-              ? "식재료를 먹으면 여기에 기록돼요."
-              : "폐기 없는 냉장고, 아주 좋아요!"
-          }
+          title={tab === "consumed" ? "아직 먹은 기록이 없어요" : "버린 기록이 없어요"}
+          description={tab === "consumed" ? "식재료를 먹거나 요리하면 여기에 기록돼요." : "폐기 없는 냉장고, 아주 좋아요!"}
         />
       ) : (
-        <div className="space-y-5">
-          {grouped.map(([date, items]) => (
+        <div className="space-y-6">
+          {grouped.map(([date, rows]) => (
             <section key={date}>
-              <h2 className="mb-2 text-[16.9px] font-bold text-ink-400">
-                {formatKoreanDate(date)}
+              <h2 className="mb-2 text-[16.5px] font-bold text-ink-500">
+                {formatKoreanDate(date)} <span className="font-medium text-ink-400">· {relativeDay(date)}</span>
               </h2>
-              <ul className="space-y-2">
-                {items.map((l) => (
-                  <li key={l.id} className="card flex items-center gap-3 p-3.5">
-                    <IngredientThumb
-                      name={l.ingredientName}
-                      emoji={l.emoji}
-                      className={`h-14 w-14 rounded-xl text-xl ${
-                        l.type === "consumed" ? "bg-fresh-50" : "bg-coral-50"
-                      } ${l.type === "discarded" ? "opacity-60 grayscale" : ""}`}
-                      sizes="44px"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[18.2px] font-bold text-ink-900">{l.ingredientName}</p>
-                      <p className="text-[15px] text-ink-400">
-                        {l.type === "consumed"
-                          ? (l.via ?? "사용 완료")
-                          : (l.reason ?? "폐기")}
-                      </p>
-                    </div>
-                    <span
-                      className={`rounded-chip px-2.5 py-1 text-[14.3px] font-bold ${
-                        l.type === "consumed"
-                          ? "bg-fresh-50 text-fresh-600"
-                          : "bg-coral-50 text-coral-500"
-                      }`}
-                    >
-                      {l.type === "consumed" ? "사용 완료" : "폐기"}
-                    </span>
-                  </li>
-                ))}
+              <ul className="divide-y divide-ink-300/20 overflow-hidden rounded-card border border-ink-300/25 bg-white">
+                {rows.map((row) =>
+                  row.kind === "cook" ? (
+                    <CookRow key={row.cookId} recipeName={row.recipeName} logs={row.logs} />
+                  ) : (
+                    <SingleRow key={row.log.id} log={row.log} />
+                  )
+                )}
               </ul>
             </section>
           ))}
         </div>
       )}
+
+      <Link href="/report" className="btn-ghost w-full">
+        절약 리포트에서 변화 보기
+        <ArrowRight size={20} />
+      </Link>
     </div>
+  );
+}
+
+function CookRow({ recipeName, logs }: { recipeName: string; logs: ConsumptionLog[] }) {
+  const recipe = RECIPES.find((r) => r.name === recipeName);
+  const total = logs.reduce((s, l) => s + l.price, 0);
+  const rescued = logs.filter((l) => isRescue(l.dLeft)).length;
+  return (
+    <li className="flex items-center gap-3 p-3.5">
+      <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-cream">
+        {recipe ? (
+          <Image src={recipeImage(recipe.image)} alt={recipeName} fill sizes="56px" className="object-contain p-1" />
+        ) : (
+          <span className="grid h-full place-items-center text-2xl">🍳</span>
+        )}
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-[18.5px] font-bold text-ink-900">
+          {recipe ? (
+            <Link href={`/recipes/${recipe.id}`} className="hover:underline">{recipeName}</Link>
+          ) : (
+            recipeName
+          )}{" "}
+          <span className="font-medium text-ink-400">요리</span>
+        </p>
+        <p className="text-[15.5px] text-ink-500">
+          {logs.map((l) => `${l.ingredientName} ${amountText(l)}`.trim()).join(" · ")}
+        </p>
+        {rescued > 0 && (
+          <p className="text-[14.5px] font-semibold text-amberish-600">임박 재료 {rescued}개를 살렸어요</p>
+        )}
+      </div>
+      <span className="shrink-0 text-[15.5px] font-semibold tabular-nums text-ink-700">{formatWon(total)}</span>
+    </li>
+  );
+}
+
+function SingleRow({ log }: { log: ConsumptionLog }) {
+  const eaten = log.type === "consumed";
+  return (
+    <li className="flex items-center gap-3 p-3.5">
+      <IngredientThumb
+        name={log.ingredientName}
+        emoji={log.emoji}
+        className={`h-14 w-14 rounded-xl text-xl ${eaten ? "bg-warmwhite" : "bg-coral-50 opacity-70 grayscale"}`}
+        sizes="56px"
+      />
+      <div className="min-w-0 flex-1">
+        <p className="text-[18.5px] font-bold text-ink-900">
+          {log.ingredientName} <span className="font-medium text-ink-400">{amountText(log)}</span>
+        </p>
+        <p className={`text-[15.5px] ${eaten ? "text-ink-500" : "text-coral-600"}`}>
+          {eaten ? log.via ?? "그대로 먹었어요" : log.reason ?? "폐기"}
+        </p>
+        {eaten && isRescue(log.dLeft) && (
+          <p className="text-[14.5px] font-semibold text-amberish-600">기한 임박 재료를 살렸어요</p>
+        )}
+      </div>
+      <span className={`shrink-0 text-[15.5px] font-semibold tabular-nums ${eaten ? "text-ink-700" : "text-coral-600"}`}>
+        {eaten ? "" : "−"}
+        {formatWon(log.price)}
+      </span>
+    </li>
   );
 }

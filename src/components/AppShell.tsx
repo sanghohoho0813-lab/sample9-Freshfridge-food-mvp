@@ -18,6 +18,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { useNotifications } from "@/lib/notifications";
 import ToastHost from "./ToastHost";
 import LiveClock from "./LiveClock";
 import SampleBridgeCTA from "./SampleBridgeCTA";
@@ -55,10 +56,10 @@ function Logo({ compact = false }: { compact?: boolean }) {
       </span>
       {!compact && (
         <span className="min-w-0 leading-tight">
-          <span className="block truncate text-[22.1px] font-extrabold tracking-tight text-ink-900">
+          <span className="block truncate text-[22px] font-extrabold tracking-tight text-ink-900 max-[380px]:text-[19px]">
             FreshFridge
           </span>
-          <span className="block text-[14.3px] font-medium text-ink-500">
+          <span className="block text-[14.5px] font-medium text-ink-500 max-[380px]:hidden">
             냉장고 식재료 관리
           </span>
         </span>
@@ -96,8 +97,10 @@ function MvpBanner() {
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { state } = useStore();
-  const unread = state.notifications.filter((n) => !n.read).length;
+  const { ready } = useStore();
+  const notifications = useNotifications();
+  // 저장된 데이터를 불러온 뒤에만 배지를 그린다 (서버/클라이언트 불일치 방지)
+  const unread = ready ? notifications.filter((n) => !n.read).length : 0;
 
   return (
     <div className="min-h-dvh">
@@ -116,7 +119,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 <Link
                   key={href}
                   href={href}
-                  className={`flex items-center gap-2.5 rounded-2xl px-2.5 py-2 text-[18.9px] font-semibold transition-colors duration-200 ${
+                  className={`flex items-center gap-2.5 rounded-2xl px-2.5 py-2 text-[18.5px] font-semibold transition-colors duration-200 ${
                     active
                       ? "bg-fresh-50 text-fresh-700"
                       : "text-ink-500 hover:bg-fresh-50/60 hover:text-ink-700"
@@ -136,7 +139,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </nav>
           <div className="rounded-card border border-fresh-100 bg-gradient-to-br from-fresh-50 to-mint-50 p-4">
             <p className="text-xs font-semibold text-fresh-700">음식 낭비를 줄여요! 🌱</p>
-            <p className="mt-1 text-[14.3px] leading-relaxed text-ink-500">
+            <p className="mt-1 text-[14.5px] leading-relaxed text-ink-500">
               버리기 전에 먼저 먹는 습관, FreshFridge가 도와드려요.
             </p>
             <div className="mt-3 border-t border-fresh-200/70 pt-3">
@@ -183,13 +186,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 </button>
                 <button
                   type="button"
-                  aria-label="알림"
+                  aria-label={unread > 0 ? `알림 ${unread}개` : "알림"}
                   onClick={() => router.push("/notifications")}
                   className="relative grid h-12 w-12 place-items-center rounded-2xl text-ink-500 transition-colors hover:bg-fresh-50"
                 >
                   <Bell size={26} />
                   {unread > 0 && (
-                    <span className="absolute right-1.5 top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-coral-500 px-0.5 text-[13px] font-bold text-white">
+                    <span className="absolute right-0.5 top-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-coral-500 px-1 text-[12.5px] font-bold leading-none text-white">
                       {unread}
                     </span>
                   )}
@@ -224,7 +227,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               height={147}
               className="h-9 w-auto opacity-90"
             />
-            <span className="text-[14.3px] text-ink-400">
+            <span className="text-[14.5px] text-ink-400">
               © 미래에이아이랩 · FreshFridge MVP Sample
             </span>
           </footer>

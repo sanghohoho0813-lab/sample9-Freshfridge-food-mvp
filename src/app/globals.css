@@ -9,6 +9,9 @@ html {
 body {
   @apply bg-warmwhite text-ink-900 antialiased;
   overflow-x: hidden;
+  /* 한국어가 글자 단위로 끊기지 않게(예: "사/용") 단어 단위로 줄바꿈하고, 긴 토큰만 강제 개행 */
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 * {

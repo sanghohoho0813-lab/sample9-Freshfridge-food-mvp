@@ -68,9 +68,24 @@ export interface ConsumptionLog {
   category: IngredientCategory;
   type: "consumed" | "discarded";
   date: string; // ISO date
-  price: number;
+  price: number; // 이 기록에 해당하는 금액 (부분 소비면 비례 금액)
   reason?: WasteReason;
   via?: string; // 레시피명 등
+  amount?: number; // 이번에 먹거나 버린 양
+  unit?: string;
+  dLeft?: number | null; // 행동 시점에 남아 있던 일수 (임박 재료를 살렸는지 판단)
+  cookId?: string; // 같은 요리에서 나온 기록 묶음
+}
+
+/** "요리했어요" 한 번 = 한 건. 반복 사용 동기(이번 주 N번 요리)와 기록 묶음에 쓴다. */
+export interface CookLog {
+  id: string;
+  recipeId: string;
+  recipeName: string;
+  date: string; // ISO date
+  usedCount: number; // 사용한 재료 종류 수
+  savedAmount: number; // 사용한 재료 금액 합계
+  rescuedCount: number; // 그중 D-2 이내였던 재료 수
 }
 
 export interface ShoppingItem {
@@ -78,15 +93,18 @@ export interface ShoppingItem {
   name: string;
   checked: boolean;
   fromRecipe?: string;
+  addedToFridge?: boolean; // 구매 후 사용자가 직접 냉장고에 넣었는지
 }
 
+/** 알림은 저장하지 않고 현재 냉장고 상태에서 매번 계산한다 (오래된 알림 방지). */
 export interface AppNotification {
   id: string;
   title: string;
   body: string;
   date: string;
   read: boolean;
-  kind: "expiry" | "recipe" | "tip";
+  kind: "expiry" | "recipe" | "freezer" | "shopping" | "report";
+  href: string;
 }
 
 export interface AppState {
@@ -94,7 +112,8 @@ export interface AppState {
   ingredients: Ingredient[];
   logs: ConsumptionLog[];
   shopping: ShoppingItem[];
-  notifications: AppNotification[];
+  cooks: CookLog[];
+  readNotificationIds: string[];
   seededAt: string;
 }
 

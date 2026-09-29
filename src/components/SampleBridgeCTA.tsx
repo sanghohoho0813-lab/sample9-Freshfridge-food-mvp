@@ -51,7 +51,7 @@ export default function SampleBridgeCTA({
         {/* 메인 헤드라인 */}
         <h2
           id="mirae-cta-headline"
-          className="mt-1.5 max-w-3xl text-[24px] font-extrabold leading-snug tracking-tight text-ink-900 sm:text-[28.6px]"
+          className="mt-1.5 max-w-3xl text-[24px] font-extrabold leading-snug tracking-tight text-ink-900 sm:text-[28.5px]"
         >
           {MIRAE_CTA_COPY.headline}
         </h2>
@@ -68,7 +68,7 @@ export default function SampleBridgeCTA({
             href={consultHref}
             target="_blank"
             rel="noopener noreferrer"
-            className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-fresh-600 to-mint-600 px-7 py-4 text-[20.8px] font-bold text-white shadow-lift transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(46,127,57,0.3)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fresh-700 active:translate-y-0 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+            className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-fresh-600 to-mint-600 px-7 py-4 text-[20.5px] font-bold text-white shadow-lift transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(46,127,57,0.3)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fresh-700 active:translate-y-0 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
           >
             {/* 6초에 한 번 지나가는 약한 빛 — 모션 최소화 환경에서는 표시하지 않음 */}
             <span
@@ -88,7 +88,7 @@ export default function SampleBridgeCTA({
             href={samplesHref}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 rounded-2xl border border-ink-300/40 bg-white px-6 py-4 text-[18.2px] font-semibold text-ink-700 transition-all duration-200 hover:border-fresh-300 hover:bg-fresh-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fresh-600"
+            className="inline-flex items-center justify-center gap-2 rounded-2xl border border-ink-300/40 bg-white px-6 py-4 text-[18.5px] font-semibold text-ink-700 transition-all duration-200 hover:border-fresh-300 hover:bg-fresh-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fresh-600"
           >
             <LayoutGrid size={20} className="text-ink-400" aria-hidden />
             {MIRAE_CTA_COPY.samples}
@@ -96,7 +96,7 @@ export default function SampleBridgeCTA({
         </div>
 
         {/* 보조 링크 */}
-        <p className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[16.2px] text-ink-400">
+        <p className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[16.5px] text-ink-400">
           <span>{MIRAE_CTA_COPY.primaryHint}</span>
           <span className="hidden h-3 w-px bg-ink-300/40 sm:inline-block" aria-hidden />
           <a

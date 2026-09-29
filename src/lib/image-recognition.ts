@@ -15,6 +15,8 @@ export interface RecognizedIngredient {
  * 현재는 데모 인식 결과를 반환한다.
  */
 export async function recognizeIngredientsFromImage(
+  // 실제 Vision API 연동 시 사용할 인자 — 데모에서는 아직 읽지 않는다
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _file: File
 ): Promise<RecognizedIngredient[]> {
   // 실제 API 연동 전까지는 인식 데모 결과를 반환

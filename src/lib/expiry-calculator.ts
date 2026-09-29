@@ -92,7 +92,7 @@ export const PRIORITY_GROUP_META: Record<
 };
 
 export function formatKoreanDate(iso: string): string {
-  const [y, m, d] = iso.split("-").map(Number);
+  const [, m, d] = iso.split("-").map(Number);
   return `${m}월 ${d}일`;
 }
 

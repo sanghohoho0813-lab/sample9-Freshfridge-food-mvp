@@ -1,64 +1,92 @@
-import type { ConsumptionLog, IngredientCategory } from "./types";
-import { addDays, toISODate, todayStart } from "./expiry-calculator";
+import type { ConsumptionLog, CookLog, IngredientCategory } from "./types";
 import { CATEGORY_LABELS } from "./types";
+import { addDays, toISODate, todayStart } from "./expiry-calculator";
+import { isRescue } from "./demo-data";
 
-function withinDays(dateISO: string, days: number): boolean {
-  const from = toISODate(addDays(todayStart(), -(days - 1)));
-  return dateISO >= from;
+/** 오늘 기준 newestDaysAgo ~ oldestDaysAgo 일 전 사이(양끝 포함)인지 */
+function inRange(dateISO: string, newestDaysAgo: number, oldestDaysAgo: number): boolean {
+  const today = todayStart();
+  return (
+    dateISO >= toISODate(addDays(today, -oldestDaysAgo)) &&
+    dateISO <= toISODate(addDays(today, -newestDaysAgo))
+  );
 }
 
-export interface WeeklySavings {
-  usedCount: number;
-  savedAmount: number;
-}
-
-/** 최근 7일간 버리지 않고 사용한 식재료 수와 예상 절약 금액 */
-export function weeklySavings(logs: ConsumptionLog[]): WeeklySavings {
-  const used = logs.filter((l) => l.type === "consumed" && withinDays(l.date, 7));
-  return {
-    usedCount: used.length,
-    savedAmount: used.reduce((sum, l) => sum + l.price, 0),
-  };
-}
-
-export interface MonthlyReport {
+export interface PeriodSummary {
   usedCount: number;
   wastedCount: number;
   wasteRate: number; // %
-  savedAmount: number;
+  savedAmount: number; // 버리지 않고 사용한 재료 금액
   wastedAmount: number;
-  prevWasteRate: number;
-  wasteRateDelta: number; // 음수면 개선
+  rescuedCount: number; // D-2 이내 재료를 버리기 전에 먹은 횟수
+  cookCount: number;
 }
 
-/** 최근 30일 vs 그 이전 30일 비교 리포트 */
-export function monthlyReport(logs: ConsumptionLog[]): MonthlyReport {
-  const cur = logs.filter((l) => withinDays(l.date, 30));
-  const prevFrom = toISODate(addDays(todayStart(), -59));
-  const prevTo = toISODate(addDays(todayStart(), -30));
-  const prev = logs.filter((l) => l.date >= prevFrom && l.date <= prevTo);
-
-  const usedCount = cur.filter((l) => l.type === "consumed").length;
-  const wastedCount = cur.filter((l) => l.type === "discarded").length;
-  const total = usedCount + wastedCount;
-  const wasteRate = total === 0 ? 0 : Math.round((wastedCount / total) * 1000) / 10;
-
-  const prevUsed = prev.filter((l) => l.type === "consumed").length;
-  const prevWasted = prev.filter((l) => l.type === "discarded").length;
-  const prevTotal = prevUsed + prevWasted;
-  // 데모 데이터가 60일 전까지 없을 수 있으므로 기본 비교값 제공
-  const prevWasteRate =
-    prevTotal === 0 ? Math.round((wasteRate + 8) * 10) / 10 : Math.round((prevWasted / prevTotal) * 1000) / 10;
-
+export function periodSummary(
+  logs: ConsumptionLog[],
+  cooks: CookLog[],
+  newestDaysAgo: number,
+  oldestDaysAgo: number
+): PeriodSummary {
+  const inPeriod = logs.filter((l) => inRange(l.date, newestDaysAgo, oldestDaysAgo));
+  const used = inPeriod.filter((l) => l.type === "consumed");
+  const wasted = inPeriod.filter((l) => l.type === "discarded");
+  const total = used.length + wasted.length;
   return {
-    usedCount,
-    wastedCount,
-    wasteRate,
-    savedAmount: cur.filter((l) => l.type === "consumed").reduce((s, l) => s + l.price, 0),
-    wastedAmount: cur.filter((l) => l.type === "discarded").reduce((s, l) => s + l.price, 0),
-    prevWasteRate,
-    wasteRateDelta: Math.round((wasteRate - prevWasteRate) * 10) / 10,
+    usedCount: used.length,
+    wastedCount: wasted.length,
+    wasteRate: total === 0 ? 0 : Math.round((wasted.length / total) * 1000) / 10,
+    savedAmount: used.reduce((s, l) => s + l.price, 0),
+    wastedAmount: wasted.reduce((s, l) => s + l.price, 0),
+    rescuedCount: used.filter((l) => isRescue(l.dLeft)).length,
+    cookCount: cooks.filter((c) => inRange(c.date, newestDaysAgo, oldestDaysAgo)).length,
   };
+}
+
+/** 최근 7일 */
+export function weeklySummary(logs: ConsumptionLog[], cooks: CookLog[]): PeriodSummary {
+  return periodSummary(logs, cooks, 0, 6);
+}
+
+export interface MonthlyReport {
+  current: PeriodSummary; // 최근 30일
+  previous: PeriodSummary | null; // 그 이전 30일 (기록이 없으면 null — 비교를 지어내지 않는다)
+  wasteCountDelta: number | null; // 음수면 폐기가 줄어든 것
+  wasteRateDelta: number | null; // %p, 음수면 개선
+}
+
+export function monthlyReport(logs: ConsumptionLog[], cooks: CookLog[]): MonthlyReport {
+  const current = periodSummary(logs, cooks, 0, 29);
+  const prev = periodSummary(logs, cooks, 30, 59);
+  const hasPrev = prev.usedCount + prev.wastedCount > 0;
+  return {
+    current,
+    previous: hasPrev ? prev : null,
+    wasteCountDelta: hasPrev ? current.wastedCount - prev.wastedCount : null,
+    wasteRateDelta: hasPrev ? Math.round((current.wasteRate - prev.wasteRate) * 10) / 10 : null,
+  };
+}
+
+export interface WeekBar {
+  label: string;
+  used: number;
+  wasted: number;
+}
+
+/** 최근 N주 사용/폐기 추이 (오래된 주 → 이번 주) */
+export function weeklyTrend(logs: ConsumptionLog[], weeks = 4): WeekBar[] {
+  const bars: WeekBar[] = [];
+  for (let w = weeks - 1; w >= 0; w--) {
+    const newest = w * 7;
+    const oldest = newest + 6;
+    const inWeek = logs.filter((l) => inRange(l.date, newest, oldest));
+    bars.push({
+      label: w === 0 ? "이번 주" : `${w}주 전`,
+      used: inWeek.filter((l) => l.type === "consumed").length,
+      wasted: inWeek.filter((l) => l.type === "discarded").length,
+    });
+  }
+  return bars;
 }
 
 export interface WasteByCategory {
@@ -68,10 +96,11 @@ export interface WasteByCategory {
   amount: number;
 }
 
-export function wasteByCategory(logs: ConsumptionLog[]): WasteByCategory[] {
+/** 최근 days 일 동안 버린 재료를 카테고리별로 */
+export function wasteByCategory(logs: ConsumptionLog[], days = 30): WasteByCategory[] {
   const map = new Map<IngredientCategory, WasteByCategory>();
   for (const l of logs) {
-    if (l.type !== "discarded") continue;
+    if (l.type !== "discarded" || !inRange(l.date, 0, days - 1)) continue;
     const cur = map.get(l.category) ?? {
       category: l.category,
       label: CATEGORY_LABELS[l.category],
@@ -85,13 +114,39 @@ export function wasteByCategory(logs: ConsumptionLog[]): WasteByCategory[] {
   return [...map.values()].sort((a, b) => b.count - a.count || b.amount - a.amount);
 }
 
-export function wasteReasonCounts(logs: ConsumptionLog[]): { reason: string; count: number }[] {
+export function wasteReasonCounts(
+  logs: ConsumptionLog[],
+  days = 30
+): { reason: string; count: number }[] {
   const map = new Map<string, number>();
   for (const l of logs) {
-    if (l.type !== "discarded" || !l.reason) continue;
+    if (l.type !== "discarded" || !l.reason || !inRange(l.date, 0, days - 1)) continue;
     map.set(l.reason, (map.get(l.reason) ?? 0) + 1);
   }
   return [...map.entries()]
     .map(([reason, count]) => ({ reason, count }))
     .sort((a, b) => b.count - a.count);
+}
+
+/** 레시피별 마지막으로 만든 날짜 */
+export function lastCookedByRecipe(cooks: CookLog[]): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const c of cooks) {
+    const prev = map.get(c.recipeId);
+    if (!prev || c.date > prev) map.set(c.recipeId, c.date);
+  }
+  return map;
+}
+
+/** "3일 전" 같은 상대 날짜 */
+export function relativeDay(dateISO: string): string {
+  const [y, m, d] = dateISO.split("-").map(Number);
+  const diff = Math.round(
+    (todayStart().getTime() - new Date(y, m - 1, d).getTime()) / (1000 * 60 * 60 * 24)
+  );
+  if (diff <= 0) return "오늘";
+  if (diff === 1) return "어제";
+  if (diff < 7) return `${diff}일 전`;
+  if (diff < 30) return `${Math.floor(diff / 7)}주 전`;
+  return `${Math.floor(diff / 30)}달 전`;
 }
