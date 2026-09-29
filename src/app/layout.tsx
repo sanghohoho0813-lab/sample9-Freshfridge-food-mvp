@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { StoreProvider } from "@/lib/store";
 import AppShell from "@/components/AppShell";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "FreshFridge — 냉장고 식재료 관리",
@@ -27,6 +28,8 @@ export default function RootLayout({
         />
       </head>
       <body>
+        {/* 미래AI랩 데모 공용 뒤로·앞으로 버튼 */}
+        <Script src="/mirae-history-nav.js" strategy="beforeInteractive" />
         <StoreProvider>
           <AppShell>{children}</AppShell>
         </StoreProvider>
