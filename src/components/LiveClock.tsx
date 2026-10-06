@@ -25,9 +25,7 @@ export default function LiveClock({ compact = false }: { compact?: boolean }) {
     return <span className="block h-[22px] w-full max-w-[300px] rounded-lg bg-fresh-100/60" aria-hidden />;
   }
 
-  const dateText = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일 ${
-    WEEKDAYS[now.getDay()]
-  }요일`;
+  const dateText = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일 ${WEEKDAYS[now.getDay()]}요일`;
 
   const hour24 = now.getHours();
   const meridiem = hour24 < 12 ? "오전" : "오후";
@@ -35,17 +33,18 @@ export default function LiveClock({ compact = false }: { compact?: boolean }) {
   const timeText = `${meridiem} ${two(hour12)}:${two(now.getMinutes())}:${two(now.getSeconds())}`;
 
   return (
-    <div
+    <time
+      dateTime={now.toISOString()}
       className={`flex flex-wrap items-center gap-x-3 gap-y-0.5 ${compact ? "text-[15.5px]" : "text-[16.5px]"}`}
     >
       <span className="inline-flex items-center gap-1.5 font-semibold text-ink-600">
-        <CalendarDays size={compact ? 16 : 18} className="text-fresh-500" />
+        <CalendarDays size={compact ? 16 : 18} className="text-fresh-500" aria-hidden />
         {dateText}
       </span>
       <span className="inline-flex items-center gap-1.5 font-bold tabular-nums text-fresh-700">
-        <Clock size={compact ? 16 : 18} className="text-mint-500" />
+        <Clock size={compact ? 16 : 18} className="text-mint-500" aria-hidden />
         {timeText}
       </span>
-    </div>
+    </time>
   );
 }

@@ -7,11 +7,11 @@ import { useNotifications } from "@/lib/notifications";
 import type { AppNotification } from "@/lib/types";
 import EmptyState from "@/components/EmptyState";
 import PageHeader from "@/components/ui/PageHeader";
-import SkeletonList from "@/components/SkeletonList";
+import PageLoading from "@/components/ui/PageLoading";
 
 const KIND_ICON: Record<AppNotification["kind"], { icon: typeof AlarmClock; tone: string }> = {
-  expiry: { icon: AlarmClock, tone: "bg-coral-50 text-coral-600" },
-  recipe: { icon: ChefHat, tone: "bg-amberish-50 text-amberish-600" },
+  expiry: { icon: AlarmClock, tone: "bg-coral-50 text-coral-700" },
+  recipe: { icon: ChefHat, tone: "bg-amberish-50 text-amberish-700" },
   freezer: { icon: Snowflake, tone: "bg-sky-50 text-sky-600" },
   shopping: { icon: ShoppingBasket, tone: "bg-ink-300/15 text-ink-600" },
   report: { icon: BarChart3, tone: "bg-fresh-50 text-fresh-700" },
@@ -22,17 +22,10 @@ export default function NotificationsPage() {
   const notifications = useNotifications();
   const unread = notifications.filter((n) => !n.read);
 
-  if (!ready) {
-    return (
-      <div className="mx-auto max-w-3xl space-y-4">
-        <div className="skeleton h-10 w-1/2" />
-        <SkeletonList rows={4} />
-      </div>
-    );
-  }
+  if (!ready) return <PageLoading title="알림" back="/" rows={4} />;
 
   return (
-    <div className="mx-auto max-w-3xl animate-fade-up space-y-5">
+    <div className="mx-auto max-w-3xl space-y-5">
       <PageHeader
         back="/"
         title="알림"
@@ -52,7 +45,11 @@ export default function NotificationsPage() {
       />
 
       {notifications.length === 0 ? (
-        <EmptyState emoji="🔕" title="지금은 알림이 없어요" description="급하게 먹어야 할 재료가 생기면 알려드릴게요." />
+        <EmptyState
+          emoji="🔕"
+          title="지금은 알림이 없어요"
+          description="급하게 먹어야 할 재료가 생기면 알려드릴게요."
+        />
       ) : (
         <ul className="divide-y divide-ink-300/20 overflow-hidden rounded-card border border-ink-300/25 bg-white">
           {notifications.map((n) => {
@@ -67,11 +64,18 @@ export default function NotificationsPage() {
                   <span className={`relative grid h-11 w-11 shrink-0 place-items-center rounded-xl ${tone}`}>
                     <Icon size={21} className={n.read ? "opacity-60" : ""} />
                     {!n.read && (
-                      <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-white bg-coral-500" aria-label="읽지 않음" />
+                      <span
+                        className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-white bg-coral-500"
+                        aria-label="읽지 않음"
+                      />
                     )}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className={`text-[17.5px] leading-snug ${n.read ? "font-semibold text-ink-600" : "font-bold text-ink-900"}`}>{n.title}</p>
+                    <p
+                      className={`text-[17.5px] leading-snug ${n.read ? "font-semibold text-ink-600" : "font-bold text-ink-900"}`}
+                    >
+                      {n.title}
+                    </p>
                     <p className="mt-1 text-[16px] leading-snug text-ink-500">{n.body}</p>
                   </div>
                   <ChevronRight size={20} className="mt-2.5 shrink-0 text-ink-300" aria-hidden />

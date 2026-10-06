@@ -20,9 +20,7 @@ export default function ListGroup({
       : "";
   return (
     <div className={`overflow-hidden rounded-card border border-ink-300/25 bg-white ${className}`}>
-      <ul className={`-mb-px [&>li]:border-b [&>li]:border-ink-300/20 ${grid}`}>
-        {children}
-      </ul>
+      <ul className={`-mb-px [&>li]:border-b [&>li]:border-ink-300/20 ${grid}`}>{children}</ul>
     </div>
   );
 }

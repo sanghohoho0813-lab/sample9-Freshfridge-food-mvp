@@ -1,9 +1,10 @@
 "use client";
 
-import { useStore } from "@/lib/store";
+import { useToast, useToastList } from "@/lib/toast";
 
 export default function ToastHost() {
-  const { toasts, dismissToast } = useStore();
+  const toasts = useToastList();
+  const { dismissToast } = useToast();
   if (toasts.length === 0) return null;
   return (
     <div

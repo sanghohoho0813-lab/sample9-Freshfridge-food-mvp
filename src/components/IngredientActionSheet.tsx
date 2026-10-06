@@ -1,20 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Minus, Plus, X } from "lucide-react";
 import type { Ingredient, WasteReason } from "@/lib/types";
 import { amountStep, defaultAmount, formatAmount } from "@/lib/quantity";
 import IngredientThumb from "./IngredientThumb";
 import Portal from "./Portal";
-import { useEscape } from "./ui/useEscape";
+import { useModal } from "./ui/useModal";
 
-const REASONS: WasteReason[] = [
-  "유통기한 지남",
-  "너무 많이 구매",
-  "먹을 기회 없음",
-  "보관 실패",
-  "기타",
-];
+const REASONS: WasteReason[] = ["유통기한 지남", "너무 많이 구매", "먹을 기회 없음", "보관 실패", "기타"];
 
 /**
  * 먹었어요 / 버렸어요 공용 시트.
@@ -33,15 +27,14 @@ export default function IngredientActionSheet({
 }) {
   const { quantity, unit } = ingredient;
   const step = amountStep(unit);
-  const [amount, setAmount] = useState(() =>
-    mode === "discard" ? quantity : defaultAmount(quantity, unit)
-  );
+  const [amount, setAmount] = useState(() => (mode === "discard" ? quantity : defaultAmount(quantity, unit)));
   const [reason, setReason] = useState<WasteReason>("유통기한 지남");
 
   const clamp = (v: number) => Math.round(Math.min(Math.max(v, Math.min(step, quantity)), quantity) * 100) / 100;
   const remaining = Math.round((quantity - amount) * 100) / 100;
   const isEat = mode === "eat";
-  useEscape(onClose);
+  const boxRef = useRef<HTMLDivElement>(null);
+  useModal(onClose, boxRef);
 
   return (
     <Portal>
@@ -54,6 +47,8 @@ export default function IngredientActionSheet({
       >
         <div
           className="max-h-[88dvh] w-full max-w-md animate-pop-in overflow-y-auto rounded-t-3xl bg-white p-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))] shadow-lift sm:rounded-3xl sm:pb-5"
+          ref={boxRef}
+          tabIndex={-1}
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-start gap-3">
@@ -67,9 +62,7 @@ export default function IngredientActionSheet({
               <h3 id="action-sheet-title" className="text-[20.5px] font-extrabold text-ink-900">
                 {isEat ? `${ingredient.name}, 얼마나 먹었나요?` : `${ingredient.name}, 얼마나 버렸나요?`}
               </h3>
-              <p className="mt-0.5 text-[15.5px] text-ink-500">
-                지금 {formatAmount(quantity, unit)} 있어요
-              </p>
+              <p className="mt-0.5 text-[15.5px] text-ink-500">지금 {formatAmount(quantity, unit)} 있어요</p>
             </div>
             <button
               type="button"
@@ -93,9 +86,7 @@ export default function IngredientActionSheet({
               <Minus size={20} />
             </button>
             <div className="text-center">
-              <p className="text-[26px] font-extrabold tabular-nums text-ink-900">
-                {formatAmount(amount, unit)}
-              </p>
+              <p className="text-[26px] font-extrabold tabular-nums text-ink-900">{formatAmount(amount, unit)}</p>
               <p className={`text-[14.5px] font-semibold ${remaining <= 0 ? "text-ink-400" : "text-fresh-700"}`}>
                 {remaining <= 0 ? "모두 정리돼요" : `남는 양 ${formatAmount(remaining, unit)}`}
               </p>
@@ -133,7 +124,7 @@ export default function IngredientActionSheet({
                     onClick={() => setReason(r)}
                     className={`chip border ${
                       reason === r
-                        ? "border-coral-400 bg-coral-50 text-coral-600"
+                        ? "border-coral-400 bg-coral-50 text-coral-700"
                         : "border-ink-300/30 bg-white text-ink-500 hover:border-ink-300"
                     }`}
                   >

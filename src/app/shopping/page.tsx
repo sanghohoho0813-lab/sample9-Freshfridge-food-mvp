@@ -11,7 +11,7 @@ import type { ShoppingItem } from "@/lib/types";
 import { josa } from "@/lib/text";
 import EmptyState from "@/components/EmptyState";
 import PageHeader from "@/components/ui/PageHeader";
-import SkeletonList from "@/components/SkeletonList";
+import PageLoading from "@/components/ui/PageLoading";
 import IngredientThumb from "@/components/IngredientThumb";
 import QuickAddSheet from "@/components/QuickAddSheet";
 
@@ -79,25 +79,14 @@ export default function ShoppingPage() {
     });
   };
 
-  if (!ready) {
-    return (
-      <div className="mx-auto max-w-3xl space-y-4">
-        <div className="skeleton h-10 w-1/2" />
-        <SkeletonList rows={4} />
-      </div>
-    );
-  }
+  if (!ready) return <PageLoading title="장보기 리스트" back="/" rows={3} />;
 
   return (
-    <div className="mx-auto max-w-3xl animate-fade-up space-y-5">
+    <div className="mx-auto max-w-3xl space-y-5">
       <PageHeader
         back="/"
         title="장보기 리스트"
-        description={
-          unchecked.length > 0
-            ? `살 것 ${unchecked.length}개`
-            : "냉장고에 있는 재료는 따로 알려드려요."
-        }
+        description={unchecked.length > 0 ? `살 것 ${unchecked.length}개` : "냉장고에 있는 재료는 따로 알려드려요."}
       />
 
       <form onSubmit={add} noValidate>
@@ -121,7 +110,9 @@ export default function ShoppingPage() {
           </button>
         </div>
         {inputError && (
-          <p role="alert" className="mt-1.5 text-[15.5px] font-medium text-coral-600">{inputError}</p>
+          <p role="alert" className="mt-1.5 text-[15.5px] font-medium text-coral-700">
+            {inputError}
+          </p>
         )}
       </form>
 
@@ -158,13 +149,15 @@ export default function ShoppingPage() {
                     <div className="min-w-0 flex-1">
                       <p className="line-clamp-2 text-[18.5px] font-bold leading-snug text-ink-900">{item.name}</p>
                       {have ? (
-                        <p className="line-clamp-2 text-[15.5px] font-semibold leading-snug text-amberish-600">
+                        <p className="line-clamp-2 text-[15.5px] font-semibold leading-snug text-amberish-700">
                           냉장고에 {have.name === item.name ? "" : `${have.name} `}
                           {formatAmount(have.quantity, have.unit)} 있어요
                         </p>
                       ) : (
                         item.fromRecipe && (
-                          <p className="line-clamp-2 text-[15.5px] leading-snug text-ink-500">{item.fromRecipe}에 필요</p>
+                          <p className="line-clamp-2 text-[15.5px] leading-snug text-ink-500">
+                            {item.fromRecipe}에 필요
+                          </p>
                         )
                       )}
                     </div>
@@ -172,7 +165,7 @@ export default function ShoppingPage() {
                       type="button"
                       aria-label={`${item.name} 삭제`}
                       onClick={() => remove(item)}
-                      className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-ink-400 transition-colors hover:bg-coral-50 hover:text-coral-500"
+                      className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-ink-400 transition-colors hover:bg-coral-50 hover:text-coral-700"
                     >
                       <Trash2 size={20} />
                     </button>
@@ -205,11 +198,12 @@ export default function ShoppingPage() {
                     >
                       <Check size={20} strokeWidth={3} />
                     </button>
-                    <p className="min-w-0 flex-1 text-[18.5px] font-bold text-ink-400 line-through">
-                      {item.name}
-                    </p>
+                    <p className="min-w-0 flex-1 text-[18.5px] font-bold text-ink-400 line-through">{item.name}</p>
                     {item.addedToFridge ? (
-                      <Link href="/fridge" className="inline-flex min-h-[44px] shrink-0 items-center gap-1 text-[15.5px] font-semibold text-fresh-700 hover:underline">
+                      <Link
+                        href="/fridge"
+                        className="inline-flex min-h-[44px] shrink-0 items-center gap-1 text-[15.5px] font-semibold text-fresh-700 hover:underline"
+                      >
                         <Check size={17} />
                         냉장고에 넣음
                       </Link>

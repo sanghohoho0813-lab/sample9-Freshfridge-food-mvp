@@ -11,18 +11,18 @@ import { lastCookedByRecipe } from "@/lib/stats";
 import RecipeCard from "@/components/RecipeCard";
 import EmptyState from "@/components/EmptyState";
 import PageHeader from "@/components/ui/PageHeader";
+import PageLoading from "@/components/ui/PageLoading";
 import { josa } from "@/lib/text";
 
 function RecipesSkeleton() {
   return (
-    <div className="mx-auto max-w-6xl space-y-4">
-      <div className="skeleton h-10 w-1/2" />
+    <PageLoading title="레시피 추천" width="6xl">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="skeleton aspect-[4/3] w-full" />
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="skeleton h-[104px] w-full sm:aspect-[4/3] sm:h-auto" />
         ))}
       </div>
-    </div>
+    </PageLoading>
   );
 }
 
@@ -36,7 +36,9 @@ function RecipesContent() {
     const all = rankRecipes(RECIPES, fridge);
     if (!withName) return all;
     return all.filter((m) =>
-      m.recipe.ingredients.some((ri) => ri.name === withName || ri.name.includes(withName) || withName.includes(ri.name))
+      m.recipe.ingredients.some(
+        (ri) => ri.name === withName || ri.name.includes(withName) || withName.includes(ri.name)
+      )
     );
   }, [fridge, withName]);
   const lastCooked = useMemo(() => lastCookedByRecipe(state.cooks), [state.cooks]);
@@ -47,7 +49,7 @@ function RecipesContent() {
   const others = ranked.filter((m) => m.matchPercent < 40);
 
   return (
-    <div className="mx-auto max-w-6xl animate-fade-up space-y-6 sm:space-y-7">
+    <div className="mx-auto max-w-6xl space-y-6 sm:space-y-7">
       <div>
         <PageHeader
           title={withName ? `${josa(withName, "으로/로")} 만들 요리` : "레시피 추천"}
@@ -77,15 +79,17 @@ function RecipesContent() {
           <EmptyState
             emoji="🍳"
             title={withName ? `${josa(withName, "을/를")} 쓰는 요리가 아직 없어요` : "지금 재료로 만들 요리가 없어요"}
-            description={others.length > 0 ? "아래 요리는 재료를 조금만 더 사면 만들 수 있어요." : "다른 재료로 찾아보세요."}
+            description={
+              others.length > 0 ? "아래 요리는 재료를 조금만 더 사면 만들 수 있어요." : "다른 재료로 찾아보세요."
+            }
             ctaLabel={withName ? "전체 레시피 보기" : undefined}
             ctaHref={withName ? "/recipes" : undefined}
           />
         )
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
-          {good.map((m) => (
-            <RecipeCard key={m.recipe.id} match={m} lastCooked={lastCooked.get(m.recipe.id)} />
+          {good.map((m, i) => (
+            <RecipeCard key={m.recipe.id} match={m} lastCooked={lastCooked.get(m.recipe.id)} priority={i < 2} />
           ))}
         </div>
       )}

@@ -3,16 +3,7 @@
 import { use, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import {
-  ArrowRight,
-  Check,
-  ChefHat,
-  Clock3,
-  Gauge,
-  Plus,
-  ShoppingBasket,
-  Users,
-} from "lucide-react";
+import { ArrowRight, Check, ChefHat, Clock3, Gauge, Plus, ShoppingBasket, Users } from "lucide-react";
 import { useFridge, useStore, useUndoToast } from "@/lib/store";
 import { RECIPES, isRescue } from "@/lib/demo-data";
 import { matchRecipe } from "@/lib/recipe-matcher";
@@ -41,11 +32,7 @@ interface CookResult {
   cooksLen: number;
 }
 
-export default function RecipeDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function RecipeDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const { ready, cookRecipe, addShoppingItem, addShoppingItems, showToast, state } = useStore();
   const undoToast = useUndoToast();
@@ -55,24 +42,26 @@ export default function RecipeDetailPage({
   const resultRef = useRef<HTMLDivElement>(null);
 
   const recipe = RECIPES.find((r) => r.id === id);
-  const match = useMemo(
-    () => (recipe ? matchRecipe(recipe, fridge) : null),
-    [recipe, fridge]
-  );
+  const match = useMemo(() => (recipe ? matchRecipe(recipe, fridge) : null), [recipe, fridge]);
   const lastCooked = useMemo(
     () => (recipe ? lastCookedByRecipe(state.cooks).get(recipe.id) : undefined),
     [recipe, state.cooks]
   );
   const urgentLeft = useMemo(
-    () => fridge.filter((i) => {
-      const d = daysLeft(i.expiresAt);
-      return d !== null && d <= 2;
-    }).length,
+    () =>
+      fridge.filter((i) => {
+        const d = daysLeft(i.expiresAt);
+        return d !== null && d <= 2;
+      }).length,
     [fridge]
   );
 
   if (!ready) {
-    return <div className="mx-auto max-w-3xl"><div className="skeleton h-64 w-full" /></div>;
+    return (
+      <div className="mx-auto max-w-3xl">
+        <div className="skeleton h-64 w-full" />
+      </div>
+    );
   }
 
   if (!recipe || !match) {
@@ -131,13 +120,11 @@ export default function RecipeDetailPage({
     });
     setUsedUpQueued(false);
     undoToast(`요리 완료 · 재료 ${lines.length}가지를 뺐어요`, "🎉", token);
-    requestAnimationFrame(() =>
-      resultRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
-    );
+    requestAnimationFrame(() => resultRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }));
   };
 
   return (
-    <div className="mx-auto max-w-3xl animate-fade-up space-y-5">
+    <div className="mx-auto max-w-3xl space-y-5">
       <BackButton fallback="/recipes" />
 
       <div className="card overflow-hidden">
@@ -145,7 +132,7 @@ export default function RecipeDetailPage({
         <div className="relative aspect-video w-full bg-cream">
           <Image
             src={recipeImage(recipe.image)}
-            alt={recipe.name}
+            alt={`${recipe.name} 완성 사진`}
             fill
             priority
             sizes="(max-width: 768px) 100vw, 768px"
@@ -163,12 +150,16 @@ export default function RecipeDetailPage({
             </h1>
             <p className="mt-1 text-[17.5px] text-ink-500">{recipe.description}</p>
             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[16.5px] text-ink-500">
-              <span className="inline-flex items-center gap-1.5"><Clock3 size={18} /> {recipe.minutes}분</span>
-              <span className="inline-flex items-center gap-1.5"><Gauge size={18} /> {recipe.difficulty}</span>
-              <span className="inline-flex items-center gap-1.5"><Users size={18} /> {recipe.servings}인분</span>
-              {lastCooked && (
-                <span className="font-semibold text-ink-600">· {relativeDay(lastCooked)} 만들었어요</span>
-              )}
+              <span className="inline-flex items-center gap-1.5">
+                <Clock3 size={18} /> {recipe.minutes}분
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Gauge size={18} /> {recipe.difficulty}
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Users size={18} /> {recipe.servings}인분
+              </span>
+              {lastCooked && <span className="font-semibold text-ink-600">· {relativeDay(lastCooked)} 만들었어요</span>}
             </div>
           </div>
 
@@ -185,7 +176,10 @@ export default function RecipeDetailPage({
                 <button
                   type="button"
                   onClick={() => {
-                    addShoppingItems(missingToAdd.map((m) => m.name), recipe.name);
+                    addShoppingItems(
+                      missingToAdd.map((m) => m.name),
+                      recipe.name
+                    );
                     showToast(`없는 재료 ${missingToAdd.length}개를 장보기에 담았어요`, "🛒");
                   }}
                   className="-mr-2 inline-flex min-h-[44px] shrink-0 items-center gap-1 rounded-xl px-2 text-[15.5px] font-semibold text-fresh-700 hover:bg-fresh-50"
@@ -195,7 +189,7 @@ export default function RecipeDetailPage({
                 </button>
               )}
             </div>
-            <ul className="overflow-hidden rounded-2xl border border-ink-300/25 divide-y divide-ink-300/20">
+            <ul className="divide-y divide-ink-300/20 overflow-hidden rounded-2xl border border-ink-300/25">
               {match.matched.map((m) => {
                 const urgent = m.owned && m.dLeft !== null && m.dLeft <= 3;
                 const ing = m.ingredient;
@@ -211,7 +205,9 @@ export default function RecipeDetailPage({
                           className={`object-contain p-1 ${m.owned ? "" : "opacity-40 grayscale"}`}
                         />
                       ) : (
-                        <span className="text-lg" aria-hidden>🧺</span>
+                        <span className="text-lg" aria-hidden>
+                          🧺
+                        </span>
                       )}
                     </span>
                     <div className="min-w-0 flex-1">
@@ -221,7 +217,7 @@ export default function RecipeDetailPage({
                       {m.owned && ing ? (
                         <p
                           className={`text-[15.5px] ${
-                            m.short || urgent ? "font-semibold text-amberish-600" : "text-fresh-700"
+                            m.short || urgent ? "font-semibold text-amberish-700" : "text-fresh-700"
                           }`}
                         >
                           {m.short
@@ -282,8 +278,13 @@ export default function RecipeDetailPage({
           </section>
 
           {showResult && result ? (
-            <div ref={resultRef} className="animate-pop-in rounded-2xl border border-fresh-100 bg-fresh-50/70 p-4 sm:p-5">
-              <p className="text-[20.5px] font-extrabold text-ink-900" role="status">맛있게 드세요! 🎉</p>
+            <div
+              ref={resultRef}
+              className="animate-pop-in rounded-2xl border border-fresh-100 bg-fresh-50/70 p-4 sm:p-5"
+            >
+              <p className="text-[20.5px] font-extrabold text-ink-900" role="status">
+                맛있게 드세요! 🎉
+              </p>
               <p className="mt-0.5 text-[16.5px] text-ink-600">
                 {formatWon(result.saved)}어치 재료를 버리지 않고 썼어요
                 {result.rescued > 0 && ` · 임박 재료 ${result.rescued}개를 살렸어요`}
@@ -298,7 +299,7 @@ export default function RecipeDetailPage({
                       <span className="tabular-nums text-ink-500">
                         {formatAmount(l.before, l.unit)}
                         <ArrowRight size={15} className="mx-1.5 inline -translate-y-px" />
-                        <span className={l.after <= 0 ? "font-bold text-coral-500" : "font-bold text-ink-900"}>
+                        <span className={l.after <= 0 ? "font-bold text-coral-700" : "font-bold text-ink-900"}>
                           {l.after <= 0 ? "다 썼어요" : formatAmount(l.after, l.unit)}
                         </span>
                       </span>
@@ -319,8 +320,7 @@ export default function RecipeDetailPage({
                     }}
                     className="btn-primary min-h-[52px] w-full"
                   >
-                    <ShoppingBasket size={20} />
-                    다 쓴 재료 장보기에 담기
+                    <ShoppingBasket size={20} />다 쓴 재료 장보기에 담기
                   </button>
                 ) : urgentLeft > 0 ? (
                   <Link href="/priority" className="btn-primary min-h-[52px] w-full">
@@ -334,10 +334,16 @@ export default function RecipeDetailPage({
                   </Link>
                 )}
                 <div className="flex justify-center gap-5 pt-1 text-[15.5px] font-semibold text-ink-500">
-                  <Link href="/history" className="hover:text-ink-800 hover:underline">소비 기록</Link>
-                  <Link href="/report" className="hover:text-ink-800 hover:underline">절약 리포트</Link>
+                  <Link href="/history" className="hover:text-ink-800 hover:underline">
+                    소비 기록
+                  </Link>
+                  <Link href="/report" className="hover:text-ink-800 hover:underline">
+                    절약 리포트
+                  </Link>
                   {usedUpQueued && (
-                    <Link href="/shopping" className="hover:text-ink-800 hover:underline">장보기 목록</Link>
+                    <Link href="/shopping" className="hover:text-ink-800 hover:underline">
+                      장보기 목록
+                    </Link>
                   )}
                 </div>
               </div>

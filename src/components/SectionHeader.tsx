@@ -26,7 +26,9 @@ export default function SectionHeader({
           className="inline-flex min-h-[36px] shrink-0 items-center gap-0.5 text-[15.5px] font-semibold text-ink-500 transition-colors hover:text-ink-800"
         >
           {moreLabel}
-          <ChevronRight size={20} />
+          {/* 화면 읽기 프로그램에서 "전체 보기"가 무엇의 전체인지 알 수 있게 */}
+          <span className="sr-only"> — {title}</span>
+          <ChevronRight size={20} aria-hidden />
         </Link>
       )}
     </div>

@@ -16,10 +16,13 @@ export default function RecipeCard({
   match,
   lastCooked,
   layout = "auto",
+  priority = false,
 }: {
   match: RecipeMatch;
   /** auto: 모바일 가로형 → sm 이상 세로형 / row: 항상 가로형 (좁은 상세 화면용) */
   layout?: "auto" | "row";
+  /** 첫 화면에 바로 보이는 카드 — 이미지를 먼저 불러온다(LCP) */
+  priority?: boolean;
   /** 마지막으로 만든 날짜 (있으면 "3일 전 만들었어요") */
   lastCooked?: string;
 }) {
@@ -35,11 +38,14 @@ export default function RecipeCard({
       text: `${first.name} ${dDayLabel(first.ingredient?.expiresAt ?? null)}${
         urgentOwned.length > 1 ? ` 외 ${urgentOwned.length - 1}개` : ""
       } 먼저 사용`,
-      tone: "text-amberish-600",
+      tone: "text-amberish-700",
     };
   } else if (missing.length > 0) {
     status = {
-      text: `${missing.slice(0, 2).map((m) => m.name).join(", ")}${missing.length > 2 ? ` 외 ${missing.length - 2}개` : ""} 필요`,
+      text: `${missing
+        .slice(0, 2)
+        .map((m) => m.name)
+        .join(", ")}${missing.length > 2 ? ` 외 ${missing.length - 2}개` : ""} 필요`,
       tone: "text-ink-500",
     };
   } else {
@@ -54,8 +60,9 @@ export default function RecipeCard({
       <div className={`relative w-[104px] shrink-0 bg-cream ${row ? "sm:w-[120px]" : "sm:aspect-[4/3] sm:w-full"}`}>
         <Image
           src={recipeImage(recipe.image)}
-          alt={recipe.name}
+          alt=""
           fill
+          priority={priority}
           sizes={row ? "120px" : "(max-width: 640px) 104px, 360px"}
           className="object-contain p-2 transition-transform duration-300 group-hover:scale-105 sm:p-3"
         />
@@ -66,7 +73,9 @@ export default function RecipeCard({
         )}
       </div>
       <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 px-3.5 py-3 sm:p-4">
-        <p className={`truncate text-[18.5px] font-bold text-ink-900 ${row ? "" : "sm:text-[20.5px]"}`}>{recipe.name}</p>
+        <p className={`truncate text-[18.5px] font-bold text-ink-900 ${row ? "" : "sm:text-[20.5px]"}`}>
+          {recipe.name}
+        </p>
         <p className="text-[15.5px] text-ink-500">
           {recipe.minutes}분 · {recipe.difficulty}
           {matchPercent < 100 && <span className={row ? "" : "sm:hidden"}> · 재료 {matchPercent}%</span>}

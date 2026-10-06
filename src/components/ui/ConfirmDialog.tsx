@@ -1,7 +1,8 @@
 "use client";
 
+import { useRef } from "react";
 import Portal from "../Portal";
-import { useEscape } from "./useEscape";
+import { useModal } from "./useModal";
 
 /** 되돌릴 수 없는 행동 전에 한 번 더 묻는 대화상자 */
 export default function ConfirmDialog({
@@ -19,7 +20,8 @@ export default function ConfirmDialog({
   onConfirm: () => void;
   onClose: () => void;
 }) {
-  useEscape(onClose);
+  const boxRef = useRef<HTMLDivElement>(null);
+  useModal(onClose, boxRef);
   return (
     <Portal>
       <div
@@ -31,9 +33,13 @@ export default function ConfirmDialog({
       >
         <div
           className="w-full animate-pop-in rounded-t-3xl bg-white p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] shadow-lift sm:max-w-sm sm:rounded-3xl sm:pb-6"
+          ref={boxRef}
+          tabIndex={-1}
           onClick={(e) => e.stopPropagation()}
         >
-          <h3 id="confirm-title" className="text-[20.5px] font-extrabold text-ink-900">{title}</h3>
+          <h3 id="confirm-title" className="text-[20.5px] font-extrabold text-ink-900">
+            {title}
+          </h3>
           {description && <p className="mt-2 text-[16.5px] leading-relaxed text-ink-500">{description}</p>}
           <div className="mt-6 grid grid-cols-2 gap-2">
             <button type="button" onClick={onClose} className="btn-ghost min-h-[52px]" autoFocus>

@@ -11,8 +11,10 @@ import { sortByExpiry } from "@/lib/expiry-calculator";
 import IngredientRow from "@/components/IngredientRow";
 import ListGroup from "@/components/ui/ListGroup";
 import PageHeader from "@/components/ui/PageHeader";
+import PageLoading from "@/components/ui/PageLoading";
+import SegmentedControl from "@/components/ui/SegmentedControl";
+import ChoiceChip from "@/components/ui/ChoiceChip";
 import EmptyState from "@/components/EmptyState";
-import SkeletonList from "@/components/SkeletonList";
 import { useIngredientActions } from "@/components/useIngredientActions";
 
 const STORAGE_TABS: { key: StorageType | "all"; label: string }[] = [
@@ -35,12 +37,7 @@ const CATEGORIES: IngredientCategory[] = [
 ];
 
 function FridgeSkeleton() {
-  return (
-    <div className="mx-auto max-w-6xl space-y-4">
-      <div className="skeleton h-10 w-1/2" />
-      <SkeletonList rows={6} />
-    </div>
-  );
+  return <PageLoading title="내 냉장고" width="6xl" rows={6} />;
 }
 
 export default function FridgePage() {
@@ -114,7 +111,7 @@ function FridgeContent() {
   const chips = CATEGORIES.filter((c) => categoryCounts.has(c));
 
   return (
-    <div className="mx-auto max-w-6xl animate-fade-up space-y-4 sm:space-y-5">
+    <div className="mx-auto max-w-6xl space-y-4 sm:space-y-5">
       <PageHeader
         title="내 냉장고"
         description={fridge.length > 0 ? `${fridge.length}개 보관 중 · 기한이 가까운 순서예요` : undefined}
@@ -137,68 +134,42 @@ function FridgeContent() {
       ) : (
         <>
           {/* 보관위치 탭 */}
-          <div role="tablist" aria-label="보관위치" className="flex gap-1 rounded-2xl bg-ink-300/15 p-1">
-            {STORAGE_TABS.map((t) => {
-              const active = storageTab === t.key;
-              return (
-                <button
-                  key={t.key}
-                  type="button"
-                  role="tab"
-                  aria-selected={active}
-                  onClick={() => setStorageTab(t.key)}
-                  className={`flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-xl text-[17px] font-bold transition-all duration-200 ${
-                    active ? "bg-white text-ink-900 shadow-soft" : "text-ink-500 hover:text-ink-700"
-                  }`}
-                >
-                  {t.label}
-                  <span className={`text-[14.5px] font-semibold ${active ? "text-fresh-600" : "text-ink-400"}`}>
-                    {storageCounts[t.key]}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          <SegmentedControl
+            label="보관위치"
+            value={storageTab}
+            onChange={setStorageTab}
+            panelId="fridge-panel"
+            segments={STORAGE_TABS.map((t) => ({ value: t.key, label: t.label, count: storageCounts[t.key] }))}
+          />
 
-          {/* 카테고리 칩 — 재료가 있는 것만 */}
-          {chips.length > 1 && (
-            <div className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
-              <div className="flex w-max gap-2 sm:w-auto sm:flex-wrap">
-                {(["all", ...chips] as const).map((c) => {
-                  const active = activeCategory === c;
-                  return (
-                    <button
-                      key={c}
-                      type="button"
-                      aria-pressed={active}
-                      onClick={() => setCategory(c)}
-                      className={`chip min-h-[40px] border ${
-                        active
-                          ? "border-fresh-400 bg-fresh-50 text-fresh-700"
-                          : "border-ink-300/30 bg-white text-ink-600 hover:border-fresh-200"
-                      }`}
-                    >
+          <div id="fridge-panel" role="tabpanel" aria-label="보관 중인 식재료" className="space-y-4 sm:space-y-5">
+            {/* 카테고리 칩 — 재료가 있는 것만 */}
+            {chips.length > 1 && (
+              <div className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
+                <div className="flex w-max gap-2 sm:w-auto sm:flex-wrap">
+                  {(["all", ...chips] as const).map((c) => (
+                    <ChoiceChip key={c} selected={activeCategory === c} onClick={() => setCategory(c)}>
                       {c === "all" ? "전체" : `${CATEGORY_EMOJIS[c]} ${CATEGORY_LABELS[c]} ${categoryCounts.get(c)}`}
-                    </button>
-                  );
-                })}
+                    </ChoiceChip>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {filtered.length === 0 ? (
-            <EmptyState
-              emoji="🧺"
-              title={`${STORAGE_TABS.find((t) => t.key === storageTab)?.label} 보관 재료가 없어요`}
-              description="다른 보관위치를 선택해보세요."
-            />
-          ) : (
-            <ListGroup columns={2}>
-              {filtered.map((ing) => (
-                <IngredientRow key={ing.id} ingredient={ing} onEat={eat} highlight={ing.id === flashId} />
-              ))}
-            </ListGroup>
-          )}
+            {filtered.length === 0 ? (
+              <EmptyState
+                emoji="🧺"
+                title={`${STORAGE_TABS.find((t) => t.key === storageTab)?.label} 보관 재료가 없어요`}
+                description="다른 보관위치를 선택해보세요."
+              />
+            ) : (
+              <ListGroup columns={2}>
+                {filtered.map((ing) => (
+                  <IngredientRow key={ing.id} ingredient={ing} onEat={eat} highlight={ing.id === flashId} />
+                ))}
+              </ListGroup>
+            )}
+          </div>
         </>
       )}
 

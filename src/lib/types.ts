@@ -1,22 +1,9 @@
 export type StorageType = "fridge" | "freezer" | "pantry";
 
 export type IngredientCategory =
-  | "vegetable"
-  | "fruit"
-  | "meat"
-  | "seafood"
-  | "dairy"
-  | "egg"
-  | "sauce"
-  | "processed"
-  | "etc";
+  "vegetable" | "fruit" | "meat" | "seafood" | "dairy" | "egg" | "sauce" | "processed" | "etc";
 
-export type IngredientStatus =
-  | "available"
-  | "consume_soon"
-  | "urgent"
-  | "consumed"
-  | "discarded";
+export type IngredientStatus = "available" | "consume_soon" | "urgent" | "consumed" | "discarded";
 
 export interface Ingredient {
   id: string;
@@ -54,12 +41,7 @@ export interface Recipe {
   description: string;
 }
 
-export type WasteReason =
-  | "유통기한 지남"
-  | "너무 많이 구매"
-  | "먹을 기회 없음"
-  | "보관 실패"
-  | "기타";
+export type WasteReason = "유통기한 지남" | "너무 많이 구매" | "먹을 기회 없음" | "보관 실패" | "기타";
 
 export interface ConsumptionLog {
   id: string;

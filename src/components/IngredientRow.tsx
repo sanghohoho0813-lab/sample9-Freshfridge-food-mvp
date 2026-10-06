@@ -18,9 +18,9 @@ const TILE_BG: Record<string, string> = {
 };
 
 const HINT_TONE: Record<string, string> = {
-  expired: "text-coral-600",
-  urgent: "text-coral-600",
-  soon: "text-amberish-600",
+  expired: "text-coral-700",
+  urgent: "text-coral-700",
+  soon: "text-amberish-700",
   ok: "text-ink-400",
   unknown: "text-ink-400",
 };
@@ -83,7 +83,7 @@ export default function IngredientRow({
         <button
           type="button"
           onClick={() => onEat(ingredient)}
-          className="min-h-[44px] shrink-0 rounded-xl bg-fresh-50 px-3 text-[15.5px] font-semibold text-fresh-700 sm:px-3.5 transition-colors hover:bg-fresh-100 active:scale-[0.97]"
+          className="min-h-[44px] shrink-0 rounded-xl bg-fresh-50 px-3 text-[15.5px] font-semibold text-fresh-700 transition-colors hover:bg-fresh-100 active:scale-[0.97] sm:px-3.5"
           aria-label={`${ingredient.name} 먹었어요`}
         >
           먹었어요

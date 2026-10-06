@@ -81,10 +81,7 @@ export function priorityGroup(expiresAt: string | null): PriorityGroup | null {
   return "later";
 }
 
-export const PRIORITY_GROUP_META: Record<
-  PriorityGroup,
-  { title: string; sub: string }
-> = {
+export const PRIORITY_GROUP_META: Record<PriorityGroup, { title: string; sub: string }> = {
   veryUrgent: { title: "오늘·내일", sub: "지금 바로 먹어주세요" },
   soon: { title: "2~3일 안", sub: "이번 끼니에 챙겨 드세요" },
   thisWeek: { title: "이번 주", sub: "일주일 안에 드시면 돼요" },
@@ -96,8 +93,9 @@ export function formatKoreanDate(iso: string): string {
   return `${m}월 ${d}일`;
 }
 
+/** 12500 → "12,500원" (문장 안에서 자연스럽게 읽히도록 ₩ 대신 "원") */
 export function formatWon(n: number): string {
-  return `₩${n.toLocaleString("ko-KR")}`;
+  return `${Math.round(n).toLocaleString("ko-KR")}원`;
 }
 
 /** 보관 기간 선택 칩 문구 — 7 → "일주일", 14 → "2주", 30 → "한 달" */

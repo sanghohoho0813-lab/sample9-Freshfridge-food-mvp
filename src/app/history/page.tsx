@@ -14,7 +14,8 @@ import type { ConsumptionLog } from "@/lib/types";
 import IngredientThumb from "@/components/IngredientThumb";
 import EmptyState from "@/components/EmptyState";
 import PageHeader from "@/components/ui/PageHeader";
-import SkeletonList from "@/components/SkeletonList";
+import PageLoading from "@/components/ui/PageLoading";
+import SegmentedControl from "@/components/ui/SegmentedControl";
 
 type Row =
   | { kind: "single"; date: string; log: ConsumptionLog }
@@ -32,8 +33,7 @@ function periodOf(date: string): string {
   return "그 이전";
 }
 
-const amountText = (l: ConsumptionLog) =>
-  l.amount !== undefined ? formatAmount(l.amount, l.unit ?? "") : "";
+const amountText = (l: ConsumptionLog) => (l.amount !== undefined ? formatAmount(l.amount, l.unit ?? "") : "");
 
 export default function HistoryPage() {
   const { ready, state } = useStore();
@@ -78,85 +78,78 @@ export default function HistoryPage() {
     return [...map.entries()];
   }, [visible]);
 
-  if (!ready) {
-    return (
-      <div className="mx-auto max-w-3xl space-y-4">
-        <div className="skeleton h-10 w-1/2" />
-        <SkeletonList rows={5} />
-      </div>
-    );
-  }
+  if (!ready) return <PageLoading title="소비 기록" back="/my" />;
 
   return (
-    <div className="mx-auto max-w-3xl animate-fade-up space-y-5">
+    <div className="mx-auto max-w-3xl space-y-5">
       <PageHeader
         back="/my"
         title="소비 기록"
         description={`최근 30일 먹은 재료 ${summary.usedCount}개 · 버린 재료 ${summary.wastedCount}개`}
       />
 
-      <div className="flex gap-1 rounded-2xl bg-ink-300/15 p-1" role="tablist" aria-label="기록 종류">
-        {(
-          [
-            { key: "consumed", label: "먹은 기록" },
-            { key: "discarded", label: "버린 기록" },
-          ] as const
-        ).map((t) => (
-          <button
-            key={t.key}
-            type="button"
-            role="tab"
-            aria-selected={tab === t.key}
-            onClick={() => {
-              setTab(t.key);
-              setLimit(PAGE);
-            }}
-            className={`flex min-h-[48px] flex-1 items-center justify-center gap-1.5 rounded-xl text-[17px] font-bold transition-all duration-200 ${
-              tab === t.key ? "bg-white text-ink-900 shadow-soft" : "text-ink-500 hover:text-ink-700"
-            }`}
-          >
-            {t.label}
-            <span className={`text-[14.5px] font-semibold ${tab === t.key ? "text-fresh-600" : "text-ink-400"}`}>
-              {counts[t.key]}
-            </span>
-          </button>
-        ))}
+      <SegmentedControl
+        label="기록 종류"
+        panelId="history-panel"
+        value={tab}
+        onChange={(t) => {
+          setTab(t);
+          setLimit(PAGE);
+        }}
+        segments={[
+          { value: "consumed", label: "먹은 기록", count: counts.consumed },
+          { value: "discarded", label: "버린 기록", count: counts.discarded },
+        ]}
+      />
+
+      <div id="history-panel" role="tabpanel" aria-label={tab === "consumed" ? "먹은 기록" : "버린 기록"}>
+        {rows.length === 0 ? (
+          <EmptyState
+            emoji={tab === "consumed" ? "🍽️" : "🗑️"}
+            title={tab === "consumed" ? "아직 먹은 기록이 없어요" : "버린 기록이 없어요"}
+            description={
+              tab === "consumed"
+                ? "‘먹었어요’나 ‘요리했어요’를 누르면 여기에 남아요."
+                : "버린 재료가 없다니, 아주 잘하고 있어요!"
+            }
+            ctaLabel={tab === "consumed" ? "먼저 먹을 재료 보기" : undefined}
+            ctaHref={tab === "consumed" ? "/priority" : undefined}
+          />
+        ) : (
+          <div className="space-y-6">
+            {periods.map(([period, list]) => (
+              <section key={period}>
+                <h2 className="mb-2 text-[16.5px] font-bold text-ink-700">{period}</h2>
+                <ul className="divide-y divide-ink-300/20 overflow-hidden rounded-card border border-ink-300/25 bg-white">
+                  {list.map((row) =>
+                    row.kind === "cook" ? (
+                      <CookRow
+                        key={row.cookId}
+                        recipeName={row.recipeName}
+                        logs={row.logs}
+                        showDate={period !== "오늘" && period !== "어제"}
+                      />
+                    ) : (
+                      <SingleRow key={row.log.id} log={row.log} showDate={period !== "오늘" && period !== "어제"} />
+                    )
+                  )}
+                </ul>
+              </section>
+            ))}
+            {rows.length > limit && (
+              <button type="button" onClick={() => setLimit((n) => n + PAGE)} className="btn-ghost min-h-[52px] w-full">
+                이전 기록 더 보기 <span className="text-ink-400">({rows.length - limit})</span>
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
-      {rows.length === 0 ? (
-        <EmptyState
-          emoji={tab === "consumed" ? "🍽️" : "🗑️"}
-          title={tab === "consumed" ? "아직 먹은 기록이 없어요" : "버린 기록이 없어요"}
-          description={tab === "consumed" ? "‘먹었어요’나 ‘요리했어요’를 누르면 여기에 남아요." : "버린 재료가 없다니, 아주 잘하고 있어요!"}
-          ctaLabel={tab === "consumed" ? "먼저 먹을 재료 보기" : undefined}
-          ctaHref={tab === "consumed" ? "/priority" : undefined}
-        />
-      ) : (
-        <div className="space-y-6">
-          {periods.map(([period, list]) => (
-            <section key={period}>
-              <h2 className="mb-2 text-[16.5px] font-bold text-ink-700">{period}</h2>
-              <ul className="divide-y divide-ink-300/20 overflow-hidden rounded-card border border-ink-300/25 bg-white">
-                {list.map((row) =>
-                  row.kind === "cook" ? (
-                    <CookRow key={row.cookId} recipeName={row.recipeName} logs={row.logs} showDate={period !== "오늘" && period !== "어제"} />
-                  ) : (
-                    <SingleRow key={row.log.id} log={row.log} showDate={period !== "오늘" && period !== "어제"} />
-                  )
-                )}
-              </ul>
-            </section>
-          ))}
-          {rows.length > limit && (
-            <button type="button" onClick={() => setLimit((n) => n + PAGE)} className="btn-ghost min-h-[52px] w-full">
-              이전 기록 더 보기 <span className="text-ink-400">({rows.length - limit})</span>
-            </button>
-          )}
-        </div>
-      )}
-
       {rows.length > 0 && (
-        <Link href="/report" className="inline-flex min-h-[44px] w-full items-center justify-center gap-1 text-[16.5px] font-semibold text-fresh-700 hover:underline">
+        <Link
+          href="/report"
+          className="inline-flex min-h-[44px] w-full items-center justify-center gap-1 text-[16.5px] font-semibold text-fresh-700 hover:underline"
+        >
           절약 리포트 보기
           <ArrowRight size={19} />
         </Link>
@@ -173,7 +166,7 @@ function CookRow({ recipeName, logs, showDate }: { recipeName: string; logs: Con
     <li className="flex items-center gap-3 p-3.5">
       <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-cream">
         {recipe ? (
-          <Image src={recipeImage(recipe.image)} alt={recipeName} fill sizes="56px" className="object-contain p-1" />
+          <Image src={recipeImage(recipe.image)} alt="" fill sizes="56px" className="object-contain p-1" />
         ) : (
           <span className="grid h-full place-items-center text-2xl">🍳</span>
         )}
@@ -181,7 +174,9 @@ function CookRow({ recipeName, logs, showDate }: { recipeName: string; logs: Con
       <div className="min-w-0 flex-1">
         <p className="text-[18.5px] font-bold text-ink-900">
           {recipe ? (
-            <Link href={`/recipes/${recipe.id}`} className="hover:underline">{recipeName}</Link>
+            <Link href={`/recipes/${recipe.id}`} className="hover:underline">
+              {recipeName}
+            </Link>
           ) : (
             recipeName
           )}{" "}
@@ -190,9 +185,7 @@ function CookRow({ recipeName, logs, showDate }: { recipeName: string; logs: Con
         <p className="text-[15.5px] text-ink-500">
           {logs.map((l) => `${l.ingredientName} ${amountText(l)}`.trim()).join(" · ")}
         </p>
-        {rescued > 0 && (
-          <p className="text-[14.5px] font-semibold text-amberish-600">임박 재료 {rescued}개 살림</p>
-        )}
+        {rescued > 0 && <p className="text-[14.5px] font-semibold text-amberish-700">임박 재료 {rescued}개 살림</p>}
       </div>
       <RowEnd amount={formatWon(total)} date={showDate ? logs[0].date : null} />
     </li>
@@ -213,11 +206,11 @@ function SingleRow({ log, showDate }: { log: ConsumptionLog; showDate: boolean }
         <p className="text-[18.5px] font-bold text-ink-900">
           {log.ingredientName} <span className="font-medium text-ink-400">{amountText(log)}</span>
         </p>
-        <p className={`text-[15.5px] ${eaten ? "text-ink-500" : "text-coral-600"}`}>
-          {eaten ? log.via ?? "그대로 먹었어요" : log.reason ?? "폐기"}
+        <p className={`text-[15.5px] ${eaten ? "text-ink-500" : "text-coral-700"}`}>
+          {eaten ? (log.via ?? "그대로 먹었어요") : (log.reason ?? "폐기")}
         </p>
         {eaten && isRescue(log.dLeft) && (
-          <p className="text-[14.5px] font-semibold text-amberish-600">임박 재료 살림</p>
+          <p className="text-[14.5px] font-semibold text-amberish-700">임박 재료 살림</p>
         )}
       </div>
       <RowEnd amount={`${eaten ? "" : "−"}${formatWon(log.price)}`} date={showDate ? log.date : null} danger={!eaten} />
@@ -228,7 +221,9 @@ function SingleRow({ log, showDate }: { log: ConsumptionLog; showDate: boolean }
 function RowEnd({ amount, date, danger = false }: { amount: string; date: string | null; danger?: boolean }) {
   return (
     <span className="shrink-0 text-right">
-      <span className={`block text-[15.5px] font-semibold tabular-nums ${danger ? "text-coral-600" : "text-ink-700"}`}>{amount}</span>
+      <span className={`block text-[15.5px] font-semibold tabular-nums ${danger ? "text-coral-700" : "text-ink-700"}`}>
+        {amount}
+      </span>
       {date && <span className="block text-[14px] text-ink-400">{formatKoreanDate(date)}</span>}
     </span>
   );

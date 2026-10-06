@@ -11,6 +11,7 @@ import RecipeCard from "@/components/RecipeCard";
 import EmptyState from "@/components/EmptyState";
 import ListGroup from "@/components/ui/ListGroup";
 import PageHeader from "@/components/ui/PageHeader";
+import PageLoading from "@/components/ui/PageLoading";
 
 const SUGGESTIONS = ["두부", "버섯", "계란", "김치볶음밥", "된장찌개"];
 
@@ -50,18 +51,19 @@ export default function SearchPage() {
     [fridge]
   );
 
-  if (!ready) {
-    return <div className="mx-auto max-w-5xl"><div className="skeleton h-12 w-full" /></div>;
-  }
+  if (!ready)
+    return (
+      <PageLoading title="검색" back="/" width="5xl">
+        <div className="skeleton h-14 w-full" />
+      </PageLoading>
+    );
 
   const chipCls =
     "chip min-h-[44px] border border-ink-300/30 bg-white text-ink-700 hover:border-fresh-200 hover:bg-fresh-50/50";
 
   return (
-    <div className="mx-auto max-w-5xl animate-fade-up space-y-5">
-      <PageHeader
-        back="/"
-        title="검색" />
+    <div className="mx-auto max-w-5xl space-y-5">
+      <PageHeader back="/" title="검색" />
 
       <form
         role="search"
@@ -71,7 +73,11 @@ export default function SearchPage() {
         }}
         className="relative"
       >
-        <Search size={22} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-400" aria-hidden />
+        <Search
+          size={22}
+          className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-400"
+          aria-hidden
+        />
         <input
           autoFocus
           type="search"

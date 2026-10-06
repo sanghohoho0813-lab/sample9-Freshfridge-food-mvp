@@ -5,15 +5,11 @@ import Link from "next/link";
 import { AlarmClock, ArrowRight, ChefHat, TrendingDown, TrendingUp } from "lucide-react";
 import { useFridge, useStore } from "@/lib/store";
 import { daysLeft, formatWon } from "@/lib/expiry-calculator";
-import {
-  monthlyReport,
-  wasteByCategory,
-  wasteReasonCounts,
-  weeklyTrend,
-} from "@/lib/stats";
+import { monthlyReport, wasteByCategory, wasteReasonCounts, weeklyTrend } from "@/lib/stats";
 import type { IngredientCategory } from "@/lib/types";
 import { josa } from "@/lib/text";
 import PageHeader from "@/components/ui/PageHeader";
+import PageLoading from "@/components/ui/PageLoading";
 import EmptyState from "@/components/EmptyState";
 
 // 사용/폐기 두 계열 — 색약(CVD)·대비 검증을 통과한 조합 (fresh-700 / coral-500)
@@ -35,20 +31,16 @@ export default function ReportPage() {
   const byCategory = useMemo(() => wasteByCategory(state.logs, 30), [state.logs]);
   const reasons = useMemo(() => wasteReasonCounts(state.logs, 30), [state.logs]);
 
-  if (!ready) {
+  if (!ready)
     return (
-      <div className="mx-auto max-w-3xl space-y-4">
-        <div className="skeleton h-10 w-1/2" />
+      <PageLoading title="절약 리포트" back="/my">
+        <div className="skeleton h-56 w-full" />
         <div className="skeleton h-40 w-full" />
-        <div className="skeleton h-40 w-full" />
-      </div>
+      </PageLoading>
     );
-  }
 
   const { current: cur, previous: prev, wasteCountDelta } = report;
-  const cookedItems30 = state.cooks
-    .filter((c) => daysAgo(c.date) <= 29)
-    .reduce((s, c) => s + c.usedCount, 0);
+  const cookedItems30 = state.cooks.filter((c) => daysAgo(c.date) <= 29).reduce((s, c) => s + c.usedCount, 0);
 
   const topWaste = byCategory[0];
   const urgentInTopCategory = topWaste
@@ -63,7 +55,7 @@ export default function ReportPage() {
   const hasRecords = cur.usedCount + cur.wastedCount > 0;
   if (!hasRecords) {
     return (
-      <div className="mx-auto max-w-3xl animate-fade-up space-y-6">
+      <div className="mx-auto max-w-3xl space-y-6">
         <PageHeader back="/my" title="절약 리포트" />
         <EmptyState
           emoji="📊"
@@ -77,10 +69,8 @@ export default function ReportPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl animate-fade-up space-y-7 sm:space-y-8">
-      <PageHeader
-        back="/my"
-        title="절약 리포트" description="최근 30일 기준이에요." />
+    <div className="mx-auto max-w-3xl space-y-7 sm:space-y-8">
+      <PageHeader back="/my" title="절약 리포트" description="최근 30일 기준이에요." />
 
       {/* 헤드라인 — 숫자 하나 + 변화 한 줄 */}
       <section className="card p-5 sm:p-6">
@@ -92,7 +82,7 @@ export default function ReportPage() {
           <div className="mt-3">
             <p
               className={`inline-flex items-center gap-1.5 text-[16.5px] font-semibold ${
-                wasteCountDelta <= 0 ? "text-fresh-700" : "text-coral-600"
+                wasteCountDelta <= 0 ? "text-fresh-700" : "text-coral-700"
               }`}
             >
               {wasteCountDelta <= 0 ? <TrendingDown size={19} aria-hidden /> : <TrendingUp size={19} aria-hidden />}
@@ -126,7 +116,7 @@ export default function ReportPage() {
         <h2 className="mb-3 text-[20.5px] font-extrabold text-ink-900">내 행동이 만든 변화</h2>
         <ul className="divide-y divide-ink-300/20 overflow-hidden rounded-card border border-ink-300/25 bg-white">
           <li className="flex items-center gap-3 p-4">
-            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-amberish-50 text-amberish-600">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-amberish-50 text-amberish-700">
               <AlarmClock size={21} />
             </span>
             <p className="text-[17.5px] text-ink-700">
@@ -147,7 +137,8 @@ export default function ReportPage() {
                 <TrendingDown size={21} />
               </span>
               <p className="text-[17.5px] text-ink-700">
-                버린 금액이 {formatWon(prev.wastedAmount)} → <b className="text-ink-900">{formatWon(cur.wastedAmount)}</b>로 줄었어요
+                버린 금액이 {formatWon(prev.wastedAmount)} →{" "}
+                <b className="text-ink-900">{formatWon(cur.wastedAmount)}</b>로 줄었어요
               </p>
             </li>
           )}
@@ -159,8 +150,14 @@ export default function ReportPage() {
         <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
           <h2 className="text-[20.5px] font-extrabold text-ink-900">주간 추이</h2>
           <div className="flex items-center gap-4 text-[15.5px] text-ink-500" aria-hidden>
-            <span className="inline-flex items-center gap-1.5"><span className={`h-2.5 w-2.5 rounded-sm ${USED}`} />먹음</span>
-            <span className="inline-flex items-center gap-1.5"><span className={`h-2.5 w-2.5 rounded-sm ${WASTED}`} />버림</span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className={`h-2.5 w-2.5 rounded-sm ${USED}`} />
+              먹음
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className={`h-2.5 w-2.5 rounded-sm ${WASTED}`} />
+              버림
+            </span>
           </div>
         </div>
         <ul className="space-y-3 rounded-card border border-ink-300/25 bg-white p-4 sm:p-5">
@@ -179,7 +176,10 @@ export default function ReportPage() {
                   <span className={`h-full rounded-[4px] ${USED}`} style={{ width: `${(w.used / maxWeek) * 100}%` }} />
                 )}
                 {w.wasted > 0 && (
-                  <span className={`h-full rounded-[4px] ${WASTED}`} style={{ width: `${(w.wasted / maxWeek) * 100}%` }} />
+                  <span
+                    className={`h-full rounded-[4px] ${WASTED}`}
+                    style={{ width: `${(w.wasted / maxWeek) * 100}%` }}
+                  />
                 )}
               </span>
               <span className="whitespace-nowrap text-right text-[15.5px] tabular-nums text-ink-500">
@@ -202,8 +202,12 @@ export default function ReportPage() {
             {byCategory.slice(0, 4).map((c, i) => (
               <div key={c.category}>
                 <div className="mb-1 flex items-center justify-between text-[16.5px]">
-                  <p className="font-bold text-ink-700">{i + 1}. {c.label}</p>
-                  <p className="tabular-nums text-ink-500">{c.count}번 · {formatWon(c.amount)}</p>
+                  <p className="font-bold text-ink-700">
+                    {i + 1}. {c.label}
+                  </p>
+                  <p className="tabular-nums text-ink-500">
+                    {c.count}번 · {formatWon(c.amount)}
+                  </p>
                 </div>
                 <div className="h-2.5 w-full rounded-full bg-ink-300/15">
                   <div className={`h-full rounded-[4px] ${WASTED}`} style={{ width: `${(c.count / maxCat) * 100}%` }} />
@@ -222,12 +226,16 @@ export default function ReportPage() {
       {/* 다음 행동 제안 — 한 가지만 */}
       {topWaste && (
         <section className="rounded-card border border-amberish-100 bg-amberish-50/60 p-5">
-          <p className="text-[16.5px] font-extrabold text-amberish-600">이번 주 제안</p>
+          <p className="text-[16.5px] font-extrabold text-amberish-700">이번 주 제안</p>
           <p className="mt-1.5 text-[17.5px] leading-relaxed text-ink-700">
             최근 30일 동안 <b>{josa(topWaste.label, "을/를")}</b> 가장 많이 버렸어요({topWaste.count}번).{" "}
-            {TIPS[topWaste.category] ?? `${josa(topWaste.label, "은/는")} 구매량을 조금 줄이거나 냉동 보관을 활용해보세요.`}
+            {TIPS[topWaste.category] ??
+              `${josa(topWaste.label, "은/는")} 구매량을 조금 줄이거나 냉동 보관을 활용해보세요.`}
           </p>
-          <Link href={urgentInTopCategory > 0 ? `/fridge?category=${topWaste.category}` : "/shopping"} className="btn-primary mt-4 min-h-[52px]">
+          <Link
+            href={urgentInTopCategory > 0 ? `/fridge?category=${topWaste.category}` : "/shopping"}
+            className="btn-primary mt-4 min-h-[52px]"
+          >
             {urgentInTopCategory > 0
               ? `지금 먹어야 할 ${topWaste.label} ${urgentInTopCategory}개 보기`
               : "장보기 목록 점검하기"}

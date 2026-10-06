@@ -18,9 +18,9 @@ import { recipeImage } from "@/lib/images";
 import IngredientRow from "@/components/IngredientRow";
 import ListGroup from "@/components/ui/ListGroup";
 import PageHeader from "@/components/ui/PageHeader";
+import PageLoading from "@/components/ui/PageLoading";
 import { useIngredientActions } from "@/components/useIngredientActions";
 import EmptyState from "@/components/EmptyState";
-import SkeletonList from "@/components/SkeletonList";
 
 const GROUP_ORDER: PriorityGroup[] = ["veryUrgent", "soon", "thisWeek"];
 
@@ -56,20 +56,13 @@ export default function PriorityPage() {
     return top && top.urgentOwned.length > 0 ? top : null;
   }, [fridge]);
 
-  if (!ready) {
-    return (
-      <div className="mx-auto max-w-6xl space-y-4">
-        <div className="skeleton h-10 w-1/2" />
-        <SkeletonList rows={5} />
-      </div>
-    );
-  }
+  if (!ready) return <PageLoading title="우선소비" back="/" width="6xl" />;
 
   const totalUrgent = groups.veryUrgent.length + groups.soon.length;
   const isEmpty = GROUP_ORDER.every((g) => groups[g].length === 0);
 
   return (
-    <div className="mx-auto max-w-6xl animate-fade-up space-y-6">
+    <div className="mx-auto max-w-6xl space-y-6">
       <PageHeader
         back="/"
         title="우선소비"
@@ -86,14 +79,14 @@ export default function PriorityPage() {
           className="card card-hover flex items-center gap-3.5 p-3 sm:gap-4 sm:p-4"
         >
           <span className="relative h-[72px] w-[72px] shrink-0 overflow-hidden rounded-2xl bg-cream sm:h-20 sm:w-20">
-            <Image src={recipeImage(rescue.recipe.image)} alt={rescue.recipe.name} fill sizes="80px" className="object-contain p-1.5" />
+            <Image src={recipeImage(rescue.recipe.image)} alt="" fill sizes="80px" className="object-contain p-1.5" />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-[15px] font-semibold text-amberish-600">급한 재료를 한 번에 쓰는 요리</p>
+            <p className="text-[15px] font-semibold text-amberish-700">급한 재료를 한 번에 쓰는 요리</p>
             <p className="truncate text-[19.5px] font-extrabold text-ink-900">{rescue.recipe.name}</p>
             <p className="line-clamp-2 text-[15.5px] leading-snug text-ink-500">
-              {rescue.urgentOwned.map((m) => `${m.name} ${dDayLabel(m.ingredient?.expiresAt ?? null)}`).join(" · ")}
-              {" "}· {rescue.recipe.minutes}분
+              {rescue.urgentOwned.map((m) => `${m.name} ${dDayLabel(m.ingredient?.expiresAt ?? null)}`).join(" · ")} ·{" "}
+              {rescue.recipe.minutes}분
             </p>
           </div>
           <ChevronRight size={22} className="shrink-0 text-ink-300" aria-hidden />

@@ -6,10 +6,7 @@ import { isRescue } from "./demo-data";
 /** 오늘 기준 newestDaysAgo ~ oldestDaysAgo 일 전 사이(양끝 포함)인지 */
 function inRange(dateISO: string, newestDaysAgo: number, oldestDaysAgo: number): boolean {
   const today = todayStart();
-  return (
-    dateISO >= toISODate(addDays(today, -oldestDaysAgo)) &&
-    dateISO <= toISODate(addDays(today, -newestDaysAgo))
-  );
+  return dateISO >= toISODate(addDays(today, -oldestDaysAgo)) && dateISO <= toISODate(addDays(today, -newestDaysAgo));
 }
 
 export interface PeriodSummary {
@@ -114,18 +111,13 @@ export function wasteByCategory(logs: ConsumptionLog[], days = 30): WasteByCateg
   return [...map.values()].sort((a, b) => b.count - a.count || b.amount - a.amount);
 }
 
-export function wasteReasonCounts(
-  logs: ConsumptionLog[],
-  days = 30
-): { reason: string; count: number }[] {
+export function wasteReasonCounts(logs: ConsumptionLog[], days = 30): { reason: string; count: number }[] {
   const map = new Map<string, number>();
   for (const l of logs) {
     if (l.type !== "discarded" || !l.reason || !inRange(l.date, 0, days - 1)) continue;
     map.set(l.reason, (map.get(l.reason) ?? 0) + 1);
   }
-  return [...map.entries()]
-    .map(([reason, count]) => ({ reason, count }))
-    .sort((a, b) => b.count - a.count);
+  return [...map.entries()].map(([reason, count]) => ({ reason, count })).sort((a, b) => b.count - a.count);
 }
 
 /** 레시피별 마지막으로 만든 날짜 */
@@ -141,9 +133,7 @@ export function lastCookedByRecipe(cooks: CookLog[]): Map<string, string> {
 /** "3일 전" 같은 상대 날짜 */
 export function relativeDay(dateISO: string): string {
   const [y, m, d] = dateISO.split("-").map(Number);
-  const diff = Math.round(
-    (todayStart().getTime() - new Date(y, m - 1, d).getTime()) / (1000 * 60 * 60 * 24)
-  );
+  const diff = Math.round((todayStart().getTime() - new Date(y, m - 1, d).getTime()) / (1000 * 60 * 60 * 24));
   if (diff <= 0) return "오늘";
   if (diff === 1) return "어제";
   if (diff < 7) return `${diff}일 전`;

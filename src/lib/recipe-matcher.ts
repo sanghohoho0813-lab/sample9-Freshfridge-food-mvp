@@ -1,5 +1,6 @@
 import type { Ingredient, Recipe, RecipeIngredient } from "./types";
 import { daysLeft } from "./expiry-calculator";
+import { isInFridge } from "./state/ops";
 
 export interface MatchedIngredient extends RecipeIngredient {
   owned: boolean;
@@ -20,10 +21,21 @@ export interface RecipeMatch {
   score: number; // 추천 정렬용
 }
 
-function findOwned(name: string, fridge: Ingredient[]): Ingredient | undefined {
-  return fridge.find(
-    (i) => i.status === "available" && i.quantity > 0 && (i.name === name || i.name.includes(name) || name.includes(i.name))
-  );
+/** 기한이 빠른 것 먼저 (기한 정보 없는 재료는 뒤로) */
+const byExpiry = (a: Ingredient, b: Ingredient) =>
+  (daysLeft(a.expiresAt) ?? Infinity) - (daysLeft(b.expiresAt) ?? Infinity);
+
+/**
+ * 레시피 재료명에 맞는 냉장고 재료를 찾는다.
+ * 같은 이름이 우선이고("우유" 두 팩이면 기한이 빠른 것), 없을 때만 부분 일치("돼지고기" ↔ "돼지고기 앞다리살").
+ */
+export function findOwned(name: string, fridge: Ingredient[]): Ingredient | undefined {
+  const usable = fridge.filter(isInFridge);
+  const exact = usable.filter((i) => i.name === name).sort(byExpiry);
+  if (exact.length > 0) return exact[0];
+  return usable
+    .filter((i) => Math.min(i.name.length, name.length) >= 2 && (i.name.includes(name) || name.includes(i.name)))
+    .sort(byExpiry)[0];
 }
 
 export function matchRecipe(recipe: Recipe, fridge: Ingredient[]): RecipeMatch {
@@ -42,9 +54,7 @@ export function matchRecipe(recipe: Recipe, fridge: Ingredient[]): RecipeMatch {
   const totalCount = matched.length;
   const matchPercent = totalCount === 0 ? 0 : Math.round((ownedCount / totalCount) * 100);
   const missing = matched.filter((m) => !m.owned);
-  const urgentOwned = matched.filter(
-    (m) => m.owned && m.dLeft !== null && m.dLeft <= 3
-  );
+  const urgentOwned = matched.filter((m) => m.owned && m.dLeft !== null && m.dLeft <= 3);
 
   // 기본 점수 = 매칭율, 유통기한 임박 재료 가중치(D-1 이하 +30, D-2 +20, D-3 +10)
   let score = matchPercent;
@@ -62,7 +72,5 @@ export function matchRecipe(recipe: Recipe, fridge: Ingredient[]): RecipeMatch {
 }
 
 export function rankRecipes(recipes: Recipe[], fridge: Ingredient[]): RecipeMatch[] {
-  return recipes
-    .map((r) => matchRecipe(r, fridge))
-    .sort((a, b) => b.score - a.score);
+  return recipes.map((r) => matchRecipe(r, fridge)).sort((a, b) => b.score - a.score);
 }

@@ -24,15 +24,14 @@ export default function HomePage() {
   const fridge = useFridge();
   const { eat, element: actionSheet } = useIngredientActions();
 
-  const withDays = useMemo(
-    () => sortByExpiry(fridge).map((i) => ({ i, d: daysLeft(i.expiresAt) })),
-    [fridge]
-  );
+  const withDays = useMemo(() => sortByExpiry(fridge).map((i) => ({ i, d: daysLeft(i.expiresAt) })), [fridge]);
   const urgent = withDays.filter((x) => x.d !== null && x.d <= 3).map((x) => x.i);
   const todayTomorrow = withDays.filter((x) => x.d !== null && x.d <= 1).map((x) => x.i);
 
   const buckets = useMemo(() => {
-    let soon = 0, week = 0, relaxed = 0;
+    let soon = 0,
+      week = 0,
+      relaxed = 0;
     for (const { d } of withDays) {
       if (d !== null && d <= 3) soon++;
       else if (d !== null && d <= 7) week++;
@@ -53,15 +52,6 @@ export default function HomePage() {
   const shopping = state.shopping.filter((s) => !s.checked);
   const latestCook = state.cooks[0];
 
-  if (!ready) {
-    return (
-      <div className="mx-auto max-w-6xl space-y-4">
-        <div className="skeleton h-16 w-2/3" />
-        <SkeletonList rows={4} />
-      </div>
-    );
-  }
-
   const empty = fridge.length === 0;
   const headline = empty
     ? "산 재료를 등록하면 기한을 대신 챙겨드려요."
@@ -72,14 +62,20 @@ export default function HomePage() {
         : "오늘 냉장고는 여유로워요.";
 
   return (
-    <div className="mx-auto max-w-6xl animate-fade-up">
+    <div className="mx-auto max-w-6xl">
       {/* 인사 + 오늘의 한 줄 */}
       <section className="flex items-end justify-between gap-3">
         <div className="min-w-0">
           <h1 className="text-[26px] font-extrabold leading-tight tracking-tight text-ink-900 sm:text-[28.5px]">
             안녕하세요, {state.userName}님 👋
           </h1>
-          <p className="mt-1.5 text-[17.5px] leading-snug text-ink-600">{headline}</p>
+          {ready ? (
+            <p className="mt-1.5 text-[17.5px] leading-snug text-ink-600">{headline}</p>
+          ) : (
+            <p className="mt-1.5 h-[24px]" aria-hidden>
+              <span className="skeleton inline-block h-[18px] w-64 max-w-full" />
+            </p>
+          )}
         </div>
         <Link href="/add" className="btn-primary hidden shrink-0 sm:inline-flex">
           <Plus size={21} />
@@ -87,158 +83,195 @@ export default function HomePage() {
         </Link>
       </section>
 
-      <div className="mt-6 grid gap-8 sm:mt-7 xl:grid-cols-[minmax(0,1fr)_340px]">
-        {/* 왼쪽: 오늘 할 일 */}
-        <div className="min-w-0 space-y-8 sm:space-y-9">
-          {empty ? (
-            <EmptyState
-              emoji="🧺"
-              title="냉장고가 비어 있어요"
-              description="먼저 먹어야 할 순서와 지금 만들 수 있는 요리를 알려드려요."
-              ctaLabel="첫 식재료 추가하기"
-              ctaHref="/add"
-            />
-          ) : (
-            <>
-              {/* 1. 오늘 먼저 먹어야 할 재료 */}
-              <section>
-                <SectionHeader
-                  title="오늘 먼저 먹어야 해요"
-                  moreHref="/priority"
-                  moreLabel={urgent.length > URGENT_LIMIT ? `${urgent.length - URGENT_LIMIT}개 더 보기` : "전체 보기"}
-                />
-                {urgent.length === 0 ? (
-                  <EmptyState
-                    compact
-                    emoji="🌿"
-                    title="급하게 먹어야 할 재료가 없어요"
-                    description="기한이 3일 안으로 다가오면 여기에 먼저 알려드려요."
-                  />
-                ) : (
-                  <ListGroup>
-                    {urgent.slice(0, URGENT_LIMIT).map((ing) => (
-                      <IngredientRow key={ing.id} ingredient={ing} onEat={eat} />
-                    ))}
-                  </ListGroup>
-                )}
-              </section>
-
-              {/* 2. 이 재료로 만들 수 있는 요리 */}
-              <section>
-                <SectionHeader title="이 재료로 만들 요리" moreHref="/recipes" moreLabel="전체 보기" />
-                {recommendations.length === 0 ? (
-                  <EmptyState
-                    compact
-                    emoji="🍳"
-                    title="지금 재료로 추천할 요리가 없어요"
-                    description="레시피에서 필요한 재료를 장보기에 담아보세요."
-                    ctaLabel="레시피 둘러보기"
-                    ctaHref="/recipes"
-                  />
-                ) : (
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
-                    {recommendations.map((m) => (
-                      <RecipeCard key={m.recipe.id} match={m} lastCooked={lastCooked.get(m.recipe.id)} />
-                    ))}
-                  </div>
-                )}
-              </section>
-            </>
-          )}
+      {!ready ? (
+        // 저장된 데이터를 읽기 전 — 예시 데이터가 잠깐 보였다 바뀌지 않도록 자리만 잡는다
+        <div className="mt-6 grid gap-8 sm:mt-7 xl:grid-cols-[minmax(0,1fr)_340px]" aria-busy="true">
+          <div className="space-y-3">
+            <div className="skeleton h-7 w-48" />
+            <SkeletonList rows={5} />
+          </div>
+          <div className="space-y-5">
+            <div className="skeleton h-40 w-full" />
+            <div className="skeleton h-32 w-full" />
+          </div>
         </div>
-
-        {/* 오른쪽(데스크톱) / 아래(모바일): 상태 요약 */}
-        <aside className="min-w-0 space-y-5">
-          {/* 3. 냉장고 상태 */}
-          <section className="card p-5">
-            <PanelTitle title="냉장고 상태" href="/fridge" linkLabel="내 냉장고" />
+      ) : (
+        <div className="mt-6 grid gap-8 sm:mt-7 xl:grid-cols-[minmax(0,1fr)_340px]">
+          {/* 왼쪽: 오늘 할 일 */}
+          <div className="min-w-0 space-y-8 sm:space-y-9">
             {empty ? (
-              <p className="mt-1 text-[16.5px] text-ink-500">보관 중인 재료가 없어요.</p>
+              <EmptyState
+                emoji="🧺"
+                title="냉장고가 비어 있어요"
+                description="먼저 먹어야 할 순서와 지금 만들 수 있는 요리를 알려드려요."
+                ctaLabel="첫 식재료 추가하기"
+                ctaHref="/add"
+              />
             ) : (
-              <p className="mt-1 text-[16.5px] text-ink-600">
-                <b className="text-ink-900">{fridge.length}개</b> 보관 중
-                <span className="block text-[15.5px] text-ink-500">
-                  냉장 {storageCounts.fridge} · 냉동 {storageCounts.freezer} · 실온 {storageCounts.pantry}
-                </span>
-              </p>
-            )}
-            {fridge.length > 0 && (
               <>
-                <div className="mt-4 flex h-3 gap-0.5" aria-hidden>
-                  {buckets.soon > 0 && (
-                    <span className="rounded-[4px] bg-coral-500" style={{ width: `${(buckets.soon / fridge.length) * 100}%` }} />
+                {/* 1. 오늘 먼저 먹어야 할 재료 */}
+                <section>
+                  <SectionHeader
+                    title="오늘 먼저 먹어야 해요"
+                    moreHref="/priority"
+                    moreLabel={urgent.length > URGENT_LIMIT ? `${urgent.length - URGENT_LIMIT}개 더 보기` : "전체 보기"}
+                  />
+                  {urgent.length === 0 ? (
+                    <EmptyState
+                      compact
+                      emoji="🌿"
+                      title="급하게 먹어야 할 재료가 없어요"
+                      description="기한이 3일 안으로 다가오면 여기에 먼저 알려드려요."
+                    />
+                  ) : (
+                    <ListGroup>
+                      {urgent.slice(0, URGENT_LIMIT).map((ing) => (
+                        <IngredientRow key={ing.id} ingredient={ing} onEat={eat} />
+                      ))}
+                    </ListGroup>
                   )}
-                  {buckets.week > 0 && (
-                    <span className="rounded-[4px] bg-amberish-500" style={{ width: `${(buckets.week / fridge.length) * 100}%` }} />
+                </section>
+
+                {/* 2. 이 재료로 만들 수 있는 요리 */}
+                <section>
+                  <SectionHeader title="이 재료로 만들 요리" moreHref="/recipes" moreLabel="전체 보기" />
+                  {recommendations.length === 0 ? (
+                    <EmptyState
+                      compact
+                      emoji="🍳"
+                      title="지금 재료로 추천할 요리가 없어요"
+                      description="레시피에서 필요한 재료를 장보기에 담아보세요."
+                      ctaLabel="레시피 둘러보기"
+                      ctaHref="/recipes"
+                    />
+                  ) : (
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+                      {recommendations.map((m) => (
+                        <RecipeCard key={m.recipe.id} match={m} lastCooked={lastCooked.get(m.recipe.id)} />
+                      ))}
+                    </div>
                   )}
-                  {buckets.relaxed > 0 && (
-                    <span className="rounded-[4px] bg-ink-300/50" style={{ width: `${(buckets.relaxed / fridge.length) * 100}%` }} />
-                  )}
-                </div>
-                <ul className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1 text-[15.5px] text-ink-600">
-                  <li className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-coral-500" />3일 안 {buckets.soon}</li>
-                  <li className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-amberish-500" />이번 주 {buckets.week}</li>
-                  <li className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-ink-300/50" />여유 {buckets.relaxed}</li>
-                </ul>
+                </section>
               </>
             )}
-          </section>
+          </div>
 
-          {/* 4. 장보기 */}
-          <section className="card p-5">
-            <PanelTitle title="장보기" href="/shopping" linkLabel="목록" />
-            {shopping.length === 0 ? (
-              <p className="mt-1 text-[16.5px] text-ink-500">지금은 살 것이 없어요.</p>
-            ) : (
-              <>
+          {/* 오른쪽(데스크톱) / 아래(모바일): 상태 요약 */}
+          <aside className="min-w-0 space-y-5">
+            {/* 3. 냉장고 상태 */}
+            <section className="card p-5">
+              <PanelTitle title="냉장고 상태" href="/fridge" linkLabel="내 냉장고" />
+              {empty ? (
+                <p className="mt-1 text-[16.5px] text-ink-500">보관 중인 재료가 없어요.</p>
+              ) : (
                 <p className="mt-1 text-[16.5px] text-ink-600">
-                  살 것 <b className="text-ink-900">{shopping.length}개</b>
+                  <b className="text-ink-900">{fridge.length}개</b> 보관 중
+                  <span className="block text-[15.5px] text-ink-500">
+                    냉장 {storageCounts.fridge} · 냉동 {storageCounts.freezer} · 실온 {storageCounts.pantry}
+                  </span>
                 </p>
-                <ul className="mt-3 flex flex-wrap gap-1.5">
-                  {shopping.slice(0, 5).map((s) => (
-                    <li key={s.id} className="rounded-chip bg-warmwhite px-3 py-1 text-[15.5px] font-medium text-ink-700 ring-1 ring-ink-300/25">
-                      {s.name}
+              )}
+              {fridge.length > 0 && (
+                <>
+                  <div className="mt-4 flex h-3 gap-0.5" aria-hidden>
+                    {buckets.soon > 0 && (
+                      <span
+                        className="rounded-[4px] bg-coral-500"
+                        style={{ width: `${(buckets.soon / fridge.length) * 100}%` }}
+                      />
+                    )}
+                    {buckets.week > 0 && (
+                      <span
+                        className="rounded-[4px] bg-amberish-500"
+                        style={{ width: `${(buckets.week / fridge.length) * 100}%` }}
+                      />
+                    )}
+                    {buckets.relaxed > 0 && (
+                      <span
+                        className="rounded-[4px] bg-ink-300/50"
+                        style={{ width: `${(buckets.relaxed / fridge.length) * 100}%` }}
+                      />
+                    )}
+                  </div>
+                  <ul className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1 text-[15.5px] text-ink-600">
+                    <li className="inline-flex items-center gap-1.5">
+                      <span className="h-2.5 w-2.5 rounded-sm bg-coral-500" />
+                      3일 안 {buckets.soon}
                     </li>
-                  ))}
-                  {shopping.length > 5 && (
-                    <li className="px-1 py-1 text-[15.5px] text-ink-400">외 {shopping.length - 5}개</li>
-                  )}
-                </ul>
-              </>
-            )}
-          </section>
+                    <li className="inline-flex items-center gap-1.5">
+                      <span className="h-2.5 w-2.5 rounded-sm bg-amberish-500" />
+                      이번 주 {buckets.week}
+                    </li>
+                    <li className="inline-flex items-center gap-1.5">
+                      <span className="h-2.5 w-2.5 rounded-sm bg-ink-300/50" />
+                      여유 {buckets.relaxed}
+                    </li>
+                  </ul>
+                </>
+              )}
+            </section>
 
-          {/* 5. 이번 주 성과 */}
-          <section className="card p-5">
-            <PanelTitle title="이번 주 성과" href="/report" linkLabel="리포트" />
-            {week.usedCount === 0 && week.cookCount === 0 ? (
-              <p className="mt-1 text-[16.5px] text-ink-500">
-                이번 주 기록이 아직 없어요. ‘먹었어요’를 누르면 여기에 쌓여요.
-              </p>
-            ) : (
-              <>
-                <p className="mt-1 text-[17.5px] font-bold leading-snug text-ink-900">
-                  식재료 {week.usedCount}개를 버리지 않고 먹었어요
+            {/* 4. 장보기 */}
+            <section className="card p-5">
+              <PanelTitle title="장보기" href="/shopping" linkLabel="목록" />
+              {shopping.length === 0 ? (
+                <p className="mt-1 text-[16.5px] text-ink-500">지금은 살 것이 없어요.</p>
+              ) : (
+                <>
+                  <p className="mt-1 text-[16.5px] text-ink-600">
+                    살 것 <b className="text-ink-900">{shopping.length}개</b>
+                  </p>
+                  <ul className="mt-3 flex flex-wrap gap-1.5">
+                    {shopping.slice(0, 5).map((s) => (
+                      <li
+                        key={s.id}
+                        className="rounded-chip bg-warmwhite px-3 py-1 text-[15.5px] font-medium text-ink-700 ring-1 ring-ink-300/25"
+                      >
+                        {s.name}
+                      </li>
+                    ))}
+                    {shopping.length > 5 && (
+                      <li className="px-1 py-1 text-[15.5px] text-ink-400">외 {shopping.length - 5}개</li>
+                    )}
+                  </ul>
+                </>
+              )}
+            </section>
+
+            {/* 5. 이번 주 성과 */}
+            <section className="card p-5">
+              <PanelTitle title="이번 주 성과" href="/report" linkLabel="리포트" />
+              {week.usedCount === 0 && week.cookCount === 0 ? (
+                <p className="mt-1 text-[16.5px] text-ink-500">
+                  이번 주 기록이 아직 없어요. ‘먹었어요’를 누르면 여기에 쌓여요.
                 </p>
-                <p className="mt-1 flex flex-wrap gap-x-1.5 text-[15.5px] text-ink-500">
-                  <span className="whitespace-nowrap">{formatWon(week.savedAmount)} 절약</span>
-                  <span className="whitespace-nowrap">· 요리 {week.cookCount}번</span>
-                  {week.rescuedCount > 0 && <span className="whitespace-nowrap">· 임박 재료 {week.rescuedCount}개 살림</span>}
+              ) : (
+                <>
+                  <p className="mt-1 text-[17.5px] font-bold leading-snug text-ink-900">
+                    식재료 {week.usedCount}개를 버리지 않고 먹었어요
+                  </p>
+                  <p className="mt-1 flex flex-wrap gap-x-1.5 text-[15.5px] text-ink-500">
+                    <span className="whitespace-nowrap">{formatWon(week.savedAmount)} 절약</span>
+                    <span className="whitespace-nowrap">· 요리 {week.cookCount}번</span>
+                    {week.rescuedCount > 0 && (
+                      <span className="whitespace-nowrap">· 임박 재료 {week.rescuedCount}개 살림</span>
+                    )}
+                  </p>
+                </>
+              )}
+              {latestCook && (
+                <p className="mt-3 border-t border-ink-300/20 pt-3 text-[15.5px] text-ink-600">
+                  최근 요리 ·{" "}
+                  <Link href={`/recipes/${latestCook.recipeId}`} className="font-semibold text-ink-800 hover:underline">
+                    {latestCook.recipeName}
+                  </Link>{" "}
+                  <span className="text-ink-400">{relativeDay(latestCook.date)}</span>
                 </p>
-              </>
-            )}
-            {latestCook && (
-              <p className="mt-3 border-t border-ink-300/20 pt-3 text-[15.5px] text-ink-600">
-                최근 요리 ·{" "}
-                <Link href={`/recipes/${latestCook.recipeId}`} className="font-semibold text-ink-800 hover:underline">
-                  {latestCook.recipeName}
-                </Link>{" "}
-                <span className="text-ink-400">{relativeDay(latestCook.date)}</span>
-              </p>
-            )}
-          </section>
-        </aside>
-      </div>
+              )}
+            </section>
+          </aside>
+        </div>
+      )}
 
       {actionSheet}
     </div>

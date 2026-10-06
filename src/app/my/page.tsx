@@ -2,20 +2,13 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import {
-  AlarmClock,
-  Bell,
-  ChevronRight,
-  History,
-  LineChart,
-  RefreshCcw,
-  ShoppingBasket,
-} from "lucide-react";
+import { AlarmClock, Bell, ChevronRight, History, LineChart, RefreshCcw, ShoppingBasket } from "lucide-react";
 import { useFridge, useStore } from "@/lib/store";
 import { useNotifications } from "@/lib/notifications";
 import { daysLeft, formatWon } from "@/lib/expiry-calculator";
 import { monthlyReport } from "@/lib/stats";
 import PageHeader from "@/components/ui/PageHeader";
+import PageLoading from "@/components/ui/PageLoading";
 import ListGroup from "@/components/ui/ListGroup";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
@@ -26,9 +19,13 @@ export default function MyPage() {
   const [confirmReset, setConfirmReset] = useState(false);
   const report = useMemo(() => monthlyReport(state.logs, state.cooks).current, [state.logs, state.cooks]);
 
-  if (!ready) {
-    return <div className="mx-auto max-w-3xl"><div className="skeleton h-40 w-full" /></div>;
-  }
+  if (!ready)
+    return (
+      <PageLoading title="마이페이지">
+        <div className="skeleton h-44 w-full" />
+        <div className="skeleton h-80 w-full" />
+      </PageLoading>
+    );
 
   const urgentCount = fridge.filter((i) => {
     const d = daysLeft(i.expiresAt);
@@ -43,7 +40,7 @@ export default function MyPage() {
       label: "우선소비",
       value: urgentCount > 0 ? `${urgentCount}개 급해요` : "급한 재료 없음",
       icon: AlarmClock,
-      tint: "bg-coral-100 text-coral-600",
+      tint: "bg-coral-100 text-coral-700",
     },
     {
       href: "/shopping",
@@ -71,7 +68,7 @@ export default function MyPage() {
       label: "알림",
       value: unread > 0 ? `안 읽은 알림 ${unread}개` : "모두 읽음",
       icon: Bell,
-      tint: "bg-amberish-100 text-amberish-600",
+      tint: "bg-amberish-100 text-amberish-700",
     },
   ];
 
@@ -82,7 +79,7 @@ export default function MyPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-3xl animate-fade-up space-y-6">
+    <div className="mx-auto max-w-3xl space-y-6">
       <PageHeader title="마이페이지" />
 
       {/* 프로필 + 핵심 숫자 */}

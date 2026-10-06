@@ -37,14 +37,22 @@ export function deriveNotifications(state: AppState, fridge: Ingredient[]): Deri
       d < 0
         ? "상태를 확인하고 먹었는지 버렸는지 기록해주세요."
         : `${STORAGE_LABELS[ing.storage]}에 ${formatAmount(ing.quantity, ing.unit)} 남았어요.`;
-    out.push({ id: `exp-${ing.id}-${ing.expiresAt}`, kind: "expiry", title, body, date: todayISO, href: `/ingredient/${ing.id}` });
+    out.push({
+      id: `exp-${ing.id}-${ing.expiresAt}`,
+      kind: "expiry",
+      title,
+      body,
+      date: todayISO,
+      href: `/ingredient/${ing.id}`,
+    });
   }
 
   // 2) 임박 재료를 쓰는 오늘의 요리
   const top = recommendRecipes(RECIPES, fridge, 1)[0];
   if (top && top.urgentOwned.length > 0) {
     const names = top.urgentOwned.slice(0, 2).map((m) => m.name);
-    const namesText = names.length > 1 ? `${josa(names[0], "과/와")} ${josa(names[1], "을/를")}` : josa(names[0], "을/를");
+    const namesText =
+      names.length > 1 ? `${josa(names[0], "과/와")} ${josa(names[1], "을/를")}` : josa(names[0], "을/를");
     out.push({
       id: `rec-${top.recipe.id}-${todayISO}`,
       kind: "recipe",
@@ -80,7 +88,11 @@ export function deriveNotifications(state: AppState, fridge: Ingredient[]): Deri
       id: `shop-${todayISO}-${pending.length}`,
       kind: "shopping",
       title: `장보기 목록에 ${pending.length}개가 남아 있어요`,
-      body: pending.slice(0, 3).map((s) => s.name).join(", ") + (pending.length > 3 ? " 외" : ""),
+      body:
+        pending
+          .slice(0, 3)
+          .map((s) => s.name)
+          .join(", ") + (pending.length > 3 ? " 외" : ""),
       date: todayISO,
       href: "/shopping",
     });

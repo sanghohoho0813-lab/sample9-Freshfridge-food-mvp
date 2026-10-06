@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   AlarmClock,
   Bell,
@@ -22,13 +22,14 @@ import { useNotifications } from "@/lib/notifications";
 import ToastHost from "./ToastHost";
 import LiveClock from "./LiveClock";
 import SampleBridgeCTA from "./SampleBridgeCTA";
+import LogoMark from "./LogoMark";
 
 /** 메뉴별 아이콘 색상 — 각 메뉴를 색으로 빠르게 구분할 수 있게 한다. */
 const NAV_ITEMS: { href: string; label: string; icon: typeof Home; tint: string; also?: string[] }[] = [
   { href: "/", label: "홈", icon: Home, tint: "bg-fresh-100 text-fresh-600" },
   { href: "/fridge", label: "내 냉장고", icon: Refrigerator, tint: "bg-sky-100 text-sky-600", also: ["/ingredient"] },
-  { href: "/priority", label: "우선소비", icon: AlarmClock, tint: "bg-coral-100 text-coral-600" },
-  { href: "/recipes", label: "레시피 추천", icon: ChefHat, tint: "bg-amberish-100 text-amberish-600" },
+  { href: "/priority", label: "우선소비", icon: AlarmClock, tint: "bg-coral-100 text-coral-700" },
+  { href: "/recipes", label: "레시피 추천", icon: ChefHat, tint: "bg-amberish-100 text-amberish-700" },
   { href: "/shopping", label: "장보기 리스트", icon: ShoppingBasket, tint: "bg-mint-100 text-mint-600" },
   { href: "/history", label: "소비 기록", icon: History, tint: "bg-violet-100 text-violet-600" },
   { href: "/report", label: "절약 리포트", icon: LineChart, tint: "bg-emerald-100 text-emerald-600" },
@@ -41,7 +42,13 @@ const MOBILE_NAV = [
   { href: "/fridge", label: "냉장고", icon: Refrigerator, tint: "text-sky-500", also: ["/ingredient"] },
   { href: "/add", label: "추가", icon: Plus, emphasized: true, tint: "", also: [] },
   { href: "/recipes", label: "레시피", icon: ChefHat, tint: "text-amberish-500", also: [] },
-  { href: "/my", label: "마이", icon: UserRound, tint: "text-rose-400", also: ["/shopping", "/history", "/report", "/notifications"] },
+  {
+    href: "/my",
+    label: "마이",
+    icon: UserRound,
+    tint: "text-rose-400",
+    also: ["/shopping", "/history", "/report", "/notifications"],
+  },
 ];
 
 function isActive(pathname: string, href: string, also: string[] = []): boolean {
@@ -54,17 +61,13 @@ function isActive(pathname: string, href: string, also: string[] = []): boolean 
 function Logo({ compact = false }: { compact?: boolean }) {
   return (
     <Link href="/" className="flex min-w-0 items-center gap-2">
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-fresh-500 text-lg text-white shadow-soft sm:h-11 sm:w-11 sm:rounded-2xl">
-        🥬
-      </span>
+      <LogoMark className="h-10 w-10 shrink-0 drop-shadow-sm sm:h-11 sm:w-11" />
       {!compact && (
         <span className="min-w-0 leading-tight">
           <span className="block truncate text-[22px] font-extrabold tracking-tight text-ink-900 max-[380px]:text-[19px]">
             FreshFridge
           </span>
-          <span className="hidden text-[14.5px] font-medium text-ink-500 sm:block">
-            냉장고 식재료 관리
-          </span>
+          <span className="hidden text-[14.5px] font-medium text-ink-500 sm:block">냉장고 식재료 관리</span>
         </span>
       )}
     </Link>
@@ -88,9 +91,7 @@ function MvpBanner() {
           <span className="hidden sm:inline">
             미래에이아이랩이 만든 <span className="font-extrabold text-fresh-700">FreshFridge</span>
           </span>
-          <span className="rounded-chip bg-fresh-500 px-2.5 py-0.5 text-[13px] font-bold text-white">
-            MVP Sample
-          </span>
+          <span className="rounded-chip bg-fresh-600 px-2.5 py-0.5 text-[13px] font-bold text-white">MVP Sample</span>
         </p>
       </div>
     </div>
@@ -99,7 +100,6 @@ function MvpBanner() {
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const router = useRouter();
   const { ready } = useStore();
   const notifications = useNotifications();
   // 저장된 데이터를 불러온 뒤에만 배지를 그린다 (서버/클라이언트 불일치 방지)
@@ -107,6 +107,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-dvh">
+      {/* 키보드 사용자가 메뉴를 건너뛰고 바로 본문으로 */}
+      <a
+        href="#main"
+        className="sr-only z-[70] rounded-xl bg-ink-900 px-4 py-2.5 font-semibold text-white focus:not-sr-only focus:fixed focus:left-3 focus:top-3"
+      >
+        본문으로 건너뛰기
+      </a>
       <MvpBanner />
 
       <div className="mx-auto flex w-full max-w-[1720px]">
@@ -115,7 +122,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <div className="px-2">
             <Logo />
           </div>
-          <nav className="flex flex-1 flex-col gap-1">
+          <nav aria-label="주 메뉴" className="flex flex-1 flex-col gap-1">
             {NAV_ITEMS.map(({ href, label, icon: Icon, tint, also }) => {
               const active = isActive(pathname, href, also);
               return (
@@ -124,9 +131,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                   href={href}
                   aria-current={active ? "page" : undefined}
                   className={`flex items-center gap-2.5 rounded-2xl px-2.5 py-2 text-[18.5px] font-semibold transition-colors duration-200 ${
-                    active
-                      ? "bg-fresh-50 text-fresh-700"
-                      : "text-ink-500 hover:bg-fresh-50/60 hover:text-ink-700"
+                    active ? "bg-fresh-50 text-fresh-700" : "text-ink-500 hover:bg-fresh-50/60 hover:text-ink-700"
                   }`}
                 >
                   <span
@@ -167,40 +172,38 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <div className="min-w-0 flex-1 lg:hidden">
                 <Logo />
               </div>
-              <button
-                type="button"
-                onClick={() => router.push("/search")}
-                className="hidden w-full max-w-sm items-center gap-2 rounded-2xl border border-ink-300/30 bg-white px-4 py-2.5 text-sm text-ink-400 transition-colors hover:border-fresh-300 lg:flex"
+              <Link
+                href="/search"
+                className="hidden w-full max-w-sm items-center gap-2 rounded-2xl border border-ink-300/30 bg-white px-4 py-2.5 text-sm text-ink-500 transition-colors hover:border-fresh-300 lg:flex"
               >
-                <Search size={22} />
+                <Search size={22} aria-hidden />
                 식재료·레시피 검색
-              </button>
+              </Link>
               {/* 오늘 날짜·요일·현재 시각 (데스크톱) */}
               <div className="hidden shrink-0 lg:block">
                 <LiveClock />
               </div>
               <div className="flex shrink-0 items-center gap-1">
-                <button
-                  type="button"
+                <Link
+                  href="/search"
                   aria-label="검색"
-                  onClick={() => router.push("/search")}
                   className="grid h-12 w-12 place-items-center rounded-2xl text-ink-500 transition-colors hover:bg-fresh-50 lg:hidden"
                 >
-                  <Search size={26} />
-                </button>
-                <button
-                  type="button"
-                  aria-label={unread > 0 ? `알림 ${unread}개` : "알림"}
-                  onClick={() => router.push("/notifications")}
+                  <Search size={26} aria-hidden />
+                </Link>
+                <Link
+                  href="/notifications"
                   className="relative grid h-12 w-12 place-items-center rounded-2xl text-ink-500 transition-colors hover:bg-fresh-50"
                 >
-                  <Bell size={26} />
+                  <Bell size={26} aria-hidden />
+                  <span className="sr-only">알림</span>
                   {unread > 0 && (
-                    <span className="absolute right-0.5 top-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-coral-500 px-1 text-[12.5px] font-bold leading-none text-white">
+                    <span className="absolute right-0.5 top-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-coral-700 px-1 text-[12.5px] font-bold leading-none text-white">
                       {unread}
+                      <span className="sr-only">개 안 읽음</span>
                     </span>
                   )}
-                </button>
+                </Link>
                 <Link
                   href="/my"
                   aria-label="마이페이지"
@@ -216,8 +219,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <LiveClock compact />
           </div>
 
-          <main className="w-full flex-1 px-4 pb-28 pt-5 sm:px-6 sm:pt-6 lg:pb-12">
-            {children}
+          <main id="main" tabIndex={-1} className="w-full flex-1 px-4 pb-28 pt-5 outline-none sm:px-6 sm:pt-6 lg:pb-12">
+            {/* 본문이 짧거나 아직 불러오는 중이어도 아래 CTA 가 첫 화면에 들어와 있다가 밀려나지 않게(CLS) */}
+            <div className="min-h-[calc(100dvh-220px)]">{children}</div>
 
             {/* 샘플 공통 브릿지 CTA — 모든 페이지 하단에 동일하게 노출 */}
             <SampleBridgeCTA className="mx-auto mt-10 max-w-6xl sm:mt-12" />
@@ -231,15 +235,16 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               height={147}
               className="h-9 w-auto opacity-90"
             />
-            <span className="text-[14.5px] text-ink-400">
-              © 미래에이아이랩 · FreshFridge MVP Sample
-            </span>
+            <span className="text-[14.5px] text-ink-400">© 미래에이아이랩 · FreshFridge MVP Sample</span>
           </footer>
         </div>
       </div>
 
       {/* Mobile bottom navigation */}
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-fresh-100 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
+      <nav
+        aria-label="하단 메뉴"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-fresh-100 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
+      >
         <div className="mx-auto flex max-w-md items-end justify-between px-6 pb-2 pt-1.5">
           {MOBILE_NAV.map(({ href, label, icon: Icon, emphasized, tint, also }) => {
             const active = isActive(pathname, href, also);
@@ -265,16 +270,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 aria-current={active ? "page" : undefined}
                 className="flex min-w-0 flex-1 flex-col items-center gap-1 py-1.5 transition-colors duration-200"
               >
-                <Icon
-                  size={25}
-                  strokeWidth={active ? 2.6 : 2}
-                  className={active ? tint : "text-ink-400"}
-                />
-                <span
-                  className={`text-[13px] font-semibold ${active ? "text-ink-900" : "text-ink-400"}`}
-                >
-                  {label}
-                </span>
+                <Icon size={25} strokeWidth={active ? 2.6 : 2} className={active ? tint : "text-ink-400"} />
+                <span className={`text-[13px] font-semibold ${active ? "text-ink-900" : "text-ink-400"}`}>{label}</span>
               </Link>
             );
           })}

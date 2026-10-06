@@ -10,7 +10,7 @@ import { josa } from "@/lib/text";
 import { amountStep, formatAmount } from "@/lib/quantity";
 import IngredientThumb from "./IngredientThumb";
 import Portal from "./Portal";
-import { useEscape } from "./ui/useEscape";
+import { useModal } from "./ui/useModal";
 
 export interface QuickAddValue {
   name: string;
@@ -42,7 +42,8 @@ export default function QuickAddSheet({
   const [days, setDays] = useState<number | null>(d.shelfDays);
 
   const expiresAt = days === null ? null : toISODate(addDays(todayStart(), days));
-  useEscape(onClose);
+  const boxRef = useRef<HTMLDivElement>(null);
+  useModal(onClose, boxRef);
   const done = useRef(false);
 
   return (
@@ -56,6 +57,8 @@ export default function QuickAddSheet({
       >
         <div
           className="max-h-[88dvh] w-full max-w-md animate-pop-in overflow-y-auto rounded-t-3xl bg-white p-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))] shadow-lift sm:rounded-3xl sm:pb-5"
+          ref={boxRef}
+          tabIndex={-1}
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-start gap-3">
