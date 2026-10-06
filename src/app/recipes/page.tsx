@@ -10,12 +10,14 @@ import { rankRecipes } from "@/lib/recipe-matcher";
 import { lastCookedByRecipe } from "@/lib/stats";
 import RecipeCard from "@/components/RecipeCard";
 import EmptyState from "@/components/EmptyState";
+import PageHeader from "@/components/ui/PageHeader";
+import { josa } from "@/lib/text";
 
 function RecipesSkeleton() {
   return (
     <div className="mx-auto max-w-6xl space-y-4">
       <div className="skeleton h-10 w-1/2" />
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
         {Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className="skeleton aspect-[4/3] w-full" />
         ))}
@@ -45,18 +47,16 @@ function RecipesContent() {
   const others = ranked.filter((m) => m.matchPercent < 40);
 
   return (
-    <div className="mx-auto max-w-6xl animate-fade-up space-y-7">
+    <div className="mx-auto max-w-6xl animate-fade-up space-y-6 sm:space-y-7">
       <div>
-        <h1 className="text-[28.5px] font-extrabold tracking-tight text-ink-900">
-          {withName ? `${withName}(으)로 만들 수 있는 요리` : "레시피 추천 🍳"}
-        </h1>
-        <p className="mt-1 text-[17.5px] text-ink-500">
-          지금 냉장고 재료로 만들 수 있는 순서예요. 유통기한이 임박한 재료를 쓰는 요리가 먼저 나와요.
-        </p>
+        <PageHeader
+          title={withName ? `${josa(withName, "으로/로")} 만들 요리` : "레시피 추천"}
+          description="기한이 급한 재료를 많이 쓰는 요리부터 보여드려요."
+        />
         {withName && (
           <Link
             href="/recipes"
-            className="mt-3 inline-flex min-h-[40px] items-center gap-1.5 rounded-chip border border-ink-300/40 bg-white px-3.5 text-[15.5px] font-semibold text-ink-700 hover:border-ink-300"
+            className="mt-3 inline-flex min-h-[44px] items-center gap-1.5 rounded-chip border border-ink-300/40 bg-white px-4 text-[15.5px] font-semibold text-ink-700 hover:border-ink-300"
           >
             {withName} 필터 해제
             <X size={16} />
@@ -67,13 +67,13 @@ function RecipesContent() {
       {good.length === 0 ? (
         <EmptyState
           emoji="🍳"
-          title="현재 재료로 추천할 요리를 찾지 못했어요"
-          description="장보기 목록을 확인해보세요."
+          title={withName ? `${josa(withName, "을/를")} 쓰는 요리가 아직 없어요` : "지금 재료로 만들 요리가 없어요"}
+          description={others.length > 0 ? "아래 요리는 재료를 조금만 더 사면 만들 수 있어요." : "장보기 목록에 필요한 재료를 담아보세요."}
           ctaLabel="장보기 리스트"
           ctaHref="/shopping"
         />
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
           {good.map((m) => (
             <RecipeCard key={m.recipe.id} match={m} lastCooked={lastCooked.get(m.recipe.id)} />
           ))}
@@ -82,10 +82,8 @@ function RecipesContent() {
 
       {others.length > 0 && (
         <section>
-          <h2 className="mb-3 text-[20.5px] font-extrabold text-ink-900">
-            재료를 조금 더 사면 만들 수 있어요
-          </h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <h2 className="mb-3 text-[20.5px] font-extrabold text-ink-900">재료를 조금 더 사면 돼요</h2>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
             {others.map((m) => (
               <RecipeCard key={m.recipe.id} match={m} lastCooked={lastCooked.get(m.recipe.id)} />
             ))}

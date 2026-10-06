@@ -63,8 +63,8 @@ interface StoreValue {
   addShoppingItem: (name: string, fromRecipe?: string) => void;
   addShoppingItems: (names: string[], fromRecipe?: string) => void;
   toggleShoppingItem: (id: string) => void;
-  removeShoppingItem: (id: string) => void;
-  clearPurchasedShopping: () => void;
+  removeShoppingItem: (id: string) => UndoToken;
+  clearPurchasedShopping: () => UndoToken;
   markNotificationsRead: (ids: string[]) => void;
   resetDemo: () => void;
 }
@@ -332,13 +332,15 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }));
   }, []);
 
-  const removeShoppingItem: StoreValue["removeShoppingItem"] = useCallback((id) => {
-    setState((prev) => ({ ...prev, shopping: prev.shopping.filter((s) => s.id !== id) }));
-  }, []);
+  const removeShoppingItem: StoreValue["removeShoppingItem"] = useCallback(
+    (id) => commit((prev) => ({ ...prev, shopping: prev.shopping.filter((s) => s.id !== id) })),
+    [commit]
+  );
 
-  const clearPurchasedShopping = useCallback(() => {
-    setState((prev) => ({ ...prev, shopping: prev.shopping.filter((s) => !s.checked) }));
-  }, []);
+  const clearPurchasedShopping: StoreValue["clearPurchasedShopping"] = useCallback(
+    () => commit((prev) => ({ ...prev, shopping: prev.shopping.filter((s) => !s.checked) })),
+    [commit]
+  );
 
   const markNotificationsRead: StoreValue["markNotificationsRead"] = useCallback((ids) => {
     setState((prev) => {

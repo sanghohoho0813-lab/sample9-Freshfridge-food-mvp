@@ -9,6 +9,7 @@ import { addDays, formatKoreanDate, toISODate, todayStart } from "@/lib/expiry-c
 import { amountStep, formatAmount } from "@/lib/quantity";
 import IngredientThumb from "./IngredientThumb";
 import Portal from "./Portal";
+import { useEscape } from "./ui/useEscape";
 
 export interface QuickAddValue {
   name: string;
@@ -40,6 +41,7 @@ export default function QuickAddSheet({
   const [days, setDays] = useState<number | null>(d.shelfDays);
 
   const expiresAt = days === null ? null : toISODate(addDays(todayStart(), days));
+  useEscape(onClose);
 
   return (
     <Portal>

@@ -1,107 +1,167 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
+  AlarmClock,
   Bell,
   ChevronRight,
   History,
   LineChart,
   RefreshCcw,
-  Refrigerator,
   ShoppingBasket,
-  Thermometer,
 } from "lucide-react";
 import { useFridge, useStore } from "@/lib/store";
-import { formatWon } from "@/lib/expiry-calculator";
+import { useNotifications } from "@/lib/notifications";
+import { daysLeft, formatWon } from "@/lib/expiry-calculator";
 import { monthlyReport } from "@/lib/stats";
+import PageHeader from "@/components/ui/PageHeader";
+import ListGroup from "@/components/ui/ListGroup";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
 export default function MyPage() {
   const { ready, state, resetDemo, showToast } = useStore();
   const fridge = useFridge();
-  const report = monthlyReport(state.logs, state.cooks).current;
+  const notifications = useNotifications();
+  const [confirmReset, setConfirmReset] = useState(false);
+  const report = useMemo(() => monthlyReport(state.logs, state.cooks).current, [state.logs, state.cooks]);
 
   if (!ready) {
-    return <div className="mx-auto max-w-5xl"><div className="skeleton h-40 w-full" /></div>;
+    return <div className="mx-auto max-w-3xl"><div className="skeleton h-40 w-full" /></div>;
   }
 
+  const urgentCount = fridge.filter((i) => {
+    const d = daysLeft(i.expiresAt);
+    return d !== null && d <= 3;
+  }).length;
+  const toBuy = state.shopping.filter((s) => !s.checked).length;
+  const unread = notifications.filter((n) => !n.read).length;
+
   const menu = [
-    { href: "/fridge", label: "냉장고 설정", desc: `보관 중인 식재료 ${fridge.length}개`, icon: Refrigerator },
-    { href: "/priority", label: "기본 보관기준", desc: "유통기한 D-2까지 '먼저 먹기'로 안내", icon: Thermometer },
-    { href: "/shopping", label: "장보기 목록", desc: `담아둔 재료 ${state.shopping.filter((s) => !s.checked).length}개`, icon: ShoppingBasket },
-    { href: "/history", label: "소비 기록", desc: "먹은 기록과 폐기 기록", icon: History },
-    { href: "/report", label: "절약 기록", desc: `이번 달 ${formatWon(report.savedAmount)} 절약`, icon: LineChart },
-    { href: "/notifications", label: "알림 설정", desc: "유통기한·레시피 알림", icon: Bell },
+    {
+      href: "/priority",
+      label: "우선소비",
+      value: urgentCount > 0 ? `${urgentCount}개 급해요` : "급한 재료 없음",
+      icon: AlarmClock,
+      tint: "bg-coral-100 text-coral-600",
+    },
+    {
+      href: "/shopping",
+      label: "장보기 리스트",
+      value: toBuy > 0 ? `살 것 ${toBuy}개` : "비어 있어요",
+      icon: ShoppingBasket,
+      tint: "bg-mint-100 text-mint-600",
+    },
+    {
+      href: "/history",
+      label: "소비 기록",
+      value: `${state.logs.length}건`,
+      icon: History,
+      tint: "bg-violet-100 text-violet-600",
+    },
+    {
+      href: "/report",
+      label: "절약 리포트",
+      value: `${formatWon(report.savedAmount)} 절약`,
+      icon: LineChart,
+      tint: "bg-emerald-100 text-emerald-600",
+    },
+    {
+      href: "/notifications",
+      label: "알림",
+      value: unread > 0 ? `안 읽은 알림 ${unread}개` : "모두 읽음",
+      icon: Bell,
+      tint: "bg-amberish-100 text-amberish-600",
+    },
+  ];
+
+  const stats = [
+    { label: "보관 중", value: `${fridge.length}개` },
+    { label: "30일간 먹음", value: `${report.usedCount}개` },
+    { label: "폐기율", value: `${report.wasteRate}%` },
   ];
 
   return (
-    <div className="mx-auto max-w-5xl animate-fade-up space-y-6">
-      <h1 className="text-[28.5px] font-extrabold tracking-tight text-ink-900">마이페이지</h1>
+    <div className="mx-auto max-w-3xl animate-fade-up space-y-6">
+      <PageHeader title="마이페이지" />
 
-      {/* 프로필 */}
-      <section className="card flex items-center gap-4 p-5">
-        <span className="grid h-20 w-20 shrink-0 place-items-center rounded-3xl bg-fresh-100 text-3xl">
-          🧑‍🍳
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-[22px] font-extrabold text-ink-900">{state.userName}님</p>
-          <p className="mt-0.5 text-[16.5px] text-ink-500">
-            버리기 전에 먼저 먹는 습관을 만드는 중이에요 🌱
-          </p>
-        </div>
-      </section>
-
-      {/* 요약 */}
-      <section className="grid grid-cols-3 gap-3">
-        {[
-          { label: "보관 중", value: `${fridge.length}개` },
-          { label: "이번 달 사용", value: `${report.usedCount}개` },
-          { label: "폐기율", value: `${report.wasteRate}%` },
-        ].map((s) => (
-          <div key={s.label} className="card p-4 text-center">
-            <p className="text-[15.5px] text-ink-400">{s.label}</p>
-            <p className="mt-0.5 text-[20.5px] font-extrabold text-ink-900">{s.value}</p>
+      {/* 프로필 + 핵심 숫자 */}
+      <section className="card overflow-hidden">
+        <div className="flex items-center gap-4 p-4 sm:p-5">
+          <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-fresh-100 text-[30px]" aria-hidden>
+            🧑‍🍳
+          </span>
+          <div className="min-w-0">
+            <p className="text-[22px] font-extrabold text-ink-900">{state.userName}님</p>
+            <p className="mt-0.5 text-[16px] text-ink-500">
+              {report.savedAmount > 0
+                ? `최근 30일 동안 ${formatWon(report.savedAmount)}을 아꼈어요`
+                : "먹은 재료를 기록하면 아낀 금액이 쌓여요"}
+            </p>
           </div>
-        ))}
-      </section>
-
-      {/* 메뉴 */}
-      <section className="card divide-y divide-fresh-50 p-2">
-        {menu.map(({ href, label, desc, icon: Icon }) => (
-          <Link
-            key={label}
-            href={href}
-            className="flex items-center gap-3.5 rounded-2xl p-3.5 transition-colors hover:bg-fresh-50/60"
-          >
-            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-fresh-50 text-fresh-600">
-              <Icon size={25} />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-[18.5px] font-bold text-ink-900">{label}</p>
-              <p className="text-[15.5px] text-ink-400">{desc}</p>
+        </div>
+        <dl className="grid grid-cols-3 border-t border-ink-300/20">
+          {stats.map((s, i) => (
+            <div key={s.label} className={`px-2 py-3.5 text-center ${i > 0 ? "border-l border-ink-300/20" : ""}`}>
+              <dt className="whitespace-nowrap text-[14.5px] text-ink-500">{s.label}</dt>
+              <dd className="mt-0.5 text-[20.5px] font-extrabold text-ink-900">{s.value}</dd>
             </div>
-            <ChevronRight size={22} className="shrink-0 text-ink-300" />
-          </Link>
-        ))}
+          ))}
+        </dl>
       </section>
 
-      {/* 데모 초기화 */}
-      <button
-        type="button"
-        onClick={() => {
-          resetDemo();
-          showToast("데모 데이터를 초기화했어요", "🔄");
-        }}
-        className="btn-ghost w-full"
-      >
-        <RefreshCcw size={21} />
-        데모 데이터 초기화
-      </button>
+      {/* 바로가기 — 각 화면의 지금 상태를 함께 보여준다 */}
+      <ListGroup>
+        {menu.map(({ href, label, value, icon: Icon, tint }) => (
+          <li key={href}>
+            <Link
+              href={href}
+              className="flex min-h-[64px] items-center gap-3.5 px-4 py-3 transition-colors hover:bg-warmwhite/70"
+            >
+              <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${tint}`}>
+                <Icon size={22} />
+              </span>
+              <span className="min-w-0 flex-1 text-[18px] font-bold text-ink-900">{label}</span>
+              <span className="shrink-0 text-[15.5px] font-medium text-ink-500">{value}</span>
+              <ChevronRight size={20} className="shrink-0 text-ink-300" aria-hidden />
+            </Link>
+          </li>
+        ))}
+      </ListGroup>
 
-      {/* 제작사 안내는 하단 공통 CTA가 담당하므로 여기서는 식품 안전 안내만 남긴다 */}
-      <p className="pb-2 pt-1 text-center text-[14.5px] leading-relaxed text-ink-400">
-        표시된 소비기한·유통기한 정보를 확인해주세요. 보관상태가 좋지 않다면 섭취하지 않는 것이
-        좋습니다.
+      {/* 데모 데이터 */}
+      <section className="flex items-center justify-between gap-3 rounded-card border border-ink-300/25 bg-white px-4 py-3.5">
+        <div className="min-w-0">
+          <p className="text-[17px] font-bold text-ink-800">데모 데이터 초기화</p>
+          <p className="text-[15px] text-ink-500">처음 예시 상태로 되돌려요</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setConfirmReset(true)}
+          className="btn-ghost min-h-[48px] shrink-0 px-3.5 text-[16.5px]"
+        >
+          <RefreshCcw size={18} />
+          초기화
+        </button>
+      </section>
+
+      <p className="text-center text-[14.5px] leading-relaxed text-ink-500">
+        보관 상태가 좋지 않다면 기한 전이라도 드시지 마세요.
       </p>
+
+      {confirmReset && (
+        <ConfirmDialog
+          title="데모 데이터를 초기화할까요?"
+          description="지금까지 추가한 재료와 기록이 모두 지워지고 처음 예시 상태로 돌아가요."
+          confirmLabel="초기화"
+          onClose={() => setConfirmReset(false)}
+          onConfirm={() => {
+            resetDemo();
+            setConfirmReset(false);
+            showToast("데모 데이터를 초기화했어요", "🔄");
+          }}
+        />
+      )}
     </div>
   );
 }

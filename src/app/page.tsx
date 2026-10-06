@@ -2,30 +2,22 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
-import { Check, ChefHat, ChevronRight, Plus } from "lucide-react";
+import { ChevronRight, Plus } from "lucide-react";
 import { useFridge, useStore } from "@/lib/store";
 import { RECIPES } from "@/lib/demo-data";
-import {
-  daysLeft,
-  formatWon,
-  friendlyExpiryText,
-  sortByExpiry,
-} from "@/lib/expiry-calculator";
-import { STORAGE_LABELS } from "@/lib/types";
+import { daysLeft, formatWon, sortByExpiry } from "@/lib/expiry-calculator";
 import { recommendRecipes } from "@/lib/recommendation-engine";
-import { rankRecipes } from "@/lib/recipe-matcher";
 import { lastCookedByRecipe, relativeDay, weeklySummary } from "@/lib/stats";
-import { formatAmount } from "@/lib/quantity";
 import { joinNames } from "@/lib/text";
-import ExpiryBadge from "@/components/ExpiryBadge";
-import IngredientThumb from "@/components/IngredientThumb";
+import IngredientRow from "@/components/IngredientRow";
+import ListGroup from "@/components/ui/ListGroup";
 import SectionHeader from "@/components/SectionHeader";
 import RecipeCard from "@/components/RecipeCard";
 import EmptyState from "@/components/EmptyState";
 import SkeletonList from "@/components/SkeletonList";
 import { useIngredientActions } from "@/components/useIngredientActions";
 
-const URGENT_LIMIT = 4;
+const URGENT_LIMIT = 5;
 
 export default function HomePage() {
   const { ready, state } = useStore();
@@ -56,16 +48,10 @@ export default function HomePage() {
   }, [fridge]);
 
   const recommendations = useMemo(() => recommendRecipes(RECIPES, fridge, 2), [fridge]);
-  const ranked = useMemo(() => rankRecipes(RECIPES, fridge), [fridge]);
   const lastCooked = useMemo(() => lastCookedByRecipe(state.cooks), [state.cooks]);
   const week = useMemo(() => weeklySummary(state.logs, state.cooks), [state.logs, state.cooks]);
   const shopping = state.shopping.filter((s) => !s.checked);
   const latestCook = state.cooks[0];
-
-  const recipeForIngredient = (name: string): string => {
-    const found = ranked.find((m) => m.matched.some((mi) => mi.owned && mi.ingredient?.name === name));
-    return found ? `/recipes/${found.recipe.id}` : `/recipes?with=${encodeURIComponent(name)}`;
-  };
 
   if (!ready) {
     return (
@@ -88,10 +74,10 @@ export default function HomePage() {
       {/* 인사 + 오늘의 한 줄 */}
       <section className="flex items-end justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="text-[28.5px] font-extrabold tracking-tight text-ink-900">
+          <h1 className="text-[26px] font-extrabold leading-tight tracking-tight text-ink-900 sm:text-[28.5px]">
             안녕하세요, {state.userName}님 👋
           </h1>
-          <p className="mt-1 text-[17.5px] text-ink-600">{headline}</p>
+          <p className="mt-1.5 text-[17.5px] leading-snug text-ink-600">{headline}</p>
         </div>
         <Link href="/add" className="btn-primary hidden shrink-0 sm:inline-flex">
           <Plus size={21} />
@@ -99,71 +85,36 @@ export default function HomePage() {
         </Link>
       </section>
 
-      <div className="mt-7 grid gap-8 xl:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="mt-6 grid gap-8 sm:mt-7 xl:grid-cols-[minmax(0,1fr)_340px]">
         {/* 왼쪽: 오늘 할 일 */}
-        <div className="min-w-0 space-y-9">
+        <div className="min-w-0 space-y-8 sm:space-y-9">
           {/* 1. 오늘 먼저 먹어야 할 재료 */}
           <section>
             <SectionHeader
               title="오늘 먼저 먹어야 해요"
-              sub="유통기한이 3일 안에 끝나는 재료예요."
               moreHref="/priority"
-              moreLabel={urgent.length > URGENT_LIMIT ? `${urgent.length - URGENT_LIMIT}개 더 보기` : "우선소비"}
+              moreLabel={urgent.length > URGENT_LIMIT ? `${urgent.length - URGENT_LIMIT}개 더 보기` : "전체 보기"}
             />
             {urgent.length === 0 ? (
               <EmptyState
                 emoji="🌿"
                 title="급하게 먹어야 할 재료가 없어요"
-                description="냉장고가 잘 관리되고 있어요. 새 식재료를 등록해보세요."
+                description="새로 산 재료를 등록하면 기한을 대신 챙겨드려요."
                 ctaLabel="식재료 추가하기"
                 ctaHref="/add"
               />
             ) : (
-              <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+              <ListGroup>
                 {urgent.slice(0, URGENT_LIMIT).map((ing) => (
-                  <li key={ing.id} className="card p-4">
-                    <Link href={`/ingredient/${ing.id}`} className="flex items-center gap-3.5">
-                      <IngredientThumb
-                        name={ing.name}
-                        emoji={ing.emoji}
-                        className="h-[70px] w-[70px] bg-coral-50 text-[34px]"
-                        sizes="70px"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="truncate text-[20.5px] font-bold text-ink-900">{ing.name}</p>
-                          <ExpiryBadge expiresAt={ing.expiresAt} />
-                        </div>
-                        <p className="mt-0.5 text-[16.5px] text-ink-500">
-                          {formatAmount(ing.quantity, ing.unit)} · {STORAGE_LABELS[ing.storage]} ·{" "}
-                          <span className="font-medium text-coral-600">{friendlyExpiryText(ing.expiresAt)}</span>
-                        </p>
-                      </div>
-                    </Link>
-                    <div className="mt-3 flex gap-2">
-                      <button type="button" onClick={() => eat(ing)} className="btn-soft flex-1">
-                        <Check size={20} />
-                        먹었어요
-                      </button>
-                      <Link href={recipeForIngredient(ing.name)} className="btn-ghost flex-1">
-                        <ChefHat size={20} />
-                        레시피 보기
-                      </Link>
-                    </div>
-                  </li>
+                  <IngredientRow key={ing.id} ingredient={ing} onEat={eat} />
                 ))}
-              </ul>
+              </ListGroup>
             )}
           </section>
 
           {/* 2. 이 재료로 만들 수 있는 요리 */}
           <section>
-            <SectionHeader
-              title="이 재료로 만들 수 있는 요리"
-              sub="급한 재료를 많이 쓰는 요리부터 골랐어요."
-              moreHref="/recipes"
-              moreLabel="레시피 더 보기"
-            />
+            <SectionHeader title="이 재료로 만들 요리" moreHref="/recipes" moreLabel="전체 보기" />
             {recommendations.length === 0 ? (
               <EmptyState
                 emoji="🍳"
@@ -173,7 +124,7 @@ export default function HomePage() {
                 ctaHref="/shopping"
               />
             ) : (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
                 {recommendations.map((m) => (
                   <RecipeCard key={m.recipe.id} match={m} lastCooked={lastCooked.get(m.recipe.id)} />
                 ))}
@@ -187,11 +138,11 @@ export default function HomePage() {
           {/* 3. 냉장고 상태 */}
           <section className="card p-5">
             <PanelTitle title="냉장고 상태" href="/fridge" linkLabel="내 냉장고" />
-            <p className="mt-1 flex flex-wrap gap-x-1.5 text-[16.5px] text-ink-600">
-              <span className="whitespace-nowrap"><b className="text-ink-900">{fridge.length}개</b> 보관 중</span>
-              <span className="whitespace-nowrap">· 냉장 {storageCounts.fridge}</span>
-              <span className="whitespace-nowrap">· 냉동 {storageCounts.freezer}</span>
-              <span className="whitespace-nowrap">· 실온 {storageCounts.pantry}</span>
+            <p className="mt-1 text-[16.5px] text-ink-600">
+              <b className="text-ink-900">{fridge.length}개</b> 보관 중
+              <span className="text-ink-500">
+                {" "}(냉장 {storageCounts.fridge} · 냉동 {storageCounts.freezer} · 실온 {storageCounts.pantry})
+              </span>
             </p>
             {fridge.length > 0 && (
               <>

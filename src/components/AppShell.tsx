@@ -51,7 +51,7 @@ function isActive(pathname: string, href: string): boolean {
 function Logo({ compact = false }: { compact?: boolean }) {
   return (
     <Link href="/" className="flex min-w-0 items-center gap-2">
-      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-fresh-500 text-lg text-white shadow-soft">
+      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-fresh-500 text-lg text-white shadow-soft sm:h-11 sm:w-11 sm:rounded-2xl">
         🥬
       </span>
       {!compact && (
@@ -59,7 +59,7 @@ function Logo({ compact = false }: { compact?: boolean }) {
           <span className="block truncate text-[22px] font-extrabold tracking-tight text-ink-900 max-[380px]:text-[19px]">
             FreshFridge
           </span>
-          <span className="block text-[14.5px] font-medium text-ink-500 max-[380px]:hidden">
+          <span className="hidden text-[14.5px] font-medium text-ink-500 sm:block">
             냉장고 식재료 관리
           </span>
         </span>
@@ -70,22 +70,22 @@ function Logo({ compact = false }: { compact?: boolean }) {
 
 function MvpBanner() {
   return (
-    <div className="border-b border-fresh-100 bg-gradient-to-r from-white via-fresh-50/60 to-white">
-      <div className="mx-auto flex max-w-[1720px] items-center justify-center gap-3 px-4 py-2.5 sm:gap-4">
+    <div className="border-b border-fresh-100 bg-white">
+      <div className="mx-auto flex max-w-[1720px] items-center justify-center gap-3 whitespace-nowrap px-4 py-2 sm:gap-4 sm:py-2.5">
         <Image
           src="/images/mirae-ai-lab-logo.png"
           alt="미래에이아이랩 (MIRAE AI LAB)"
           width={755}
           height={147}
-          className="h-7 w-auto sm:h-9"
+          className="h-6 w-auto sm:h-8"
           priority
         />
-        <span className="h-6 w-px shrink-0 bg-fresh-200 sm:h-7" aria-hidden />
-        <p className="text-[14.5px] font-semibold leading-tight text-ink-600 sm:text-[16.5px]">
-          <span className="hidden sm:inline">미래에이아이랩이 만든 </span>
-          <span className="font-extrabold text-fresh-600">FreshFridge</span>
-          <span className="hidden sm:inline"> · </span>
-          <span className="ml-1.5 inline-flex items-center rounded-chip bg-fresh-500 px-2 py-0.5 text-[12.5px] font-bold text-white sm:ml-0 sm:text-[13.5px]">
+        <span className="h-5 w-px shrink-0 bg-fresh-200 sm:h-6" aria-hidden />
+        <p className="flex items-center gap-2 text-[15.5px] font-semibold text-ink-600">
+          <span className="hidden sm:inline">
+            미래에이아이랩이 만든 <span className="font-extrabold text-fresh-700">FreshFridge</span>
+          </span>
+          <span className="rounded-chip bg-fresh-500 px-2.5 py-0.5 text-[13px] font-bold text-white">
             MVP Sample
           </span>
         </p>
@@ -158,8 +158,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         {/* Main column */}
         <div className="flex min-h-dvh w-full min-w-0 flex-col">
           {/* Header */}
-          <header className="sticky top-0 z-30 border-b border-fresh-100/80 bg-warmwhite/85 backdrop-blur">
-            <div className="flex items-center justify-between gap-2 px-3 py-3 sm:gap-3 sm:px-5">
+          <header className="sticky top-0 z-30 border-b border-fresh-100/80 bg-warmwhite/90 backdrop-blur">
+            <div className="flex h-16 items-center justify-between gap-2 px-3 sm:h-[72px] sm:gap-3 sm:px-5">
               <div className="min-w-0 flex-1 lg:hidden">
                 <Logo />
               </div>
@@ -200,23 +200,23 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 <Link
                   href="/my"
                   aria-label="마이페이지"
-                  className="grid h-12 w-12 place-items-center rounded-2xl bg-fresh-100 text-base transition-transform hover:scale-105"
+                  className="hidden h-12 w-12 place-items-center rounded-2xl bg-fresh-100 text-base transition-transform hover:scale-105 lg:grid"
                 >
                   🧑‍🍳
                 </Link>
               </div>
             </div>
-            {/* 오늘 날짜·요일·현재 시각 (모바일·태블릿) */}
-            <div className="border-t border-fresh-100/70 bg-fresh-50/40 px-4 py-1.5 sm:px-5 lg:hidden">
-              <LiveClock compact />
-            </div>
           </header>
+          {/* 오늘 날짜·요일·현재 시각 (모바일·태블릿) — 스크롤하면 자연스럽게 사라지도록 고정하지 않는다 */}
+          <div className="border-b border-fresh-100/70 px-4 py-2 sm:px-5 lg:hidden">
+            <LiveClock compact />
+          </div>
 
-          <main className="w-full flex-1 px-4 pb-28 pt-5 sm:px-5 lg:pb-12">
+          <main className="w-full flex-1 px-4 pb-28 pt-5 sm:px-6 sm:pt-6 lg:pb-12">
             {children}
 
             {/* 샘플 공통 브릿지 CTA — 모든 페이지 하단에 동일하게 노출 */}
-            <SampleBridgeCTA className="mx-auto mt-12 max-w-6xl" />
+            <SampleBridgeCTA className="mx-auto mt-10 max-w-6xl sm:mt-12" />
           </main>
 
           <footer className="hidden flex-col items-center gap-2.5 pb-10 pt-4 lg:flex">
@@ -263,7 +263,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 <Icon
                   size={25}
                   strokeWidth={active ? 2.6 : 2}
-                  className={active ? tint : "text-ink-300"}
+                  className={active ? tint : "text-ink-400"}
                 />
                 <span
                   className={`text-[13px] font-semibold ${active ? "text-ink-900" : "text-ink-400"}`}

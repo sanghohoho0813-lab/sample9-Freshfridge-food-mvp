@@ -6,6 +6,7 @@ import type { Ingredient, WasteReason } from "@/lib/types";
 import { amountStep, defaultAmount, formatAmount } from "@/lib/quantity";
 import IngredientThumb from "./IngredientThumb";
 import Portal from "./Portal";
+import { useEscape } from "./ui/useEscape";
 
 const REASONS: WasteReason[] = [
   "유통기한 지남",
@@ -40,6 +41,7 @@ export default function IngredientActionSheet({
   const clamp = (v: number) => Math.round(Math.min(Math.max(v, Math.min(step, quantity)), quantity) * 100) / 100;
   const remaining = Math.round((quantity - amount) * 100) / 100;
   const isEat = mode === "eat";
+  useEscape(onClose);
 
   return (
     <Portal>

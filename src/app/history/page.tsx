@@ -13,6 +13,7 @@ import { periodSummary, relativeDay } from "@/lib/stats";
 import type { ConsumptionLog } from "@/lib/types";
 import IngredientThumb from "@/components/IngredientThumb";
 import EmptyState from "@/components/EmptyState";
+import PageHeader from "@/components/ui/PageHeader";
 import SkeletonList from "@/components/SkeletonList";
 
 type Row =
@@ -27,6 +28,13 @@ export default function HistoryPage() {
   const [tab, setTab] = useState<"consumed" | "discarded">("consumed");
 
   const summary = useMemo(() => periodSummary(state.logs, state.cooks, 0, 29), [state.logs, state.cooks]);
+  const counts = useMemo(
+    () => ({
+      consumed: state.logs.filter((l) => l.type === "consumed").length,
+      discarded: state.logs.filter((l) => l.type === "discarded").length,
+    }),
+    [state.logs]
+  );
 
   // 날짜별 → 같은 요리에서 나온 기록은 한 줄로 묶기
   const grouped = useMemo(() => {
@@ -51,7 +59,7 @@ export default function HistoryPage() {
 
   if (!ready) {
     return (
-      <div className="mx-auto max-w-5xl space-y-4">
+      <div className="mx-auto max-w-3xl space-y-4">
         <div className="skeleton h-10 w-1/2" />
         <SkeletonList rows={5} />
       </div>
@@ -59,15 +67,13 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl animate-fade-up space-y-5">
-      <div>
-        <h1 className="text-[28.5px] font-extrabold tracking-tight text-ink-900">소비 기록 📒</h1>
-        <p className="mt-1 text-[17.5px] text-ink-500">
-          최근 30일 먹은 재료 {summary.usedCount}개 · 버린 재료 {summary.wastedCount}개
-        </p>
-      </div>
+    <div className="mx-auto max-w-3xl animate-fade-up space-y-5">
+      <PageHeader
+        title="소비 기록"
+        description={`최근 30일 먹은 재료 ${summary.usedCount}개 · 버린 재료 ${summary.wastedCount}개`}
+      />
 
-      <div className="flex gap-1.5 rounded-2xl bg-ink-300/15 p-1.5" role="tablist">
+      <div className="flex gap-1 rounded-2xl bg-ink-300/15 p-1" role="tablist" aria-label="기록 종류">
         {(
           [
             { key: "consumed", label: "먹은 기록" },
@@ -80,11 +86,14 @@ export default function HistoryPage() {
             role="tab"
             aria-selected={tab === t.key}
             onClick={() => setTab(t.key)}
-            className={`flex-1 rounded-xl py-2.5 text-[17.5px] font-bold transition-all duration-200 ${
-              tab === t.key ? "bg-white text-ink-900 shadow-soft" : "text-ink-500"
+            className={`flex min-h-[48px] flex-1 items-center justify-center gap-1.5 rounded-xl text-[17px] font-bold transition-all duration-200 ${
+              tab === t.key ? "bg-white text-ink-900 shadow-soft" : "text-ink-500 hover:text-ink-700"
             }`}
           >
             {t.label}
+            <span className={`text-[14.5px] font-semibold ${tab === t.key ? "text-fresh-600" : "text-ink-400"}`}>
+              {counts[t.key]}
+            </span>
           </button>
         ))}
       </div>
@@ -94,13 +103,15 @@ export default function HistoryPage() {
           emoji={tab === "consumed" ? "🍽️" : "🗑️"}
           title={tab === "consumed" ? "아직 먹은 기록이 없어요" : "버린 기록이 없어요"}
           description={tab === "consumed" ? "식재료를 먹거나 요리하면 여기에 기록돼요." : "폐기 없는 냉장고, 아주 좋아요!"}
+          ctaLabel={tab === "consumed" ? "우선소비 재료 보기" : undefined}
+          ctaHref={tab === "consumed" ? "/priority" : undefined}
         />
       ) : (
         <div className="space-y-6">
           {grouped.map(([date, rows]) => (
             <section key={date}>
-              <h2 className="mb-2 text-[16.5px] font-bold text-ink-500">
-                {formatKoreanDate(date)} <span className="font-medium text-ink-400">· {relativeDay(date)}</span>
+              <h2 className="mb-2 text-[16.5px] font-bold text-ink-700">
+                {formatKoreanDate(date)} <span className="font-medium text-ink-500">· {relativeDay(date)}</span>
               </h2>
               <ul className="divide-y divide-ink-300/20 overflow-hidden rounded-card border border-ink-300/25 bg-white">
                 {rows.map((row) =>
@@ -116,8 +127,8 @@ export default function HistoryPage() {
         </div>
       )}
 
-      <Link href="/report" className="btn-ghost w-full">
-        절약 리포트에서 변화 보기
+      <Link href="/report" className="btn-ghost min-h-[52px] w-full">
+        절약 리포트 보기
         <ArrowRight size={20} />
       </Link>
     </div>

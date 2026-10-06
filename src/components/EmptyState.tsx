@@ -16,12 +16,12 @@ export default function EmptyState({
   ctaHref?: string;
 }) {
   return (
-    <div className="card flex animate-fade-up flex-col items-center gap-2 px-6 py-12 text-center">
+    <div className="card flex animate-fade-up flex-col items-center gap-2 px-6 py-10 text-center">
       <span className="text-4xl" aria-hidden>
         {emoji}
       </span>
-      <p className="text-[20.5px] font-bold text-ink-700">{title}</p>
-      {description && <p className="text-[16.5px] text-ink-400">{description}</p>}
+      <p className="text-[19.5px] font-bold text-ink-700">{title}</p>
+      {description && <p className="text-[16.5px] text-ink-500">{description}</p>}
       {ctaLabel && ctaHref && (
         <Link href={ctaHref} className="btn-primary mt-3">
           {ctaLabel}

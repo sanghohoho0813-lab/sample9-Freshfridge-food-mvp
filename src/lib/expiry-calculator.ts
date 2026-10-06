@@ -41,7 +41,7 @@ export function expiryLevel(expiresAt: string | null): ExpiryLevel {
 
 export function dDayLabel(expiresAt: string | null): string {
   const d = daysLeft(expiresAt);
-  if (d === null) return "기한 정보 없음";
+  if (d === null) return "기한 모름";
   if (d < 0) return `D+${Math.abs(d)}`;
   if (d === 0) return "D-Day";
   return `D-${d}`;
@@ -85,9 +85,9 @@ export const PRIORITY_GROUP_META: Record<
   PriorityGroup,
   { title: string; sub: string }
 > = {
-  veryUrgent: { title: "매우 급해요", sub: "오늘·내일까지 먹어주세요" },
-  soon: { title: "곧 먹기", sub: "2~3일 안에 먹는 게 좋아요" },
-  thisWeek: { title: "이번 주", sub: "이번 주 안에 소비해 주세요" },
+  veryUrgent: { title: "오늘·내일", sub: "지금 바로 먹어주세요" },
+  soon: { title: "2~3일 안", sub: "이번 끼니에 챙겨 드세요" },
+  thisWeek: { title: "이번 주", sub: "일주일 안에 드시면 돼요" },
   later: { title: "여유 있어요", sub: "아직 시간이 충분해요" },
 };
 

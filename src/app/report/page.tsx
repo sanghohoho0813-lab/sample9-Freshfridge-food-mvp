@@ -12,6 +12,8 @@ import {
   weeklyTrend,
 } from "@/lib/stats";
 import type { IngredientCategory } from "@/lib/types";
+import { josa } from "@/lib/text";
+import PageHeader from "@/components/ui/PageHeader";
 
 // 사용/폐기 두 계열 — 색약(CVD)·대비 검증을 통과한 조합 (fresh-700 / coral-500)
 const USED = "bg-fresh-700";
@@ -58,16 +60,13 @@ export default function ReportPage() {
   const maxCat = Math.max(1, ...byCategory.map((c) => c.count));
 
   return (
-    <div className="mx-auto max-w-5xl animate-fade-up space-y-8">
-      <div>
-        <h1 className="text-[28.5px] font-extrabold tracking-tight text-ink-900">절약 리포트 🌱</h1>
-        <p className="mt-1 text-[17.5px] text-ink-500">최근 30일 동안 냉장고에서 한 행동을 정리했어요.</p>
-      </div>
+    <div className="mx-auto max-w-5xl animate-fade-up space-y-7 sm:space-y-8">
+      <PageHeader title="절약 리포트" description="최근 30일 기준이에요." />
 
       {/* 헤드라인 — 숫자 하나 + 변화 한 줄 */}
       <section className="card p-5 sm:p-6">
         <p className="text-[16.5px] font-semibold text-ink-500">버리지 않고 먹은 재료</p>
-        <p className="mt-1 text-[41.5px] font-extrabold leading-none tracking-tight text-ink-900">
+        <p className="mt-1.5 text-[36px] font-extrabold leading-none tracking-tight text-ink-900 sm:text-[41.5px]">
           {formatWon(cur.savedAmount)}
         </p>
         {prev && wasteCountDelta !== null && (
@@ -83,15 +82,15 @@ export default function ReportPage() {
         )}
         <dl className="mt-5 grid grid-cols-3 divide-x divide-ink-300/25 border-t border-ink-300/25 pt-4 text-center">
           <div>
-            <dt className="text-[15.5px] text-ink-400">먹은 재료</dt>
+            <dt className="text-[15.5px] text-ink-500">먹은 재료</dt>
             <dd className="mt-0.5 text-[22px] font-extrabold text-ink-900">{cur.usedCount}개</dd>
           </div>
           <div>
-            <dt className="text-[15.5px] text-ink-400">버린 재료</dt>
+            <dt className="text-[15.5px] text-ink-500">버린 재료</dt>
             <dd className="mt-0.5 text-[22px] font-extrabold text-ink-900">{cur.wastedCount}개</dd>
           </div>
           <div>
-            <dt className="text-[15.5px] text-ink-400">폐기율</dt>
+            <dt className="text-[15.5px] text-ink-500">폐기율</dt>
             <dd className="mt-0.5 text-[22px] font-extrabold text-ink-900">{cur.wasteRate}%</dd>
           </div>
         </dl>
@@ -200,10 +199,10 @@ export default function ReportPage() {
         <section className="rounded-card border border-amberish-100 bg-amberish-50/60 p-5">
           <p className="text-[16.5px] font-extrabold text-amberish-600">이번 주 제안</p>
           <p className="mt-1.5 text-[17.5px] leading-relaxed text-ink-700">
-            최근 30일 동안 <b>{topWaste.label}</b>를 가장 많이 버렸어요({topWaste.count}번).{" "}
-            {TIPS[topWaste.category] ?? `${topWaste.label}는 구매량을 조금 줄이거나 냉동 보관을 활용해보세요.`}
+            최근 30일 동안 <b>{josa(topWaste.label, "을/를")}</b> 가장 많이 버렸어요({topWaste.count}번).{" "}
+            {TIPS[topWaste.category] ?? `${josa(topWaste.label, "은/는")} 구매량을 조금 줄이거나 냉동 보관을 활용해보세요.`}
           </p>
-          <Link href={urgentInTopCategory > 0 ? "/priority" : "/shopping"} className="btn-primary mt-4">
+          <Link href={urgentInTopCategory > 0 ? "/priority" : "/shopping"} className="btn-primary mt-4 min-h-[52px]">
             {urgentInTopCategory > 0
               ? `지금 먹어야 할 ${topWaste.label} ${urgentInTopCategory}개 보기`
               : "장보기 목록 점검하기"}

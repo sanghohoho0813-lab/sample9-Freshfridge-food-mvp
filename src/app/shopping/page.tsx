@@ -8,7 +8,9 @@ import { ingredientDefaults } from "@/lib/demo-data";
 import { formatAmount } from "@/lib/quantity";
 import { toISODate, todayStart } from "@/lib/expiry-calculator";
 import type { ShoppingItem } from "@/lib/types";
+import { josa } from "@/lib/text";
 import EmptyState from "@/components/EmptyState";
+import PageHeader from "@/components/ui/PageHeader";
 import SkeletonList from "@/components/SkeletonList";
 import IngredientThumb from "@/components/IngredientThumb";
 import QuickAddSheet from "@/components/QuickAddSheet";
@@ -27,6 +29,7 @@ export default function ShoppingPage() {
   const undoToast = useUndoToast();
   const fridge = useFridge();
   const [input, setInput] = useState("");
+  const [inputError, setInputError] = useState<string | null>(null);
   const [adding, setAdding] = useState<ShoppingItem | null>(null);
 
   const items = state.shopping;
@@ -34,17 +37,39 @@ export default function ShoppingPage() {
   const purchased = items.filter((i) => i.checked);
   const fromRecipeCount = unchecked.filter((i) => i.fromRecipe).length;
 
+  // 이미 냉장고에 있는 재료면 알려서 중복 구매를 막는다 (같은 이름 우선, 없으면 부분 일치)
   const alreadyHave = useMemo(() => {
     return (name: string) =>
-      fridge.find((f) => f.name === name || f.name.includes(name) || name.includes(f.name));
+      fridge.find((f) => f.name === name) ??
+      fridge.find((f) => name.length >= 2 && (f.name.includes(name) || name.includes(f.name)));
   }, [fridge]);
 
-  const add = () => {
+  const add = (e?: React.FormEvent) => {
+    e?.preventDefault();
     const name = input.trim();
-    if (!name) return;
+    if (!name) {
+      setInputError("살 재료 이름을 입력해주세요.");
+      return;
+    }
+    if (unchecked.some((i) => i.name === name)) {
+      setInputError(`${josa(name, "은/는")} 이미 목록에 있어요.`);
+      return;
+    }
     addShoppingItem(name);
     setInput("");
-    showToast(`${name}을(를) 장보기 목록에 담았어요`, "🛒");
+    setInputError(null);
+    showToast(`${josa(name, "을/를")} 장보기에 담았어요`, "🛒");
+  };
+
+  const remove = (item: ShoppingItem) => {
+    const token = removeShoppingItem(item.id);
+    undoToast(`${josa(item.name, "을/를")} 목록에서 지웠어요`, "🗑️", token);
+  };
+
+  const clearPurchased = () => {
+    const count = purchased.length;
+    const token = clearPurchasedShopping();
+    undoToast(`구매 완료 ${count}개를 비웠어요`, "🧹", token);
   };
 
   const markPurchased = (item: ShoppingItem) => {
@@ -57,7 +82,7 @@ export default function ShoppingPage() {
 
   if (!ready) {
     return (
-      <div className="mx-auto max-w-5xl space-y-4">
+      <div className="mx-auto max-w-3xl space-y-4">
         <div className="skeleton h-10 w-1/2" />
         <SkeletonList rows={4} />
       </div>
@@ -65,32 +90,40 @@ export default function ShoppingPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl animate-fade-up space-y-5">
-      <div>
-        <h1 className="text-[28.5px] font-extrabold tracking-tight text-ink-900">장보기 리스트 🛒</h1>
-        <p className="mt-1 text-[17.5px] text-ink-500">
-          {unchecked.length > 0
+    <div className="mx-auto max-w-3xl animate-fade-up space-y-5">
+      <PageHeader
+        title="장보기 리스트"
+        description={
+          unchecked.length > 0
             ? `살 것 ${unchecked.length}개${fromRecipeCount > 0 ? ` · 레시피에서 담은 재료 ${fromRecipeCount}개` : ""}`
-            : "냉장고에 없는 재료만 골라 담아 중복 구매를 막아요."}
-        </p>
-      </div>
+            : "냉장고에 있는 재료는 따로 알려드려요."
+        }
+      />
 
-      <div className="flex gap-2">
-        <input
-          className="input min-w-0 flex-1"
-          placeholder="예: 고추, 간장, 돼지고기"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.nativeEvent.isComposing) add();
-          }}
-          aria-label="장보기 재료 이름"
-        />
-        <button type="button" onClick={add} className="btn-primary shrink-0">
-          <Plus size={22} />
-          추가
-        </button>
-      </div>
+      <form onSubmit={add} noValidate>
+        <div className="flex gap-2">
+          <input
+            className={`input min-h-[52px] min-w-0 flex-1 ${inputError ? "border-coral-400 focus:border-coral-400 focus:ring-coral-100" : ""}`}
+            placeholder="살 재료 입력 (예: 간장)"
+            value={input}
+            maxLength={20}
+            enterKeyHint="done"
+            onChange={(e) => {
+              setInput(e.target.value);
+              if (inputError) setInputError(null);
+            }}
+            aria-label="장보기 재료 이름"
+            aria-invalid={!!inputError}
+          />
+          <button type="submit" className="btn-primary min-h-[52px] shrink-0">
+            <Plus size={22} />
+            담기
+          </button>
+        </div>
+        {inputError && (
+          <p role="alert" className="mt-1.5 text-[15.5px] font-medium text-coral-600">{inputError}</p>
+        )}
+      </form>
 
       {items.length === 0 ? (
         <EmptyState
@@ -123,23 +156,23 @@ export default function ShoppingPage() {
                       sizes="48px"
                     />
                     <div className="min-w-0 flex-1">
-                      <p className="text-[18.5px] font-bold text-ink-900">{item.name}</p>
-                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                        {item.fromRecipe && (
-                          <p className="text-[15.5px] text-ink-400">‘{item.fromRecipe}’에 필요해요</p>
-                        )}
-                        {have && (
-                          <span className="text-[14.5px] font-bold text-amberish-600">
-                            냉장고에 {formatAmount(have.quantity, have.unit)} 있어요
-                          </span>
-                        )}
-                      </div>
+                      <p className="line-clamp-2 text-[18.5px] font-bold leading-snug text-ink-900">{item.name}</p>
+                      {have ? (
+                        <p className="line-clamp-2 text-[15.5px] font-semibold leading-snug text-amberish-600">
+                          냉장고에 {have.name === item.name ? "" : `${have.name} `}
+                          {formatAmount(have.quantity, have.unit)} 있어요
+                        </p>
+                      ) : (
+                        item.fromRecipe && (
+                          <p className="line-clamp-2 text-[15.5px] leading-snug text-ink-500">{item.fromRecipe}에 필요</p>
+                        )
+                      )}
                     </div>
                     <button
                       type="button"
                       aria-label={`${item.name} 삭제`}
-                      onClick={() => removeShoppingItem(item.id)}
-                      className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-ink-300 transition-colors hover:bg-coral-50 hover:text-coral-500"
+                      onClick={() => remove(item)}
+                      className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-ink-400 transition-colors hover:bg-coral-50 hover:text-coral-500"
                     >
                       <Trash2 size={20} />
                     </button>
@@ -152,11 +185,11 @@ export default function ShoppingPage() {
           {purchased.length > 0 && (
             <section>
               <div className="mb-2.5 flex items-center justify-between">
-                <h2 className="text-[16.5px] font-bold text-ink-500">구매 완료 {purchased.length}개</h2>
+                <h2 className="text-[16.5px] font-bold text-ink-600">구매 완료 {purchased.length}개</h2>
                 <button
                   type="button"
-                  onClick={clearPurchasedShopping}
-                  className="text-[15.5px] font-semibold text-ink-400 hover:text-ink-700"
+                  onClick={clearPurchased}
+                  className="-mr-2 inline-flex min-h-[44px] items-center rounded-xl px-2 text-[15.5px] font-semibold text-ink-500 hover:bg-ink-300/10 hover:text-ink-800"
                 >
                   목록에서 비우기
                 </button>
@@ -176,8 +209,9 @@ export default function ShoppingPage() {
                       {item.name}
                     </p>
                     {item.addedToFridge ? (
-                      <Link href="/fridge" className="shrink-0 text-[15.5px] font-semibold text-fresh-700 hover:underline">
-                        냉장고에 넣었어요 ✓
+                      <Link href="/fridge" className="inline-flex min-h-[44px] shrink-0 items-center gap-1 text-[15.5px] font-semibold text-fresh-700 hover:underline">
+                        <Check size={17} />
+                        냉장고에 넣음
                       </Link>
                     ) : (
                       <button
@@ -218,7 +252,7 @@ export default function ShoppingPage() {
               { fromShoppingId: adding.id }
             );
             setAdding(null);
-            undoToast(`${v.name}을(를) 냉장고에 넣었어요`, "🧊", token);
+            undoToast(`${josa(v.name, "을/를")} 냉장고에 넣었어요`, "🧊", token);
           }}
         />
       )}

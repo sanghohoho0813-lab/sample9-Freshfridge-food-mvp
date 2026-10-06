@@ -3,9 +3,7 @@
 import { use, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import {
-  ArrowLeft,
   ArrowRight,
   Check,
   ChefHat,
@@ -22,7 +20,9 @@ import { daysLeft, dDayLabel, formatWon } from "@/lib/expiry-calculator";
 import { ingredientImage, recipeImage } from "@/lib/images";
 import { formatAmount } from "@/lib/quantity";
 import { lastCookedByRecipe, relativeDay } from "@/lib/stats";
+import { josa } from "@/lib/text";
 import EmptyState from "@/components/EmptyState";
+import BackButton from "@/components/ui/BackButton";
 
 interface CookLine {
   name: string;
@@ -47,7 +47,6 @@ export default function RecipeDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const router = useRouter();
   const { ready, cookRecipe, addShoppingItem, addShoppingItems, showToast, state } = useStore();
   const undoToast = useUndoToast();
   const fridge = useFridge();
@@ -73,15 +72,17 @@ export default function RecipeDetailPage({
   );
 
   if (!ready) {
-    return <div className="mx-auto max-w-5xl"><div className="skeleton h-64 w-full" /></div>;
+    return <div className="mx-auto max-w-3xl"><div className="skeleton h-64 w-full" /></div>;
   }
 
   if (!recipe || !match) {
     return (
-      <div className="mx-auto max-w-5xl">
+      <div className="mx-auto max-w-3xl space-y-4">
+        <BackButton fallback="/recipes" />
         <EmptyState
           emoji="🍳"
           title="레시피를 찾지 못했어요"
+          description="주소가 바뀌었거나 없는 레시피예요."
           ctaLabel="레시피 추천으로 가기"
           ctaHref="/recipes"
         />
@@ -136,15 +137,8 @@ export default function RecipeDetailPage({
   };
 
   return (
-    <div className="mx-auto max-w-5xl animate-fade-up space-y-5">
-      <button
-        type="button"
-        onClick={() => router.back()}
-        className="inline-flex items-center gap-1 text-[17.5px] font-semibold text-ink-500 transition-colors hover:text-ink-700"
-      >
-        <ArrowLeft size={21} />
-        뒤로
-      </button>
+    <div className="mx-auto max-w-3xl animate-fade-up space-y-5">
+      <BackButton fallback="/recipes" />
 
       <div className="card overflow-hidden">
         {/* 레시피 대표이미지 (16:9) */}
@@ -154,7 +148,7 @@ export default function RecipeDetailPage({
             alt={recipe.name}
             fill
             priority
-            sizes="(max-width: 768px) 100vw, 672px"
+            sizes="(max-width: 768px) 100vw, 768px"
             className="object-contain p-4"
           />
           <span className="absolute left-4 top-4 rounded-chip bg-white/90 px-3 py-1 text-[15.5px] font-bold text-ink-700 shadow-soft">
@@ -162,9 +156,9 @@ export default function RecipeDetailPage({
           </span>
         </div>
 
-        <div className="space-y-6 p-5 sm:p-6">
+        <div className="space-y-7 p-4 sm:p-6">
           <div>
-            <h1 className="text-[28.5px] font-extrabold tracking-tight text-ink-900">
+            <h1 className="text-[26px] font-extrabold leading-tight tracking-tight text-ink-900 sm:text-[28.5px]">
               {recipe.name}
             </h1>
             <p className="mt-1 text-[17.5px] text-ink-500">{recipe.description}</p>
@@ -180,85 +174,82 @@ export default function RecipeDetailPage({
 
           {/* 재료 */}
           <section>
-            <div className="mb-2.5 flex items-end justify-between gap-3">
-              <h2 className="text-[20.5px] font-extrabold text-ink-900">재료</h2>
+            <div className="mb-3 flex items-end justify-between gap-3">
+              <h2 className="text-[20.5px] font-extrabold text-ink-900">
+                재료{" "}
+                <span className="text-[16.5px] font-bold text-ink-400">
+                  {match.ownedCount}/{match.matched.length} 있음
+                </span>
+              </h2>
               {missingToAdd.length >= 2 && (
                 <button
                   type="button"
                   onClick={() => {
                     addShoppingItems(missingToAdd.map((m) => m.name), recipe.name);
-                    showToast(`부족한 재료 ${missingToAdd.length}개를 장보기에 담았어요`, "🛒");
+                    showToast(`없는 재료 ${missingToAdd.length}개를 장보기에 담았어요`, "🛒");
                   }}
-                  className="inline-flex shrink-0 items-center gap-1 text-[15.5px] font-semibold text-fresh-700 hover:underline"
+                  className="-mr-2 inline-flex min-h-[44px] shrink-0 items-center gap-1 rounded-xl px-2 text-[15.5px] font-semibold text-fresh-700 hover:bg-fresh-50"
                 >
                   <ShoppingBasket size={18} />
-                  부족한 재료 모두 담기
+                  없는 재료 모두 담기
                 </button>
               )}
             </div>
-            <ul className="space-y-2">
+            <ul className="overflow-hidden rounded-2xl border border-ink-300/25 divide-y divide-ink-300/20">
               {match.matched.map((m) => {
                 const urgent = m.owned && m.dLeft !== null && m.dLeft <= 3;
                 const ing = m.ingredient;
                 return (
-                  <li
-                    key={m.name}
-                    className={`flex items-center gap-3 rounded-2xl p-3 transition-colors ${
-                      urgent || m.short ? "bg-amberish-50" : m.owned ? "bg-fresh-50/60" : "bg-warmwhite"
-                    }`}
-                  >
-                    <span className="relative grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-white">
+                  <li key={m.name} className="flex items-center gap-3 bg-white px-3 py-2.5 sm:px-4">
+                    <span className="relative grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-warmwhite">
                       {ingredientImage(m.name) ? (
                         <Image
                           src={ingredientImage(m.name)!}
-                          alt={m.name}
+                          alt=""
                           fill
-                          sizes="56px"
+                          sizes="48px"
                           className={`object-contain p-1 ${m.owned ? "" : "opacity-40 grayscale"}`}
                         />
                       ) : (
-                        <span className="text-lg">🧺</span>
+                        <span className="text-lg" aria-hidden>🧺</span>
                       )}
-                      <span
-                        className={`absolute -bottom-0.5 -right-0.5 grid h-6 w-6 place-items-center rounded-full border-2 border-white text-white ${
-                          m.owned ? "bg-fresh-500" : "bg-ink-300"
-                        }`}
-                      >
-                        <Check size={14} strokeWidth={3.5} />
-                      </span>
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[18.5px] font-bold text-ink-900">
-                        {m.name} <span className="font-medium text-ink-400">{m.amount}</span>
+                      <p className="text-[18px] font-bold text-ink-900">
+                        {m.name} <span className="font-medium text-ink-500">{m.amount}</span>
                       </p>
-                      {m.owned && ing && (
+                      {m.owned && ing ? (
                         <p
                           className={`text-[15.5px] ${
-                            m.short || urgent ? "font-semibold text-amberish-600" : "text-ink-500"
+                            m.short || urgent ? "font-semibold text-amberish-600" : "text-fresh-700"
                           }`}
                         >
-                          냉장고 {formatAmount(ing.quantity, ing.unit)}
-                          {m.short && " · 조금 부족해요"}
-                          {!m.short && urgent && ` · 먼저 소비하면 좋아요 ${dDayLabel(ing.expiresAt)}`}
-                          {m.consume === 0 && " · 양념은 차감하지 않아요"}
+                          {m.short
+                            ? `냉장고 ${formatAmount(ing.quantity, ing.unit)} · 조금 부족해요`
+                            : urgent
+                              ? `냉장고 ${formatAmount(ing.quantity, ing.unit)} · ${dDayLabel(ing.expiresAt)} 먼저 쓰기`
+                              : `냉장고 ${formatAmount(ing.quantity, ing.unit)}`}
                         </p>
+                      ) : (
+                        <p className="text-[15.5px] text-ink-500">냉장고에 없어요</p>
                       )}
-                      {!m.owned && <p className="text-[15.5px] text-ink-400">냉장고에 없어요</p>}
                     </div>
                     {!m.owned &&
                       (pendingNames.has(m.name) ? (
                         <Link
                           href="/shopping"
-                          className="shrink-0 text-[15.5px] font-semibold text-fresh-700 hover:underline"
+                          className="inline-flex min-h-[44px] shrink-0 items-center gap-1 px-1 text-[15.5px] font-semibold text-fresh-700 hover:underline"
                         >
-                          장보기에 있어요 ✓
+                          <Check size={17} />
+                          담았어요
                         </Link>
                       ) : (
                         <button
                           type="button"
+                          aria-label={`${m.name} 장보기에 담기`}
                           onClick={() => {
                             addShoppingItem(m.name, recipe.name);
-                            showToast(`${m.name}을(를) 장보기 목록에 담았어요`, "🛒");
+                            showToast(`${josa(m.name, "을/를")} 장보기에 담았어요`, "🛒");
                           }}
                           className="inline-flex min-h-[44px] shrink-0 items-center gap-1 rounded-xl border border-ink-300/40 bg-white px-3 text-[15.5px] font-semibold text-ink-700 transition-all hover:border-fresh-300 active:scale-95"
                         >
@@ -270,6 +261,9 @@ export default function RecipeDetailPage({
                 );
               })}
             </ul>
+            {match.matched.some((m) => m.owned && m.consume === 0) && (
+              <p className="mt-2 text-[15px] text-ink-500">양념류는 요리해도 수량이 줄지 않아요.</p>
+            )}
           </section>
 
           {/* 조리방법 */}
@@ -281,7 +275,7 @@ export default function RecipeDetailPage({
                   <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-fresh-100 text-[16.5px] font-extrabold text-fresh-700">
                     {i + 1}
                   </span>
-                  <p className="pt-0.5 text-[18.5px] leading-relaxed text-ink-700">{step}</p>
+                  <p className="pt-0.5 text-[18px] leading-relaxed text-ink-700">{step}</p>
                 </li>
               ))}
             </ol>
@@ -289,7 +283,7 @@ export default function RecipeDetailPage({
 
           {showResult && result ? (
             <div ref={resultRef} className="animate-pop-in rounded-2xl border border-fresh-100 bg-fresh-50/70 p-5">
-              <p className="text-[20.5px] font-extrabold text-ink-900">맛있게 드세요! 🎉</p>
+              <p className="text-[20.5px] font-extrabold text-ink-900" role="status">맛있게 드세요! 🎉</p>
               <p className="mt-0.5 text-[16.5px] text-ink-600">
                 {formatWon(result.saved)}어치 재료를 버리지 않고 썼어요
                 {result.rescued > 0 && ` · 임박 재료 ${result.rescued}개를 살렸어요`}
@@ -354,13 +348,15 @@ export default function RecipeDetailPage({
                 type="button"
                 onClick={handleCook}
                 disabled={match.ownedCount === 0}
-                className="btn-primary w-full py-3.5 text-[20.5px]"
+                className="btn-primary min-h-[58px] w-full text-[20px]"
               >
                 <ChefHat size={23} />
                 요리했어요
               </button>
-              <p className="mt-2 text-center text-[14.5px] text-ink-400">
-                누르면 사용한 재료만큼 냉장고에서 빠지고 소비 기록에 남아요.
+              <p className="mt-2 text-center text-[15px] text-ink-500">
+                {match.ownedCount === 0
+                  ? "냉장고에 있는 재료가 없어요. 먼저 장보기에 담아보세요."
+                  : "사용한 재료만큼 냉장고에서 빠지고 기록에 남아요."}
               </p>
             </div>
           )}

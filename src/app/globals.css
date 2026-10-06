@@ -18,6 +18,12 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* 키보드로 이동할 때만 보이는 포커스 표시 (입력칸은 자체 포커스 링을 쓴다) */
+:focus-visible:not(input):not(select):not(textarea) {
+  outline: 2px solid #3f9c4b;
+  outline-offset: 2px;
+}
+
 @layer components {
   .card {
     @apply rounded-card border border-fresh-100/80 bg-white shadow-soft;

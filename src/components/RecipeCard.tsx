@@ -2,12 +2,16 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Clock3, Gauge } from "lucide-react";
 import type { RecipeMatch } from "@/lib/recipe-matcher";
 import { dDayLabel } from "@/lib/expiry-calculator";
 import { recipeImage } from "@/lib/images";
 import { relativeDay } from "@/lib/stats";
 
+/**
+ * 레시피 카드 — 모바일에선 사진이 왼쪽인 가로형(목록을 빠르게 훑기 좋게),
+ * sm 이상에선 사진이 위에 오는 세로형.
+ * 정보는 "이름 · 시간/난이도 · 상태 한 줄"만 보여준다.
+ */
 export default function RecipeCard({
   match,
   lastCooked,
@@ -17,66 +21,47 @@ export default function RecipeCard({
   lastCooked?: string;
 }) {
   const { recipe, matchPercent, missing, urgentOwned } = match;
+
+  let status: { text: string; tone: string };
+  if (urgentOwned.length > 0) {
+    status = {
+      text: `${urgentOwned
+        .slice(0, 2)
+        .map((m) => `${m.name} ${dDayLabel(m.ingredient?.expiresAt ?? null)}`)
+        .join(" · ")} 먼저 사용`,
+      tone: "text-amberish-600",
+    };
+  } else if (missing.length > 0) {
+    status = { text: `${missing.map((m) => m.name).join(", ")} 필요`, tone: "text-ink-400" };
+  } else {
+    status = { text: "재료가 모두 있어요", tone: "text-fresh-700" };
+  }
+
   return (
     <Link
       href={`/recipes/${recipe.id}`}
-      className="card card-hover group flex flex-col overflow-hidden"
+      className="card card-hover group flex items-stretch overflow-hidden sm:flex-col"
     >
-      {/* 레시피 대표이미지 (4:3) */}
-      <div className="relative aspect-[4/3] w-full bg-cream">
+      <div className="relative w-[104px] shrink-0 bg-cream sm:aspect-[4/3] sm:w-full">
         <Image
           src={recipeImage(recipe.image)}
           alt={recipe.name}
           fill
-          sizes="(max-width: 640px) 100vw, 340px"
-          className="object-contain p-3 transition-transform duration-300 group-hover:scale-105"
+          sizes="(max-width: 640px) 104px, 360px"
+          className="object-contain p-2 transition-transform duration-300 group-hover:scale-105 sm:p-3"
         />
-        <span className="absolute left-3 top-3 rounded-chip bg-white/90 px-2.5 py-1 text-[14.5px] font-bold text-ink-700 shadow-soft">
-          보유 재료 {matchPercent}%
+        <span className="absolute left-3 top-3 hidden rounded-chip bg-white/90 px-2.5 py-1 text-[14.5px] font-bold text-ink-700 shadow-soft sm:inline-flex">
+          재료 {matchPercent}%
         </span>
-        {lastCooked && (
-          <span className="absolute bottom-3 left-3 rounded-chip bg-ink-900/75 px-2.5 py-1 text-[13px] font-semibold text-white">
-            {relativeDay(lastCooked)} 만들었어요
-          </span>
-        )}
       </div>
-      <div className="flex flex-1 flex-col gap-2 p-4">
-        <div>
-          <p className="text-[20.5px] font-bold text-ink-900">{recipe.name}</p>
-          <p className="mt-0.5 flex items-center gap-2.5 text-[15.5px] text-ink-500">
-            <span className="inline-flex items-center gap-1">
-              <Clock3 size={17} /> {recipe.minutes}분
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <Gauge size={17} /> {recipe.difficulty}
-            </span>
-          </p>
-        </div>
-
-        {/* 매칭 프로그레스 */}
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-fresh-50">
-          <div
-            className="h-full rounded-full bg-fresh-400 transition-all duration-300"
-            style={{ width: `${matchPercent}%` }}
-          />
-        </div>
-
-        {urgentOwned.length > 0 && (
-          <p className="text-[15.5px] font-medium text-amberish-600">
-            먼저 소비:{" "}
-            {urgentOwned
-              .slice(0, 2)
-              .map((m) => `${m.name} ${dDayLabel(m.ingredient?.expiresAt ?? null)}`)
-              .join(" · ")}
-          </p>
-        )}
-        {missing.length > 0 ? (
-          <p className="truncate text-[15.5px] text-ink-400">
-            추가 필요: {missing.map((m) => m.name).join(", ")}
-          </p>
-        ) : (
-          <p className="text-[15.5px] font-medium text-fresh-600">재료가 모두 있어요 ✓</p>
-        )}
+      <div className="flex min-w-0 flex-1 flex-col justify-center gap-1 px-3.5 py-3 sm:p-4">
+        <p className="truncate text-[18.5px] font-bold text-ink-900 sm:text-[20.5px]">{recipe.name}</p>
+        <p className="text-[15.5px] text-ink-500">
+          {recipe.minutes}분 · {recipe.difficulty}
+          <span className="sm:hidden"> · 재료 {matchPercent}%</span>
+          {lastCooked && <span> · {relativeDay(lastCooked)} 만듦</span>}
+        </p>
+        <p className={`line-clamp-2 text-[15.5px] font-medium leading-snug sm:truncate ${status.tone}`}>{status.text}</p>
       </div>
     </Link>
   );
