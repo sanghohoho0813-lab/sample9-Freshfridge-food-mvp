@@ -62,8 +62,10 @@ export default function HomePage() {
     );
   }
 
-  const headline =
-    todayTomorrow.length > 0
+  const empty = fridge.length === 0;
+  const headline = empty
+    ? "산 재료를 등록하면 기한을 대신 챙겨드려요."
+    : todayTomorrow.length > 0
       ? `오늘은 ${joinNames(todayTomorrow.map((i) => i.name))} 먼저 먹어주세요.`
       : urgent.length > 0
         ? `${urgent.length}개 재료가 곧 기한이에요. 버리기 전에 먹어요.`
@@ -88,49 +90,61 @@ export default function HomePage() {
       <div className="mt-6 grid gap-8 sm:mt-7 xl:grid-cols-[minmax(0,1fr)_340px]">
         {/* 왼쪽: 오늘 할 일 */}
         <div className="min-w-0 space-y-8 sm:space-y-9">
-          {/* 1. 오늘 먼저 먹어야 할 재료 */}
-          <section>
-            <SectionHeader
-              title="오늘 먼저 먹어야 해요"
-              moreHref="/priority"
-              moreLabel={urgent.length > URGENT_LIMIT ? `${urgent.length - URGENT_LIMIT}개 더 보기` : "전체 보기"}
+          {empty ? (
+            <EmptyState
+              emoji="🧺"
+              title="냉장고가 비어 있어요"
+              description="먼저 먹어야 할 순서와 지금 만들 수 있는 요리를 알려드려요."
+              ctaLabel="첫 식재료 추가하기"
+              ctaHref="/add"
             />
-            {urgent.length === 0 ? (
-              <EmptyState
-                emoji="🌿"
-                title="급하게 먹어야 할 재료가 없어요"
-                description="새로 산 재료를 등록하면 기한을 대신 챙겨드려요."
-                ctaLabel="식재료 추가하기"
-                ctaHref="/add"
-              />
-            ) : (
-              <ListGroup>
-                {urgent.slice(0, URGENT_LIMIT).map((ing) => (
-                  <IngredientRow key={ing.id} ingredient={ing} onEat={eat} />
-                ))}
-              </ListGroup>
-            )}
-          </section>
+          ) : (
+            <>
+              {/* 1. 오늘 먼저 먹어야 할 재료 */}
+              <section>
+                <SectionHeader
+                  title="오늘 먼저 먹어야 해요"
+                  moreHref="/priority"
+                  moreLabel={urgent.length > URGENT_LIMIT ? `${urgent.length - URGENT_LIMIT}개 더 보기` : "전체 보기"}
+                />
+                {urgent.length === 0 ? (
+                  <EmptyState
+                    compact
+                    emoji="🌿"
+                    title="급하게 먹어야 할 재료가 없어요"
+                    description="기한이 3일 안으로 다가오면 여기에 먼저 알려드려요."
+                  />
+                ) : (
+                  <ListGroup>
+                    {urgent.slice(0, URGENT_LIMIT).map((ing) => (
+                      <IngredientRow key={ing.id} ingredient={ing} onEat={eat} />
+                    ))}
+                  </ListGroup>
+                )}
+              </section>
 
-          {/* 2. 이 재료로 만들 수 있는 요리 */}
-          <section>
-            <SectionHeader title="이 재료로 만들 요리" moreHref="/recipes" moreLabel="전체 보기" />
-            {recommendations.length === 0 ? (
-              <EmptyState
-                emoji="🍳"
-                title="현재 재료로 추천할 요리를 찾지 못했어요"
-                description="장보기 목록을 확인해보세요."
-                ctaLabel="장보기 리스트"
-                ctaHref="/shopping"
-              />
-            ) : (
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
-                {recommendations.map((m) => (
-                  <RecipeCard key={m.recipe.id} match={m} lastCooked={lastCooked.get(m.recipe.id)} />
-                ))}
-              </div>
-            )}
-          </section>
+              {/* 2. 이 재료로 만들 수 있는 요리 */}
+              <section>
+                <SectionHeader title="이 재료로 만들 요리" moreHref="/recipes" moreLabel="전체 보기" />
+                {recommendations.length === 0 ? (
+                  <EmptyState
+                    compact
+                    emoji="🍳"
+                    title="지금 재료로 추천할 요리가 없어요"
+                    description="레시피에서 필요한 재료를 장보기에 담아보세요."
+                    ctaLabel="레시피 둘러보기"
+                    ctaHref="/recipes"
+                  />
+                ) : (
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+                    {recommendations.map((m) => (
+                      <RecipeCard key={m.recipe.id} match={m} lastCooked={lastCooked.get(m.recipe.id)} />
+                    ))}
+                  </div>
+                )}
+              </section>
+            </>
+          )}
         </div>
 
         {/* 오른쪽(데스크톱) / 아래(모바일): 상태 요약 */}
@@ -138,12 +152,16 @@ export default function HomePage() {
           {/* 3. 냉장고 상태 */}
           <section className="card p-5">
             <PanelTitle title="냉장고 상태" href="/fridge" linkLabel="내 냉장고" />
-            <p className="mt-1 text-[16.5px] text-ink-600">
-              <b className="text-ink-900">{fridge.length}개</b> 보관 중
-              <span className="text-ink-500">
-                {" "}(냉장 {storageCounts.fridge} · 냉동 {storageCounts.freezer} · 실온 {storageCounts.pantry})
-              </span>
-            </p>
+            {empty ? (
+              <p className="mt-1 text-[16.5px] text-ink-500">보관 중인 재료가 없어요.</p>
+            ) : (
+              <p className="mt-1 text-[16.5px] text-ink-600">
+                <b className="text-ink-900">{fridge.length}개</b> 보관 중
+                <span className="block text-[15.5px] text-ink-500">
+                  냉장 {storageCounts.fridge} · 냉동 {storageCounts.freezer} · 실온 {storageCounts.pantry}
+                </span>
+              </p>
+            )}
             {fridge.length > 0 && (
               <>
                 <div className="mt-4 flex h-3 gap-0.5" aria-hidden>
@@ -175,7 +193,6 @@ export default function HomePage() {
               <>
                 <p className="mt-1 text-[16.5px] text-ink-600">
                   살 것 <b className="text-ink-900">{shopping.length}개</b>
-                  {shopping.some((s) => s.fromRecipe) && " · 레시피에서 담은 재료 포함"}
                 </p>
                 <ul className="mt-3 flex flex-wrap gap-1.5">
                   {shopping.slice(0, 5).map((s) => (
@@ -194,16 +211,22 @@ export default function HomePage() {
           {/* 5. 이번 주 성과 */}
           <section className="card p-5">
             <PanelTitle title="이번 주 성과" href="/report" linkLabel="리포트" />
-            <p className="mt-1 text-[17.5px] font-bold leading-snug text-ink-900">
-              식재료 {week.usedCount}개를 버리지 않고 먹었어요
-            </p>
-            <p className="mt-1 flex flex-wrap gap-x-1.5 text-[15.5px] text-ink-500">
-              <span className="whitespace-nowrap">{formatWon(week.savedAmount)} 절약</span>
-              <span className="whitespace-nowrap">· 요리 {week.cookCount}번</span>
-              {week.rescuedCount > 0 && (
-                <span className="whitespace-nowrap">· 임박 재료 {week.rescuedCount}개 살림</span>
-              )}
-            </p>
+            {week.usedCount === 0 && week.cookCount === 0 ? (
+              <p className="mt-1 text-[16.5px] text-ink-500">
+                이번 주 기록이 아직 없어요. ‘먹었어요’를 누르면 여기에 쌓여요.
+              </p>
+            ) : (
+              <>
+                <p className="mt-1 text-[17.5px] font-bold leading-snug text-ink-900">
+                  식재료 {week.usedCount}개를 버리지 않고 먹었어요
+                </p>
+                <p className="mt-1 flex flex-wrap gap-x-1.5 text-[15.5px] text-ink-500">
+                  <span className="whitespace-nowrap">{formatWon(week.savedAmount)} 절약</span>
+                  <span className="whitespace-nowrap">· 요리 {week.cookCount}번</span>
+                  {week.rescuedCount > 0 && <span className="whitespace-nowrap">· 임박 재료 {week.rescuedCount}개 살림</span>}
+                </p>
+              </>
+            )}
             {latestCook && (
               <p className="mt-3 border-t border-ink-300/20 pt-3 text-[15.5px] text-ink-600">
                 최근 요리 ·{" "}

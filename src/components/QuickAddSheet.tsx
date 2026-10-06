@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Minus, Plus, X } from "lucide-react";
 import type { StorageType } from "@/lib/types";
 import { STORAGE_LABELS } from "@/lib/types";
 import { ingredientDefaults } from "@/lib/demo-data";
-import { addDays, formatKoreanDate, toISODate, todayStart } from "@/lib/expiry-calculator";
+import { addDays, formatKoreanDate, shelfLabel, toISODate, todayStart } from "@/lib/expiry-calculator";
+import { josa } from "@/lib/text";
 import { amountStep, formatAmount } from "@/lib/quantity";
 import IngredientThumb from "./IngredientThumb";
 import Portal from "./Portal";
@@ -42,6 +43,7 @@ export default function QuickAddSheet({
 
   const expiresAt = days === null ? null : toISODate(addDays(todayStart(), days));
   useEscape(onClose);
+  const done = useRef(false);
 
   return (
     <Portal>
@@ -60,9 +62,8 @@ export default function QuickAddSheet({
             <IngredientThumb name={name} emoji={d.emoji} className="h-14 w-14 bg-fresh-50 text-2xl" sizes="56px" />
             <div className="min-w-0 flex-1">
               <h3 id="quick-add-title" className="text-[20.5px] font-extrabold text-ink-900">
-                {name}, 냉장고에 넣을까요?
+                {josa(name, "을/를")} 냉장고에 넣을까요?
               </h3>
-              <p className="mt-0.5 text-[15.5px] text-ink-500">확인하고 넣으면 D-Day 관리가 시작돼요.</p>
             </div>
             <button
               type="button"
@@ -107,8 +108,9 @@ export default function QuickAddSheet({
                   <button
                     key={s}
                     type="button"
+                    aria-pressed={storage === s}
                     onClick={() => setStorage(s)}
-                    className={`chip flex-1 justify-center border ${
+                    className={`chip min-h-[44px] flex-1 justify-center border ${
                       storage === s
                         ? "border-fresh-400 bg-fresh-50 text-fresh-700"
                         : "border-ink-300/30 bg-white text-ink-500"
@@ -124,7 +126,7 @@ export default function QuickAddSheet({
               <p className="mb-2 text-[15.5px] font-bold text-ink-700">
                 유통기한{" "}
                 <span className="font-medium text-ink-400">
-                  {expiresAt ? `· ${formatKoreanDate(expiresAt)}까지` : "· 정보 없음"}
+                  {expiresAt ? `· ${formatKoreanDate(expiresAt)}까지` : "· 모름"}
                 </span>
               </p>
               <div className="flex flex-wrap gap-2">
@@ -134,39 +136,45 @@ export default function QuickAddSheet({
                     <button
                       key={n}
                       type="button"
+                      aria-pressed={days === n}
                       onClick={() => setDays(n)}
-                      className={`chip border ${
+                      className={`chip min-h-[44px] border ${
                         days === n
                           ? "border-fresh-400 bg-fresh-50 text-fresh-700"
                           : "border-ink-300/30 bg-white text-ink-500"
                       }`}
                     >
-                      {n}일
+                      {shelfLabel(n)}
                     </button>
                   ))}
                 <button
                   type="button"
+                  aria-pressed={days === null}
                   onClick={() => setDays(null)}
-                  className={`chip border ${
+                  className={`chip min-h-[44px] border ${
                     days === null
                       ? "border-fresh-400 bg-fresh-50 text-fresh-700"
                       : "border-ink-300/30 bg-white text-ink-500"
                   }`}
                 >
-                  정보 없음
+                  모름
                 </button>
               </div>
             </div>
           </div>
 
           <div className="mt-6 flex gap-2">
-            <button type="button" onClick={onClose} className="btn-ghost flex-1">
+            <button type="button" onClick={onClose} className="btn-ghost min-h-[52px] flex-1">
               나중에
             </button>
             <button
               type="button"
-              onClick={() => onConfirm({ name, quantity, unit: d.unit, storage, expiresAt })}
-              className="btn-primary flex-[1.4]"
+              onClick={() => {
+                if (done.current) return; // 연타로 두 번 들어가지 않게
+                done.current = true;
+                onConfirm({ name, quantity, unit: d.unit, storage, expiresAt });
+              }}
+              className="btn-primary min-h-[52px] flex-[1.4]"
             >
               냉장고에 넣기
             </button>

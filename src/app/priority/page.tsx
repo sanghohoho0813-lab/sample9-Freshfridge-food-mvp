@@ -71,6 +71,7 @@ export default function PriorityPage() {
   return (
     <div className="mx-auto max-w-6xl animate-fade-up space-y-6">
       <PageHeader
+        back="/"
         title="우선소비"
         description={
           totalUrgent > 0

@@ -65,13 +65,23 @@ function RecipesContent() {
       </div>
 
       {good.length === 0 ? (
-        <EmptyState
-          emoji="🍳"
-          title={withName ? `${josa(withName, "을/를")} 쓰는 요리가 아직 없어요` : "지금 재료로 만들 요리가 없어요"}
-          description={others.length > 0 ? "아래 요리는 재료를 조금만 더 사면 만들 수 있어요." : "장보기 목록에 필요한 재료를 담아보세요."}
-          ctaLabel="장보기 리스트"
-          ctaHref="/shopping"
-        />
+        fridge.length === 0 ? (
+          <EmptyState
+            emoji="🧺"
+            title="냉장고에 재료가 없어요"
+            description="재료를 등록하면 지금 만들 수 있는 요리부터 골라드려요."
+            ctaLabel="식재료 추가하기"
+            ctaHref="/add"
+          />
+        ) : (
+          <EmptyState
+            emoji="🍳"
+            title={withName ? `${josa(withName, "을/를")} 쓰는 요리가 아직 없어요` : "지금 재료로 만들 요리가 없어요"}
+            description={others.length > 0 ? "아래 요리는 재료를 조금만 더 사면 만들 수 있어요." : "다른 재료로 찾아보세요."}
+            ctaLabel={withName ? "전체 레시피 보기" : undefined}
+            ctaHref={withName ? "/recipes" : undefined}
+          />
+        )
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
           {good.map((m) => (
@@ -82,7 +92,9 @@ function RecipesContent() {
 
       {others.length > 0 && (
         <section>
-          <h2 className="mb-3 text-[20.5px] font-extrabold text-ink-900">재료를 조금 더 사면 돼요</h2>
+          <h2 className="mb-3 text-[20.5px] font-extrabold text-ink-900">
+            {fridge.length === 0 ? "이런 요리를 만들 수 있어요" : "재료를 조금 더 사면 돼요"}
+          </h2>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
             {others.map((m) => (
               <RecipeCard key={m.recipe.id} match={m} lastCooked={lastCooked.get(m.recipe.id)} />

@@ -34,6 +34,7 @@ export default function NotificationsPage() {
   return (
     <div className="mx-auto max-w-3xl animate-fade-up space-y-5">
       <PageHeader
+        back="/"
         title="알림"
         description={unread.length > 0 ? `확인하지 않은 알림 ${unread.length}개` : "모두 확인했어요."}
         action={
@@ -63,17 +64,17 @@ export default function NotificationsPage() {
                   onClick={() => markNotificationsRead([n.id])}
                   className={`flex items-start gap-3 p-4 transition-colors hover:bg-warmwhite ${n.read ? "" : "bg-fresh-50/40"}`}
                 >
-                  <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${tone} ${n.read ? "opacity-60" : ""}`}>
-                    <Icon size={21} />
+                  <span className={`relative grid h-11 w-11 shrink-0 place-items-center rounded-xl ${tone}`}>
+                    <Icon size={21} className={n.read ? "opacity-60" : ""} />
+                    {!n.read && (
+                      <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-white bg-coral-500" aria-label="읽지 않음" />
+                    )}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className={`text-[18px] ${n.read ? "font-semibold text-ink-600" : "font-bold text-ink-900"}`}>{n.title}</p>
-                      {!n.read && <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-coral-500" aria-label="읽지 않음" />}
-                    </div>
-                    <p className="mt-0.5 text-[16px] leading-relaxed text-ink-500">{n.body}</p>
+                    <p className={`text-[17.5px] leading-snug ${n.read ? "font-semibold text-ink-600" : "font-bold text-ink-900"}`}>{n.title}</p>
+                    <p className="mt-1 text-[16px] leading-snug text-ink-500">{n.body}</p>
                   </div>
-                  <ChevronRight size={20} className="mt-3 shrink-0 text-ink-300" />
+                  <ChevronRight size={20} className="mt-2.5 shrink-0 text-ink-300" aria-hidden />
                 </Link>
               </li>
             );

@@ -130,7 +130,7 @@ export default function RecipeDetailPage({
       cooksLen: state.cooks.length + 1,
     });
     setUsedUpQueued(false);
-    undoToast(`${recipe.name} 완성! 재료 ${lines.length}가지를 냉장고에서 뺐어요`, "🎉", token);
+    undoToast(`요리 완료 · 재료 ${lines.length}가지를 뺐어요`, "🎉", token);
     requestAnimationFrame(() =>
       resultRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
     );
@@ -282,7 +282,7 @@ export default function RecipeDetailPage({
           </section>
 
           {showResult && result ? (
-            <div ref={resultRef} className="animate-pop-in rounded-2xl border border-fresh-100 bg-fresh-50/70 p-5">
+            <div ref={resultRef} className="animate-pop-in rounded-2xl border border-fresh-100 bg-fresh-50/70 p-4 sm:p-5">
               <p className="text-[20.5px] font-extrabold text-ink-900" role="status">맛있게 드세요! 🎉</p>
               <p className="mt-0.5 text-[16.5px] text-ink-600">
                 {formatWon(result.saved)}어치 재료를 버리지 않고 썼어요
@@ -317,18 +317,18 @@ export default function RecipeDetailPage({
                       setUsedUpQueued(true);
                       showToast(`다 쓴 재료 ${result.usedUp.length}개를 장보기에 담았어요`, "🛒");
                     }}
-                    className="btn-primary w-full"
+                    className="btn-primary min-h-[52px] w-full"
                   >
                     <ShoppingBasket size={20} />
-                    다 쓴 재료 장보기에 담기 ({result.usedUp.join(", ")})
+                    다 쓴 재료 장보기에 담기
                   </button>
                 ) : urgentLeft > 0 ? (
-                  <Link href="/priority" className="btn-primary w-full">
+                  <Link href="/priority" className="btn-primary min-h-[52px] w-full">
                     남은 급한 재료 {urgentLeft}개 보기
                     <ArrowRight size={20} />
                   </Link>
                 ) : (
-                  <Link href="/fridge" className="btn-primary w-full">
+                  <Link href="/fridge" className="btn-primary min-h-[52px] w-full">
                     냉장고 확인하기
                     <ArrowRight size={20} />
                   </Link>

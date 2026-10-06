@@ -51,6 +51,12 @@ body {
   }
 }
 
+/* 시트·대화상자가 열려 있는 동안 공용 뒤로·앞으로 버튼 숨김 */
+html.modal-open [data-mirae-history-nav],
+html.modal-open .toast-host {
+  display: none !important;
+}
+
 ::selection {
   background: #c5e6c8;
 }

@@ -24,9 +24,9 @@ import LiveClock from "./LiveClock";
 import SampleBridgeCTA from "./SampleBridgeCTA";
 
 /** 메뉴별 아이콘 색상 — 각 메뉴를 색으로 빠르게 구분할 수 있게 한다. */
-const NAV_ITEMS = [
+const NAV_ITEMS: { href: string; label: string; icon: typeof Home; tint: string; also?: string[] }[] = [
   { href: "/", label: "홈", icon: Home, tint: "bg-fresh-100 text-fresh-600" },
-  { href: "/fridge", label: "내 냉장고", icon: Refrigerator, tint: "bg-sky-100 text-sky-600" },
+  { href: "/fridge", label: "내 냉장고", icon: Refrigerator, tint: "bg-sky-100 text-sky-600", also: ["/ingredient"] },
   { href: "/priority", label: "우선소비", icon: AlarmClock, tint: "bg-coral-100 text-coral-600" },
   { href: "/recipes", label: "레시피 추천", icon: ChefHat, tint: "bg-amberish-100 text-amberish-600" },
   { href: "/shopping", label: "장보기 리스트", icon: ShoppingBasket, tint: "bg-mint-100 text-mint-600" },
@@ -35,17 +35,20 @@ const NAV_ITEMS = [
   { href: "/my", label: "마이페이지", icon: UserRound, tint: "bg-rose-100 text-rose-500" },
 ];
 
+/** also: 하단 탭에 없는 화면을 어느 탭 아래로 볼지 (현재 위치를 잃지 않게) */
 const MOBILE_NAV = [
-  { href: "/", label: "홈", icon: Home, tint: "text-fresh-500" },
-  { href: "/fridge", label: "냉장고", icon: Refrigerator, tint: "text-sky-500" },
-  { href: "/add", label: "추가", icon: Plus, emphasized: true, tint: "" },
-  { href: "/recipes", label: "레시피", icon: ChefHat, tint: "text-amberish-500" },
-  { href: "/my", label: "마이", icon: UserRound, tint: "text-rose-400" },
+  { href: "/", label: "홈", icon: Home, tint: "text-fresh-500", also: ["/priority"] },
+  { href: "/fridge", label: "냉장고", icon: Refrigerator, tint: "text-sky-500", also: ["/ingredient"] },
+  { href: "/add", label: "추가", icon: Plus, emphasized: true, tint: "", also: [] },
+  { href: "/recipes", label: "레시피", icon: ChefHat, tint: "text-amberish-500", also: [] },
+  { href: "/my", label: "마이", icon: UserRound, tint: "text-rose-400", also: ["/shopping", "/history", "/report", "/notifications"] },
 ];
 
-function isActive(pathname: string, href: string): boolean {
+function isActive(pathname: string, href: string, also: string[] = []): boolean {
+  const under = (base: string) => pathname === base || pathname.startsWith(base + "/");
+  if (also.some(under)) return true;
   if (href === "/") return pathname === "/";
-  return pathname === href || pathname.startsWith(href + "/");
+  return under(href);
 }
 
 function Logo({ compact = false }: { compact?: boolean }) {
@@ -113,12 +116,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <Logo />
           </div>
           <nav className="flex flex-1 flex-col gap-1">
-            {NAV_ITEMS.map(({ href, label, icon: Icon, tint }) => {
-              const active = isActive(pathname, href);
+            {NAV_ITEMS.map(({ href, label, icon: Icon, tint, also }) => {
+              const active = isActive(pathname, href, also);
               return (
                 <Link
                   key={href}
                   href={href}
+                  aria-current={active ? "page" : undefined}
                   className={`flex items-center gap-2.5 rounded-2xl px-2.5 py-2 text-[18.5px] font-semibold transition-colors duration-200 ${
                     active
                       ? "bg-fresh-50 text-fresh-700"
@@ -237,8 +241,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       {/* Mobile bottom navigation */}
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-fresh-100 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
         <div className="mx-auto flex max-w-md items-end justify-between px-6 pb-2 pt-1.5">
-          {MOBILE_NAV.map(({ href, label, icon: Icon, emphasized, tint }) => {
-            const active = isActive(pathname, href);
+          {MOBILE_NAV.map(({ href, label, icon: Icon, emphasized, tint, also }) => {
+            const active = isActive(pathname, href, also);
             if (emphasized) {
               return (
                 <Link
@@ -258,6 +262,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <Link
                 key={href}
                 href={href}
+                aria-current={active ? "page" : undefined}
                 className="flex min-w-0 flex-1 flex-col items-center gap-1 py-1.5 transition-colors duration-200"
               >
                 <Icon

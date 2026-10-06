@@ -8,6 +8,7 @@ import { recommendRecipes } from "./recommendation-engine";
 import { addDays, daysLeft, sortByExpiry, toISODate, todayStart } from "./expiry-calculator";
 import { formatAmount } from "./quantity";
 import { weeklySummary } from "./stats";
+import { josa } from "./text";
 import { useFridge, useStore } from "./store";
 
 type DerivedNotification = Omit<AppNotification, "read">;
@@ -34,20 +35,21 @@ export function deriveNotifications(state: AppState, fridge: Ingredient[]): Deri
           : `${ing.name}의 유통기한이 내일이에요`;
     const body =
       d < 0
-        ? "표시된 기한과 보관상태를 확인하고, 먹었는지 버렸는지 기록해주세요."
-        : `${STORAGE_LABELS[ing.storage]} · ${formatAmount(ing.quantity, ing.unit)} 남았어요. 버리기 전에 먼저 먹어요.`;
+        ? "상태를 확인하고 먹었는지 버렸는지 기록해주세요."
+        : `${STORAGE_LABELS[ing.storage]}에 ${formatAmount(ing.quantity, ing.unit)} 남았어요.`;
     out.push({ id: `exp-${ing.id}-${ing.expiresAt}`, kind: "expiry", title, body, date: todayISO, href: `/ingredient/${ing.id}` });
   }
 
   // 2) 임박 재료를 쓰는 오늘의 요리
   const top = recommendRecipes(RECIPES, fridge, 1)[0];
   if (top && top.urgentOwned.length > 0) {
-    const names = top.urgentOwned.slice(0, 2).map((m) => m.name).join("·");
+    const names = top.urgentOwned.slice(0, 2).map((m) => m.name);
+    const namesText = names.length > 1 ? `${josa(names[0], "과/와")} ${josa(names[1], "을/를")}` : josa(names[0], "을/를");
     out.push({
       id: `rec-${top.recipe.id}-${todayISO}`,
       kind: "recipe",
-      title: `오늘 저녁 추천: ${top.recipe.name}`,
-      body: `${names}을(를) 한 번에 쓸 수 있어요. 보유 재료 ${top.matchPercent}%`,
+      title: `오늘의 요리: ${top.recipe.name}`,
+      body: `${namesText} 한 번에 쓸 수 있어요.`,
       date: todayISO,
       href: `/recipes/${top.recipe.id}`,
     });
@@ -65,7 +67,7 @@ export function deriveNotifications(state: AppState, fridge: Ingredient[]): Deri
       id: `frz-${i.id}`,
       kind: "freezer",
       title: `냉동 ${i.name} 보관 ${days}일째`,
-      body: "냉동실에서 잊히기 전에 한 번 활용해보세요.",
+      body: "잊히기 전에 한 번 꺼내 써보세요.",
       date: todayISO,
       href: `/ingredient/${i.id}`,
     });
@@ -94,8 +96,8 @@ export function deriveNotifications(state: AppState, fridge: Ingredient[]): Deri
       title: `이번 주 식재료 ${week.usedCount}개를 버리지 않고 사용했어요`,
       body:
         week.rescuedCount > 0
-          ? `기한이 임박했던 재료 ${week.rescuedCount}개를 살렸어요. 리포트에서 확인해보세요.`
-          : "리포트에서 이번 주 기록을 확인해보세요.",
+          ? `기한이 임박했던 재료 ${week.rescuedCount}개를 살렸어요.`
+          : "리포트에서 이번 주 기록을 볼 수 있어요.",
       date: todayISO,
       href: "/report",
     });

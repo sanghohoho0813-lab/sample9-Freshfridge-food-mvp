@@ -42,14 +42,22 @@ function shortExpiry(expiresAt: string | null): string | null {
 export default function IngredientRow({
   ingredient,
   onEat,
+  highlight = false,
 }: {
   ingredient: Ingredient;
   onEat?: (ingredient: Ingredient) => void;
+  /** 방금 추가한 재료 — 잠깐 강조해서 찾기 쉽게 */
+  highlight?: boolean;
 }) {
   const level = expiryLevel(ingredient.expiresAt);
   const hint = shortExpiry(ingredient.expiresAt);
   return (
-    <li className="flex items-center gap-2 bg-white pr-2.5 transition-colors hover:bg-warmwhite/70 sm:pr-3">
+    <li
+      id={`ing-${ingredient.id}`}
+      className={`flex scroll-mt-28 items-center gap-2 pr-2.5 transition-colors duration-700 sm:pr-3 ${
+        highlight ? "bg-fresh-50" : "bg-white hover:bg-warmwhite/70"
+      }`}
+    >
       <Link
         href={`/ingredient/${ingredient.id}`}
         className="flex min-w-0 flex-1 items-center gap-3 py-3 pl-3 sm:gap-3.5 sm:pl-4"

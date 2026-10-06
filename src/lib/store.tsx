@@ -52,7 +52,7 @@ interface StoreValue {
   undo: (token: UndoToken) => void;
   addIngredient: (
     ing: Omit<Ingredient, "id" | "status">,
-    opts?: { fromShoppingId?: string }
+    opts?: { fromShoppingId?: string; id?: string }
   ) => UndoToken;
   updateIngredient: (id: string, patch: Partial<Ingredient>) => void;
   /** 재고 수정(기록 없음) — 실제로 먹었다면 consumeIngredient 를 쓴다 */
@@ -212,7 +212,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     (ing, opts) =>
       commit((prev) => ({
         ...prev,
-        ingredients: [{ ...ing, id: newId("ing"), status: "available" }, ...prev.ingredients],
+        ingredients: [{ ...ing, id: opts?.id ?? newId("ing"), status: "available" }, ...prev.ingredients],
         shopping: opts?.fromShoppingId
           ? prev.shopping.map((s) =>
               s.id === opts.fromShoppingId ? { ...s, checked: true, addedToFridge: true } : s

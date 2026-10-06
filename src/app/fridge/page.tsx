@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
 import { useFridge, useStore } from "@/lib/store";
 import type { IngredientCategory, StorageType } from "@/lib/types";
@@ -33,12 +34,37 @@ const CATEGORIES: IngredientCategory[] = [
   "etc",
 ];
 
+function FridgeSkeleton() {
+  return (
+    <div className="mx-auto max-w-6xl space-y-4">
+      <div className="skeleton h-10 w-1/2" />
+      <SkeletonList rows={6} />
+    </div>
+  );
+}
+
 export default function FridgePage() {
+  return (
+    <Suspense fallback={<FridgeSkeleton />}>
+      <FridgeContent />
+    </Suspense>
+  );
+}
+
+function FridgeContent() {
   const { ready } = useStore();
+  const router = useRouter();
+  const params = useSearchParams();
+  const addedId = params.get("added");
+  const [flashId, setFlashId] = useState<string | null>(null);
   const fridge = useFridge();
   const { eat, element: actionSheet } = useIngredientActions();
   const [storageTab, setStorageTab] = useState<StorageType | "all">("all");
-  const [category, setCategory] = useState<IngredientCategory | "all">("all");
+  // 리포트의 "지금 먹어야 할 채소 보기"처럼 종류를 지정해서 들어올 수 있다
+  const [category, setCategory] = useState<IngredientCategory | "all">(() => {
+    const c = params.get("category");
+    return c && (CATEGORIES as string[]).includes(c) ? (c as IngredientCategory) : "all";
+  });
 
   const storageCounts = useMemo(() => {
     const c: Record<StorageType | "all", number> = { all: fridge.length, fridge: 0, freezer: 0, pantry: 0 };
@@ -64,14 +90,26 @@ export default function FridgePage() {
     [inStorage, activeCategory]
   );
 
-  if (!ready) {
-    return (
-      <div className="mx-auto max-w-6xl space-y-4">
-        <div className="skeleton h-10 w-1/2" />
-        <SkeletonList rows={6} />
-      </div>
+  // 추가 화면에서 넘어오면 새 재료로 스크롤하고 잠깐 강조한 뒤 주소를 정리한다
+  useEffect(() => {
+    if (!ready || !addedId) return;
+    setFlashId(addedId);
+    router.replace("/fridge", { scroll: false });
+  }, [ready, addedId, router]);
+
+  useEffect(() => {
+    if (!flashId) return;
+    const raf = requestAnimationFrame(() =>
+      document.getElementById(`ing-${flashId}`)?.scrollIntoView({ block: "center", behavior: "smooth" })
     );
-  }
+    const t = setTimeout(() => setFlashId(null), 2600);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(t);
+    };
+  }, [flashId]);
+
+  if (!ready) return <FridgeSkeleton />;
 
   const chips = CATEGORIES.filter((c) => categoryCounts.has(c));
 
@@ -157,7 +195,7 @@ export default function FridgePage() {
           ) : (
             <ListGroup columns={2}>
               {filtered.map((ing) => (
-                <IngredientRow key={ing.id} ingredient={ing} onEat={eat} />
+                <IngredientRow key={ing.id} ingredient={ing} onEat={eat} highlight={ing.id === flashId} />
               ))}
             </ListGroup>
           )}

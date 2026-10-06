@@ -35,7 +35,6 @@ export default function ShoppingPage() {
   const items = state.shopping;
   const unchecked = items.filter((i) => !i.checked);
   const purchased = items.filter((i) => i.checked);
-  const fromRecipeCount = unchecked.filter((i) => i.fromRecipe).length;
 
   // 이미 냉장고에 있는 재료면 알려서 중복 구매를 막는다 (같은 이름 우선, 없으면 부분 일치)
   const alreadyHave = useMemo(() => {
@@ -92,10 +91,11 @@ export default function ShoppingPage() {
   return (
     <div className="mx-auto max-w-3xl animate-fade-up space-y-5">
       <PageHeader
+        back="/"
         title="장보기 리스트"
         description={
           unchecked.length > 0
-            ? `살 것 ${unchecked.length}개${fromRecipeCount > 0 ? ` · 레시피에서 담은 재료 ${fromRecipeCount}개` : ""}`
+            ? `살 것 ${unchecked.length}개`
             : "냉장고에 있는 재료는 따로 알려드려요."
         }
       />

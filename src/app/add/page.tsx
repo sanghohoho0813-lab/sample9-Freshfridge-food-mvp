@@ -17,6 +17,7 @@ import {
   dDayLabel,
   daysLeft,
   formatKoreanDate,
+  shelfLabel,
   toISODate,
   todayStart,
 } from "@/lib/expiry-calculator";
@@ -26,6 +27,7 @@ import {
   recognizeIngredientsFromImage,
   type RecognizedIngredient,
 } from "@/lib/image-recognition";
+import { newId } from "@/lib/demo-data";
 import IngredientThumb from "@/components/IngredientThumb";
 import PageHeader from "@/components/ui/PageHeader";
 
@@ -125,6 +127,7 @@ function AddIngredientContent() {
   const [memo, setMemo] = useState("");
   const [moreOpen, setMoreOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [saving, setSaving] = useState(false);
   const nameRef = useRef<HTMLInputElement>(null);
   const qtyRef = useRef<HTMLInputElement>(null);
 
@@ -178,6 +181,7 @@ function AddIngredientContent() {
 
   const submit = (e?: React.FormEvent) => {
     e?.preventDefault();
+    if (saving) return; // 화면이 넘어가는 동안 다시 눌러도 두 번 들어가지 않게
     setSubmitted(true);
     if (hasError) {
       if (errors.name) nameRef.current?.focus();
@@ -188,6 +192,8 @@ function AddIngredientContent() {
       }
       return;
     }
+    setSaving(true);
+    const id = newId("ing");
     const token = addIngredient({
       name: trimmed,
       emoji: NAME_EMOJI[trimmed] ?? CATEGORY_EMOJIS[category],
@@ -199,9 +205,10 @@ function AddIngredientContent() {
       expiresAt: expiresAt || null,
       memo: memo.trim() || undefined,
       price: QUICK_ITEMS.find((q) => q.name === trimmed)?.price ?? 3000,
-    });
+    }, { id });
     showUndo(`${josa(trimmed, "을/를")} ${STORAGE_LABELS[storage]}에 넣었어요`, "🧊", token);
-    router.push("/fridge");
+    // 냉장고 목록에서 방금 넣은 재료를 바로 찾을 수 있게 표시
+    router.push(`/fridge?added=${id}`);
   };
 
   const handlePhoto = async (file: File) => {
@@ -237,7 +244,8 @@ function AddIngredientContent() {
   };
 
   const submitRecognized = () => {
-    if (!recognized || recognized.length === 0) return;
+    if (!recognized || recognized.length === 0 || saving) return;
+    setSaving(true);
     for (const r of recognized) {
       addIngredient({
         name: r.name,
@@ -354,6 +362,7 @@ function AddIngredientContent() {
             />
           </Field>
 
+          <div className="grid gap-6 lg:grid-cols-2 lg:gap-5">
           <Field label="수량" htmlFor="ing-qty" error={showErr("quantity")}>
             <div className="flex items-center gap-2">
               <button
@@ -426,7 +435,7 @@ function AddIngredientContent() {
                 const v = toISODate(addDays(todayStart(), d));
                 return (
                   <button key={d} type="button" aria-pressed={expiresAt === v} onClick={() => setExpiresAt(v)} className={optionBtn(expiresAt === v)}>
-                    {d === 7 ? "일주일" : d === 14 ? "2주" : d === 30 ? "한 달" : `${d}일`}
+                    {shelfLabel(d)}
                   </button>
                 );
               })}
@@ -435,6 +444,7 @@ function AddIngredientContent() {
               </button>
             </div>
           </Field>
+          </div>
 
           <Field label="보관 위치">
             <div className="flex gap-2">
@@ -513,7 +523,7 @@ function AddIngredientContent() {
             )}
           </div>
 
-          <button type="submit" className="btn-primary min-h-[56px] w-full text-[19.5px]">
+          <button type="submit" disabled={saving} className="btn-primary min-h-[56px] w-full text-[19.5px]">
             <Plus size={22} />
             {trimmed && trimmed.length <= 8 ? `${josa(trimmed, "을/를")} 냉장고에 추가` : "냉장고에 추가"}
           </button>
@@ -521,22 +531,33 @@ function AddIngredientContent() {
       ) : (
         <div className="space-y-4">
           {!recognized && !recognizing && (
-            <button
-              type="button"
-              onClick={() => fileRef.current?.click()}
-              className="card card-hover flex w-full flex-col items-center gap-3 border-2 border-dashed border-fresh-200 bg-fresh-50/40 px-6 py-12"
-            >
-              <span className="grid h-[72px] w-[72px] place-items-center rounded-3xl bg-white text-fresh-500 shadow-soft">
-                <ImagePlus size={36} />
-              </span>
-              <span className="text-center">
-                <span className="block text-[20.5px] font-bold text-ink-900">사진 올리기</span>
-                <span className="mt-1 block text-[16.5px] text-ink-500">식재료나 영수증 사진에서 재료를 찾아요.</span>
-                <span className="mt-2.5 inline-block rounded-chip bg-amberish-50 px-3 py-1 text-[14.5px] font-semibold text-amberish-600">
-                  데모 — 예시 인식 결과가 나와요
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                className="card card-hover flex w-full flex-col items-center gap-3 border-2 border-dashed border-fresh-200 bg-fresh-50/40 px-6 py-10"
+              >
+                <span className="grid h-[72px] w-[72px] place-items-center rounded-3xl bg-white text-fresh-500 shadow-soft">
+                  <ImagePlus size={36} />
                 </span>
-              </span>
-            </button>
+                <span className="text-center">
+                  <span className="block text-[20.5px] font-bold text-ink-900">사진 올리기</span>
+                  <span className="mt-1 block text-[16.5px] text-ink-500">식재료나 영수증 사진에서 재료를 찾아요.</span>
+                </span>
+              </button>
+              {/* 데모: 사진이 없어도 흐름을 바로 체험할 수 있게 */}
+              <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 pt-1 text-[15.5px]">
+                <span className="rounded-chip bg-amberish-50 px-2.5 py-0.5 text-[14px] font-semibold text-amberish-600">데모</span>
+                <span className="text-ink-500">예시 인식 결과가 나와요.</span>
+                <button
+                  type="button"
+                  onClick={() => void handlePhoto(new File([""], "sample.jpg", { type: "image/jpeg" }))}
+                  className="inline-flex min-h-[44px] items-center font-semibold text-fresh-700 underline underline-offset-4"
+                >
+                  예시 사진으로 해보기
+                </button>
+              </div>
+            </div>
           )}
           <input
             ref={fileRef}
@@ -578,10 +599,13 @@ function AddIngredientContent() {
                       />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-[18px] font-bold text-ink-900">{r.name}</p>
+                        {fridge.some((f) => f.name === r.name) && (
+                          <span className="mr-2 text-[14.5px] font-semibold text-amberish-600">이미 있음</span>
+                        )}
                         <button
                           type="button"
                           onClick={() => removeRecognized(idx)}
-                          className="text-[14.5px] font-semibold text-ink-400 hover:text-coral-600"
+                          className="text-[14.5px] font-semibold text-ink-500 underline-offset-2 hover:text-coral-600 hover:underline"
                         >
                           빼기
                         </button>

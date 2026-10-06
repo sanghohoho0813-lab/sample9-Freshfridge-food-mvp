@@ -59,7 +59,9 @@ export default function SearchPage() {
 
   return (
     <div className="mx-auto max-w-5xl animate-fade-up space-y-5">
-      <PageHeader title="검색" />
+      <PageHeader
+        back="/"
+        title="검색" />
 
       <form
         role="search"

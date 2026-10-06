@@ -6,11 +6,7 @@ import { ArrowRight, Check, ChefHat, Minus, PencilLine, Plus, Trash2 } from "luc
 import { useStore } from "@/lib/store";
 import { RECIPES } from "@/lib/demo-data";
 import { rankRecipes } from "@/lib/recipe-matcher";
-import {
-  expiryLevel,
-  formatKoreanDate,
-  friendlyExpiryText,
-} from "@/lib/expiry-calculator";
+import { daysLeft, expiryLevel, formatKoreanDate } from "@/lib/expiry-calculator";
 import { amountStep, formatAmount } from "@/lib/quantity";
 import { josa } from "@/lib/text";
 import { relativeDay } from "@/lib/stats";
@@ -124,11 +120,9 @@ export default function IngredientDetailPage({
               <h1 className="text-[26px] font-extrabold leading-tight text-ink-900 sm:text-[28.5px]">{ingredient.name}</h1>
               <ExpiryBadge expiresAt={ingredient.expiresAt} size="lg" />
             </div>
-            <p className="mt-1 text-[17.5px] font-semibold text-ink-700">
-              {friendlyExpiryText(ingredient.expiresAt)}
-            </p>
+            <p className="mt-1 text-[17.5px] font-semibold text-ink-700">{expiryLine(ingredient.expiresAt)}</p>
             <p className="mt-0.5 text-[16px] text-ink-500">
-              {formatAmount(ingredient.quantity, ingredient.unit)} 남음 · {STORAGE_LABELS[ingredient.storage]} · {CATEGORY_LABELS[ingredient.category]}
+              {formatAmount(ingredient.quantity, ingredient.unit)} 남음 · {CATEGORY_LABELS[ingredient.category]}
             </p>
           </div>
         </div>
@@ -180,10 +174,8 @@ export default function IngredientDetailPage({
               </div>
               <dl className="grid grid-cols-2 gap-x-3 gap-y-3 px-4 pb-4 pt-1 text-[16.5px]">
                 <div>
-                  <dt className="text-[15px] text-ink-500">유통기한</dt>
-                  <dd className="font-bold text-ink-800">
-                    {ingredient.expiresAt ? formatKoreanDate(ingredient.expiresAt) : "모름"}
-                  </dd>
+                  <dt className="text-[15px] text-ink-500">보관 위치</dt>
+                  <dd className="font-bold text-ink-800">{STORAGE_LABELS[ingredient.storage]}</dd>
                 </div>
                 <div>
                   <dt className="text-[15px] text-ink-500">구매일</dt>
@@ -219,7 +211,7 @@ export default function IngredientDetailPage({
           </h2>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
             {relatedRecipes.map((m) => (
-              <RecipeCard key={m.recipe.id} match={m} />
+              <RecipeCard key={m.recipe.id} match={m} layout="row" />
             ))}
           </div>
         </section>
@@ -228,6 +220,16 @@ export default function IngredientDetailPage({
       {actionSheet}
     </div>
   );
+}
+
+/** 상세 상단 기한 문구 — 배지(D-2)와 겹치지 않게 날짜로 보여준다 */
+function expiryLine(expiresAt: string | null): string {
+  const d = daysLeft(expiresAt);
+  if (d === null || !expiresAt) return "유통기한 정보가 없어요";
+  if (d < 0) return `${formatKoreanDate(expiresAt)}까지였어요`;
+  if (d === 0) return "오늘까지예요";
+  if (d === 1) return "내일까지예요";
+  return `${formatKoreanDate(expiresAt)}까지`;
 }
 
 const HERO_BG: Record<string, string> = {

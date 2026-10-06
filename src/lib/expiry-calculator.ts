@@ -99,3 +99,11 @@ export function formatKoreanDate(iso: string): string {
 export function formatWon(n: number): string {
   return `₩${n.toLocaleString("ko-KR")}`;
 }
+
+/** 보관 기간 선택 칩 문구 — 7 → "일주일", 14 → "2주", 30 → "한 달" */
+export function shelfLabel(days: number): string {
+  if (days === 7) return "일주일";
+  if (days === 14) return "2주";
+  if (days === 30) return "한 달";
+  return `${days}일`;
+}

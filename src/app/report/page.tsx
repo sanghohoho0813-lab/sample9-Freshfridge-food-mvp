@@ -14,6 +14,7 @@ import {
 import type { IngredientCategory } from "@/lib/types";
 import { josa } from "@/lib/text";
 import PageHeader from "@/components/ui/PageHeader";
+import EmptyState from "@/components/EmptyState";
 
 // 사용/폐기 두 계열 — 색약(CVD)·대비 검증을 통과한 조합 (fresh-700 / coral-500)
 const USED = "bg-fresh-700";
@@ -36,7 +37,7 @@ export default function ReportPage() {
 
   if (!ready) {
     return (
-      <div className="mx-auto max-w-5xl space-y-4">
+      <div className="mx-auto max-w-3xl space-y-4">
         <div className="skeleton h-10 w-1/2" />
         <div className="skeleton h-40 w-full" />
         <div className="skeleton h-40 w-full" />
@@ -59,26 +60,50 @@ export default function ReportPage() {
   const maxWeek = Math.max(1, ...trend.map((w) => w.used + w.wasted));
   const maxCat = Math.max(1, ...byCategory.map((c) => c.count));
 
+  const hasRecords = cur.usedCount + cur.wastedCount > 0;
+  if (!hasRecords) {
+    return (
+      <div className="mx-auto max-w-3xl animate-fade-up space-y-6">
+        <PageHeader back="/my" title="절약 리포트" />
+        <EmptyState
+          emoji="📊"
+          title="아직 리포트에 쓸 기록이 없어요"
+          description="재료를 먹거나 버린 기록이 쌓이면 아낀 금액과 자주 버리는 재료를 보여드려요."
+          ctaLabel={fridge.length > 0 ? "먼저 먹을 재료 보기" : "식재료 추가하기"}
+          ctaHref={fridge.length > 0 ? "/priority" : "/add"}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="mx-auto max-w-5xl animate-fade-up space-y-7 sm:space-y-8">
-      <PageHeader title="절약 리포트" description="최근 30일 기준이에요." />
+    <div className="mx-auto max-w-3xl animate-fade-up space-y-7 sm:space-y-8">
+      <PageHeader
+        back="/my"
+        title="절약 리포트" description="최근 30일 기준이에요." />
 
       {/* 헤드라인 — 숫자 하나 + 변화 한 줄 */}
       <section className="card p-5 sm:p-6">
-        <p className="text-[16.5px] font-semibold text-ink-500">버리지 않고 먹은 재료</p>
+        <p className="text-[16.5px] font-semibold text-ink-500">버리지 않고 먹어서 아낀 금액</p>
         <p className="mt-1.5 text-[36px] font-extrabold leading-none tracking-tight text-ink-900 sm:text-[41.5px]">
           {formatWon(cur.savedAmount)}
         </p>
         {prev && wasteCountDelta !== null && (
-          <p
-            className={`mt-3 inline-flex items-center gap-1.5 text-[16.5px] font-semibold ${
-              wasteCountDelta <= 0 ? "text-fresh-700" : "text-coral-600"
-            }`}
-          >
-            {wasteCountDelta <= 0 ? <TrendingDown size={19} /> : <TrendingUp size={19} />}
-            그 전 30일보다 폐기 {Math.abs(wasteCountDelta)}개 {wasteCountDelta <= 0 ? "감소" : "증가"} · 폐기율{" "}
-            {prev.wasteRate}% → {cur.wasteRate}%
-          </p>
+          <div className="mt-3">
+            <p
+              className={`inline-flex items-center gap-1.5 text-[16.5px] font-semibold ${
+                wasteCountDelta <= 0 ? "text-fresh-700" : "text-coral-600"
+              }`}
+            >
+              {wasteCountDelta <= 0 ? <TrendingDown size={19} aria-hidden /> : <TrendingUp size={19} aria-hidden />}
+              {wasteCountDelta === 0
+                ? "그 전 30일과 폐기 개수가 같아요"
+                : `그 전 30일보다 폐기 ${Math.abs(wasteCountDelta)}개 ${wasteCountDelta < 0 ? "줄었어요" : "늘었어요"}`}
+            </p>
+            <p className="mt-0.5 text-[15.5px] text-ink-500">
+              폐기율 {prev.wasteRate}% → {cur.wasteRate}%
+            </p>
+          </div>
         )}
         <dl className="mt-5 grid grid-cols-3 divide-x divide-ink-300/25 border-t border-ink-300/25 pt-4 text-center">
           <div>
@@ -202,7 +227,7 @@ export default function ReportPage() {
             최근 30일 동안 <b>{josa(topWaste.label, "을/를")}</b> 가장 많이 버렸어요({topWaste.count}번).{" "}
             {TIPS[topWaste.category] ?? `${josa(topWaste.label, "은/는")} 구매량을 조금 줄이거나 냉동 보관을 활용해보세요.`}
           </p>
-          <Link href={urgentInTopCategory > 0 ? "/priority" : "/shopping"} className="btn-primary mt-4 min-h-[52px]">
+          <Link href={urgentInTopCategory > 0 ? `/fridge?category=${topWaste.category}` : "/shopping"} className="btn-primary mt-4 min-h-[52px]">
             {urgentInTopCategory > 0
               ? `지금 먹어야 할 ${topWaste.label} ${urgentInTopCategory}개 보기`
               : "장보기 목록 점검하기"}
