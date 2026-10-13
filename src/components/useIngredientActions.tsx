@@ -29,7 +29,6 @@ export function useIngredientActions(opts?: {
         left <= 0
           ? `${ing.name} 다 먹었어요! 소비 기록에 남겼어요`
           : `${ing.name} ${formatAmount(amount, ing.unit)} 먹었어요 · ${formatAmount(left, ing.unit)} 남음`,
-        "✅",
         token
       );
       onDone?.(ing, "eat", left <= 0);
@@ -61,7 +60,7 @@ export function useIngredientActions(opts?: {
         }
         const token = discardIngredient(ing.id, reason ?? "기타", amount);
         const left = Math.round((ing.quantity - amount) * 100) / 100;
-        undoToast(`${ing.name} ${formatAmount(amount, ing.unit)} 폐기를 기록했어요`, "📝", token);
+        undoToast(`${ing.name} ${formatAmount(amount, ing.unit)} 폐기를 기록했어요`, token);
         onDone?.(ing, "discard", left <= 0);
       }}
     />

@@ -54,7 +54,7 @@ export default function IngredientActionSheet({
           <div className="flex items-start gap-3">
             <IngredientThumb
               name={ingredient.name}
-              emoji={ingredient.emoji}
+              category={ingredient.category}
               className={`h-14 w-14 text-2xl ${isEat ? "bg-fresh-50" : "bg-coral-50"}`}
               sizes="56px"
             />

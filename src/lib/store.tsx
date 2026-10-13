@@ -17,15 +17,16 @@ interface StoreValue {
   /** localStorage 에서 불러오기를 마쳤는가 (그 전에는 스켈레톤을 그린다) */
   ready: boolean;
   state: AppState;
-  showToast: (text: string, emoji?: string, action?: ToastAction) => void;
+  showToast: (text: string, action?: ToastAction) => void;
   undo: (token: UndoToken) => void;
   addIngredient: (ing: ops.NewIngredient, opts?: { fromShoppingId?: string; id?: string }) => UndoToken;
   updateIngredient: (id: string, patch: Partial<Omit<Ingredient, "id">>) => void;
   consumeIngredient: (id: string, amount?: number) => UndoToken;
   discardIngredient: (id: string, reason: WasteReason, amount?: number) => UndoToken;
   cookRecipe: (recipe: { id: string; name: string }, deductions: ops.Deduction[]) => UndoToken;
-  addShoppingItem: (name: string, fromRecipe?: string) => void;
-  addShoppingItems: (names: string[], fromRecipe?: string) => void;
+  restockIngredient: (id: string, amount: number, price: number, opts?: { fromShoppingId?: string }) => UndoToken;
+  addShoppingItem: (name: string, source?: ops.ShoppingSource) => UndoToken;
+  addShoppingItems: (names: string[], source?: ops.ShoppingSource) => UndoToken;
   toggleShoppingItem: (id: string) => void;
   removeShoppingItem: (id: string) => UndoToken;
   clearPurchasedShopping: () => UndoToken;
@@ -109,8 +110,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       consumeIngredient: (id, amount) => commit((s) => ops.consumeIngredient(s, id, amount)),
       discardIngredient: (id, reason, amount) => commit((s) => ops.discardIngredient(s, id, reason, amount)),
       cookRecipe: (recipe, deductions) => commit((s) => ops.cookRecipe(s, recipe, deductions)),
-      addShoppingItem: (name, fromRecipe) => setState((s) => ops.addShoppingItems(s, [name], fromRecipe)),
-      addShoppingItems: (names, fromRecipe) => setState((s) => ops.addShoppingItems(s, names, fromRecipe)),
+      restockIngredient: (id, amount, price, opts) => commit((s) => ops.restockIngredient(s, id, amount, price, opts)),
+      addShoppingItem: (name, source) => commit((s) => ops.addShoppingItems(s, [name], source)),
+      addShoppingItems: (names, source) => commit((s) => ops.addShoppingItems(s, names, source)),
       toggleShoppingItem: (id) => setState((s) => ops.toggleShoppingItem(s, id)),
       removeShoppingItem: (id) => commit((s) => ops.removeShoppingItem(s, id)),
       clearPurchasedShopping: () => commit((s) => ops.clearPurchasedShopping(s)),
@@ -138,8 +140,7 @@ export function useFridge(): Ingredient[] {
 export function useUndoToast() {
   const { showToast, undo } = useStore();
   return useCallback(
-    (text: string, emoji: string, token: UndoToken) =>
-      showToast(text, emoji, { label: "되돌리기", onClick: () => undo(token) }),
+    (text: string, token: UndoToken) => showToast(text, { label: "되돌리기", onClick: () => undo(token) }),
     [showToast, undo]
   );
 }

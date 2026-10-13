@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChefHat, Trash2, Utensils } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { RECIPES, isRescue } from "@/lib/demo-data";
 import { daysLeft, formatKoreanDate, formatWon } from "@/lib/expiry-calculator";
@@ -105,7 +105,7 @@ export default function HistoryPage() {
       <div id="history-panel" role="tabpanel" aria-label={tab === "consumed" ? "먹은 기록" : "버린 기록"}>
         {rows.length === 0 ? (
           <EmptyState
-            emoji={tab === "consumed" ? "🍽️" : "🗑️"}
+            icon={tab === "consumed" ? Utensils : Trash2}
             title={tab === "consumed" ? "아직 먹은 기록이 없어요" : "버린 기록이 없어요"}
             description={
               tab === "consumed"
@@ -150,7 +150,7 @@ export default function HistoryPage() {
           href="/report"
           className="inline-flex min-h-[44px] w-full items-center justify-center gap-1 text-[16.5px] font-semibold text-fresh-700 hover:underline"
         >
-          절약 리포트 보기
+          낭비 리포트 보기
           <ArrowRight size={19} />
         </Link>
       )}
@@ -168,7 +168,9 @@ function CookRow({ recipeName, logs, showDate }: { recipeName: string; logs: Con
         {recipe ? (
           <Image src={recipeImage(recipe.image)} alt="" fill sizes="56px" className="object-contain p-1" />
         ) : (
-          <span className="grid h-full place-items-center text-2xl">🍳</span>
+          <span className="grid h-full place-items-center text-ink-400">
+            <ChefHat size={22} aria-hidden />
+          </span>
         )}
       </span>
       <div className="min-w-0 flex-1">
@@ -198,7 +200,7 @@ function SingleRow({ log, showDate }: { log: ConsumptionLog; showDate: boolean }
     <li className="flex items-center gap-3 p-3.5">
       <IngredientThumb
         name={log.ingredientName}
-        emoji={log.emoji}
+        category={log.category}
         className={`h-14 w-14 rounded-xl text-xl ${eaten ? "bg-warmwhite" : "bg-coral-50 opacity-70 grayscale"}`}
         sizes="56px"
       />

@@ -1,5 +1,6 @@
 "use client";
 
+import { CircleCheck } from "lucide-react";
 import { useToast, useToastList } from "@/lib/toast";
 
 export default function ToastHost() {
@@ -19,7 +20,7 @@ export default function ToastHost() {
             t.action ? "pointer-events-auto pr-2" : "pr-4"
           }`}
         >
-          {t.emoji && <span className="shrink-0 text-base">{t.emoji}</span>}
+          <CircleCheck size={20} className="shrink-0 text-mint-300" aria-hidden />
           <span className="min-w-0 flex-1">{t.text}</span>
           {t.action && (
             <button

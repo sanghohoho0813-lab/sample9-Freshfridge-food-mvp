@@ -11,7 +11,6 @@ export interface ToastAction {
 export interface ToastMsg {
   id: string;
   text: string;
-  emoji?: string;
   action?: ToastAction;
 }
 
@@ -20,7 +19,7 @@ const DURATION = { plain: 2600, withAction: 5000 };
 const MAX_VISIBLE = 3;
 
 interface ToastApi {
-  showToast: (text: string, emoji?: string, action?: ToastAction) => void;
+  showToast: (text: string, action?: ToastAction) => void;
   dismissToast: (id: string) => void;
 }
 
@@ -40,9 +39,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const showToast = useCallback(
-    (text: string, emoji?: string, action?: ToastAction) => {
+    (text: string, action?: ToastAction) => {
       const id = newId("toast");
-      setToasts((prev) => [...prev.slice(-(MAX_VISIBLE - 1)), { id, text, emoji, action }]);
+      setToasts((prev) => [...prev.slice(-(MAX_VISIBLE - 1)), { id, text, action }]);
       timers.current.set(
         id,
         setTimeout(() => dismissToast(id), action ? DURATION.withAction : DURATION.plain)

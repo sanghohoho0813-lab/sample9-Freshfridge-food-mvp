@@ -6,7 +6,8 @@ test("레시피 → 요리했어요 → 재고 차감 → 다 쓴 재료 장보�
 
   const before = await app.state();
   await page.getByRole("button", { name: "요리했어요" }).click();
-  await expect(page.getByText("맛있게 드세요!")).toBeVisible();
+  await expect(page.getByText("버섯 두부전골 완성")).toBeVisible();
+  await expect(page.getByText(/기한 임박 재료 2개를 살렸어요/)).toBeVisible();
 
   const s = await app.state();
   expect(s.cooks.length).toBe(before.cooks.length + 1);
@@ -20,10 +21,15 @@ test("레시피 → 요리했어요 → 재고 차감 → 다 쓴 재료 장보�
   ).toEqual(["대파", "두부", "새송이버섯", "청양고추"].sort());
   expect((await app.ingredient("대파"))?.quantity).toBe(0.5);
 
-  await page.getByRole("button", { name: "다 쓴 재료 장보기에 담기" }).click();
+  // 다 쓴 재료 중 다시 살 것을 고른다 (자주 먹는 두부는 미리 골라져 있다)
+  const tofu = page.getByRole("button", { name: "두부", exact: true });
+  await expect(tofu).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "새송이버섯", exact: true }).click();
+  await page.getByRole("button", { name: "2개 장보기에 담기" }).click();
   await expect
     .poll(async () => (await app.state()).shopping.filter((x) => !x.checked).map((x) => x.name))
     .toEqual(expect.arrayContaining(["두부", "새송이버섯"]));
+  await expect(page.getByRole("link", { name: /장보기 보기/ })).toBeVisible();
   await expect(page.getByRole("link", { name: /남은 급한 재료 \d+개 보기/ })).toBeVisible();
 
   await open(page, "/history");

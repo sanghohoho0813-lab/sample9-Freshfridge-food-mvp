@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Search, X } from "lucide-react";
+import { Search, SearchX, X } from "lucide-react";
 import { useFridge, useStore } from "@/lib/store";
 import { RECIPES } from "@/lib/demo-data";
 import { rankRecipes } from "@/lib/recipe-matcher";
@@ -128,7 +128,7 @@ export default function SearchPage() {
         </div>
       ) : matchedIngredients.length === 0 && matchedRecipes.length === 0 ? (
         <EmptyState
-          emoji="🔍"
+          icon={SearchX}
           title={`‘${query.trim()}’ 결과가 없어요`}
           description="냉장고에 없는 재료라면 바로 추가할 수 있어요."
           ctaLabel="식재료 추가하기"

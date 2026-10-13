@@ -89,17 +89,61 @@ export function addIngredient(
 ): AppState {
   return {
     ...prev,
-    ingredients: [{ ...ing, id: opts.id ?? env.newId("ing"), status: "available" }, ...prev.ingredients],
-    shopping: opts.fromShoppingId
-      ? prev.shopping.map((s) => (s.id === opts.fromShoppingId ? { ...s, checked: true, addedToFridge: true } : s))
-      : prev.shopping,
+    ingredients: [
+      {
+        ...ing,
+        initialQuantity: ing.initialQuantity ?? ing.quantity,
+        id: opts.id ?? env.newId("ing"),
+        status: "available",
+      },
+      ...prev.ingredients,
+    ],
+    shopping: markAddedToFridge(prev.shopping, opts.fromShoppingId),
+  };
+}
+
+function markAddedToFridge(shopping: ShoppingItem[], id?: string): ShoppingItem[] {
+  return id ? shopping.map((s) => (s.id === id ? { ...s, checked: true, addedToFridge: true } : s)) : shopping;
+}
+
+/**
+ * 같은 재료를 새로 샀을 때 "기존 재료에 더하기" — 양과 금액을 더하고, 기한·보관위치는 기존 그대로 둔다.
+ * 지금 양을 새 기준(가득 찬 상태)으로 삼는다.
+ */
+export function restockIngredient(
+  prev: AppState,
+  id: string,
+  amount: number,
+  price: number,
+  opts: { fromShoppingId?: string } = {}
+): AppState {
+  const target = prev.ingredients.find((i) => i.id === id);
+  if (!target || !isInFridge(target) || !(amount > 0)) return prev;
+  const quantity = round2(target.quantity + amount);
+  return {
+    ...prev,
+    ingredients: prev.ingredients.map((i) =>
+      i.id === id ? { ...i, quantity, initialQuantity: quantity, price: i.price + Math.max(0, price) } : i
+    ),
+    shopping: markAddedToFridge(prev.shopping, opts.fromShoppingId),
   };
 }
 
 /** 재고 정보 수정 — 기록을 남기지 않는다 (실제 소비는 consume 으로) */
 export function updateIngredient(prev: AppState, id: string, patch: Partial<Omit<Ingredient, "id">>): AppState {
   if (!prev.ingredients.some((i) => i.id === id)) return prev;
-  return { ...prev, ingredients: prev.ingredients.map((i) => (i.id === id ? { ...i, ...patch } : i)) };
+  return {
+    ...prev,
+    ingredients: prev.ingredients.map((i) => {
+      if (i.id !== id) return i;
+      const next = { ...i, ...patch };
+      // 처음보다 많게 바로잡았다면 그 양을 새 기준으로 (남은 비율이 100%를 넘지 않게)
+      if (patch.quantity !== undefined && patch.quantity > (i.initialQuantity ?? i.quantity)) {
+        next.initialQuantity = patch.quantity;
+      }
+      return next;
+    }),
+  };
 }
 
 function take(
@@ -170,11 +214,18 @@ export function cookRecipe(
   return { ...prev, ingredients, logs: [...newLogs, ...prev.logs], cooks: [cook, ...prev.cooks] };
 }
 
+export interface ShoppingSource {
+  /** 이 재료가 필요한 레시피 이름 */
+  fromRecipe?: string;
+  /** 거의 다 먹었거나 떨어져서 다시 사는 재료 */
+  restock?: boolean;
+}
+
 /** 장보기 담기 — 아직 사지 않은 같은 이름이 있으면 건너뛴다 */
 export function addShoppingItems(
   prev: AppState,
   names: string[],
-  fromRecipe?: string,
+  source: ShoppingSource = {},
   env: Env = defaultEnv()
 ): AppState {
   const pending = new Set(prev.shopping.filter((s) => !s.checked).map((s) => s.name));
@@ -183,7 +234,13 @@ export function addShoppingItems(
     const name = raw.trim();
     if (!name || pending.has(name)) continue;
     pending.add(name);
-    fresh.push({ id: env.newId("shop"), name, checked: false, fromRecipe });
+    fresh.push({
+      id: env.newId("shop"),
+      name,
+      checked: false,
+      ...(source.fromRecipe ? { fromRecipe: source.fromRecipe } : {}),
+      ...(source.restock ? { restock: true } : {}),
+    });
   }
   return fresh.length === 0 ? prev : { ...prev, shopping: [...fresh, ...prev.shopping] };
 }

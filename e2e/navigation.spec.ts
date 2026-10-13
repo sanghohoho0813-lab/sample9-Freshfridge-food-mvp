@@ -24,7 +24,7 @@ test.describe("이동·예외 상황", () => {
       ["/fridge", "내 냉장고"],
       ["/recipes/recipe_tofu_mushroom_jeongol", "버섯 두부전골"],
       ["/shopping", "장보기 리스트"],
-      ["/report", "절약 리포트"],
+      ["/report", "낭비 리포트"],
     ] as const) {
       await open(page, path);
       await expect(page).toHaveTitle(new RegExp(title));
@@ -50,19 +50,35 @@ test.describe("이동·예외 상황", () => {
     await expect(page.locator("#ing-name")).toHaveValue("콜라비");
   });
 
-  test("리포트 제안 → 해당 종류만 걸러진 냉장고", async ({ page }) => {
+  test("리포트: 이번 달 버린 금액·지난달 비교·근거 있는 다음 행동 → 지금 있는 재료로 이동", async ({ page }) => {
     await open(page, "/report");
-    await page.getByRole("link", { name: /지금 먹어야 할/ }).click();
-    await expect(page).toHaveURL(/category=vegetable/);
-    await expect(page.getByRole("button", { name: /채소/, pressed: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /월에 버린 식재료$/ })).toBeVisible();
+    await expect(page.getByText(/지난달 같은 기간\(.+\)보다 .+ (덜|더) 버렸어요|같아요/)).toBeVisible();
+    await expect(page.getByRole("region", { name: "많이 버린 식재료" }).getByRole("listitem")).not.toHaveCount(0);
+    await expect(page.getByRole("region", { name: "버린 이유" }).getByRole("listitem")).not.toHaveCount(0);
+
+    const actions = page.getByRole("region", { name: "다음 달엔 이렇게 줄여봐요" });
+    await actions.getByRole("link", { name: /지금 있는 상추 보기/ }).click();
+    await expect(page).toHaveURL(/\/ingredient\//);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("상추");
   });
 
-  test("냉장고 보관위치 탭", async ({ page }) => {
+  test("냉장고: 보관위치 탭과 종류 필터, 기한 구간별 묶음", async ({ page, app }) => {
     await open(page, "/fridge");
+    await expect(page.getByRole("heading", { name: /^오늘·내일/ })).toBeVisible();
+
     await page.getByRole("tab", { name: /냉동/ }).click();
-    const rows = await page.locator("main ul li").allInnerTexts();
-    expect(rows.length).toBeGreaterThan(0);
-    for (const r of rows) expect(r).toContain("냉동");
+    const freezer = (await app.state()).ingredients
+      .filter((i) => i.storage === "freezer" && i.status !== "consumed" && i.status !== "discarded")
+      .map((i) => i.name);
+    const shown = page.getByRole("tabpanel").getByRole("link");
+    await expect(shown).toHaveCount(freezer.length);
+    for (const name of freezer) await expect(shown.filter({ hasText: name })).toHaveCount(1);
+
+    await open(page, "/fridge?category=vegetable");
+    await expect(page.getByRole("combobox", { name: "종류" })).toHaveValue("vegetable");
+    await expect(page.getByRole("tabpanel").getByRole("link", { name: /^우유/ })).toHaveCount(0);
+    await expect(page.getByRole("tabpanel").getByRole("link", { name: /^상추/ })).toHaveCount(1);
   });
 
   test("모바일: 하단 탭에 없는 화면도 위치와 뒤로가기를 보여준다", async ({ page }) => {

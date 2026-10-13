@@ -86,7 +86,12 @@ describe("state ops", () => {
 
   describe("장보기", () => {
     it("아직 사지 않은 같은 이름은 다시 담지 않고, 빈 이름은 무시한다", () => {
-      const s1 = ops.addShoppingItems(stateWith([]), ["간장", " 간장 ", "", "식초"], "두부조림", fixedEnv());
+      const s1 = ops.addShoppingItems(
+        stateWith([]),
+        ["간장", " 간장 ", "", "식초"],
+        { fromRecipe: "두부조림" },
+        fixedEnv()
+      );
       expect(s1.shopping.map((s) => s.name)).toEqual(["간장", "식초"]);
       expect(s1.shopping[0].fromRecipe).toBe("두부조림");
       expect(ops.addShoppingItems(s1, ["간장"], undefined, fixedEnv())).toBe(s1);
@@ -122,10 +127,56 @@ describe("state ops", () => {
     });
   });
 
+  describe("기존 재료에 더하기 (restockIngredient)", () => {
+    it("양과 금액을 더하고 기한은 그대로, 지금 양을 새 기준으로", () => {
+      const s0 = stateWith([
+        ing({ name: "요거트", quantity: 1, initialQuantity: 4, price: 750, expiresAt: inDays(5) }),
+      ]);
+      const s1 = ops.restockIngredient(s0, "ing_요거트", 4, 3000);
+      expect(s1.ingredients[0]).toMatchObject({ quantity: 5, initialQuantity: 5, price: 3750, expiresAt: inDays(5) });
+    });
+
+    it("장보기에서 넣었다면 그 항목을 '넣음'으로", () => {
+      const s0 = stateWith([ing({ name: "양배추" })], { shopping: [{ id: "sh1", name: "양배추", checked: true }] });
+      expect(
+        ops.restockIngredient(s0, "ing_양배추", 1, 3500, { fromShoppingId: "sh1" }).shopping[0].addedToFridge
+      ).toBe(true);
+    });
+
+    it("다 먹은 재료·0개는 바꾸지 않는다", () => {
+      const s0 = stateWith([ing({ name: "우유", quantity: 0, status: "consumed" })]);
+      expect(ops.restockIngredient(s0, "ing_우유", 1, 1000)).toBe(s0);
+      const s1 = stateWith([ing({ name: "우유" })]);
+      expect(ops.restockIngredient(s1, "ing_우유", 0, 1000)).toBe(s1);
+    });
+  });
+
+  it("새로 넣은 재료는 지금 양이 처음 양", () => {
+    const s1 = ops.addIngredient(
+      stateWith([]),
+      { ...ing({ name: "두부", quantity: 2 }) } as unknown as ops.NewIngredient,
+      {},
+      fixedEnv()
+    );
+    expect(s1.ingredients[0].initialQuantity).toBe(2);
+  });
+
+  it("장보기 출처 — 레시피·다시 사기 표시", () => {
+    const s1 = ops.addShoppingItems(stateWith([]), ["바나나"], { restock: true }, fixedEnv());
+    expect(s1.shopping[0]).toMatchObject({ name: "바나나", restock: true });
+  });
+
   it("알림 읽음 처리는 중복 없이, 바뀐 것이 없으면 같은 참조", () => {
     const s1 = ops.markNotificationsRead(stateWith([]), ["n1", "n1", "n2"]);
     expect(s1.readNotificationIds).toEqual(["n1", "n2"]);
     expect(ops.markNotificationsRead(s1, ["n2"])).toBe(s1);
+  });
+
+  it("처음보다 많게 바로잡으면 그 양이 새 기준", () => {
+    const s1 = ops.updateIngredient(stateWith([ing({ name: "계란", quantity: 8, initialQuantity: 10 })]), "ing_계란", {
+      quantity: 12,
+    });
+    expect(s1.ingredients[0].initialQuantity).toBe(12);
   });
 
   it("정보 수정은 기록을 남기지 않는다", () => {

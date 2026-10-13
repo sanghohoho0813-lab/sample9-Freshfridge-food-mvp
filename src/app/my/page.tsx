@@ -6,7 +6,7 @@ import { AlarmClock, Bell, ChevronRight, History, LineChart, RefreshCcw, Shoppin
 import { useFridge, useStore } from "@/lib/store";
 import { useNotifications } from "@/lib/notifications";
 import { daysLeft, formatWon } from "@/lib/expiry-calculator";
-import { monthlyReport } from "@/lib/stats";
+import { monthCompare, monthlyReport } from "@/lib/stats";
 import PageHeader from "@/components/ui/PageHeader";
 import PageLoading from "@/components/ui/PageLoading";
 import ListGroup from "@/components/ui/ListGroup";
@@ -18,6 +18,7 @@ export default function MyPage() {
   const notifications = useNotifications();
   const [confirmReset, setConfirmReset] = useState(false);
   const report = useMemo(() => monthlyReport(state.logs, state.cooks).current, [state.logs, state.cooks]);
+  const month = useMemo(() => monthCompare(state.logs, state.cooks), [state.logs, state.cooks]);
 
   if (!ready)
     return (
@@ -40,35 +41,30 @@ export default function MyPage() {
       label: "우선소비",
       value: urgentCount > 0 ? `${urgentCount}개 급해요` : "급한 재료 없음",
       icon: AlarmClock,
-      tint: "bg-coral-100 text-coral-700",
     },
     {
       href: "/shopping",
       label: "장보기 리스트",
       value: toBuy > 0 ? `살 것 ${toBuy}개` : "비어 있어요",
       icon: ShoppingBasket,
-      tint: "bg-mint-100 text-mint-600",
     },
     {
       href: "/history",
       label: "소비 기록",
       value: `${state.logs.length}건`,
       icon: History,
-      tint: "bg-violet-100 text-violet-600",
     },
     {
       href: "/report",
-      label: "절약 리포트",
-      value: `${formatWon(report.savedAmount)} 절약`,
+      label: "낭비 리포트",
+      value: `${month.span.month}월 ${formatWon(month.current.wastedAmount)} 버림`,
       icon: LineChart,
-      tint: "bg-emerald-100 text-emerald-600",
     },
     {
       href: "/notifications",
       label: "알림",
       value: unread > 0 ? `안 읽은 알림 ${unread}개` : "모두 읽음",
       icon: Bell,
-      tint: "bg-amberish-100 text-amberish-700",
     },
   ];
 
@@ -85,8 +81,11 @@ export default function MyPage() {
       {/* 프로필 + 핵심 숫자 */}
       <section className="card overflow-hidden">
         <div className="flex items-center gap-4 p-4 sm:p-5">
-          <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-fresh-100 text-[30px]" aria-hidden>
-            🧑‍🍳
+          <span
+            className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-fresh-100 text-[26px] font-extrabold text-fresh-700"
+            aria-hidden
+          >
+            {state.userName.slice(0, 1)}
           </span>
           <div className="min-w-0">
             <p className="text-[22px] font-extrabold text-ink-900">{state.userName}님</p>
@@ -109,14 +108,14 @@ export default function MyPage() {
 
       {/* 바로가기 — 각 화면의 지금 상태를 함께 보여준다 */}
       <ListGroup>
-        {menu.map(({ href, label, value, icon: Icon, tint }) => (
+        {menu.map(({ href, label, value, icon: Icon }) => (
           <li key={href}>
             <Link
               href={href}
               className="flex min-h-[64px] items-center gap-3.5 px-4 py-3 transition-colors hover:bg-warmwhite/70"
             >
-              <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${tint}`}>
-                <Icon size={22} />
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-ink-300/10 text-ink-600">
+                <Icon size={22} aria-hidden />
               </span>
               <span className="min-w-0 flex-1 text-[18px] font-bold text-ink-900">{label}</span>
               <span className="shrink-0 text-[15.5px] font-medium text-ink-500">{value}</span>
@@ -155,7 +154,7 @@ export default function MyPage() {
           onConfirm={() => {
             resetDemo();
             setConfirmReset(false);
-            showToast("데모 데이터를 초기화했어요", "🔄");
+            showToast("데모 데이터를 초기화했어요");
           }}
         />
       )}

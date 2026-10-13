@@ -1,11 +1,12 @@
 import Link from "next/link";
+import { MapPinOff } from "lucide-react";
 
 /** 없는 주소로 들어왔을 때 — 앱 안에서 바로 갈 수 있는 곳을 안내한다 */
 export default function NotFound() {
   return (
     <div className="mx-auto flex max-w-xl animate-fade-up flex-col items-center px-2 py-10 text-center sm:py-16">
-      <span className="text-[56px]" aria-hidden>
-        🥕
+      <span className="grid h-16 w-16 place-items-center rounded-full bg-fresh-50 text-fresh-600" aria-hidden>
+        <MapPinOff size={30} />
       </span>
       <p className="mt-3 text-[15.5px] font-bold tracking-wide text-fresh-700">404</p>
       <h1 className="mt-1 text-[26px] font-extrabold leading-tight text-ink-900 sm:text-[28.5px]">

@@ -24,31 +24,25 @@ import LiveClock from "./LiveClock";
 import SampleBridgeCTA from "./SampleBridgeCTA";
 import LogoMark from "./LogoMark";
 
-/** 메뉴별 아이콘 색상 — 각 메뉴를 색으로 빠르게 구분할 수 있게 한다. */
-const NAV_ITEMS: { href: string; label: string; icon: typeof Home; tint: string; also?: string[] }[] = [
-  { href: "/", label: "홈", icon: Home, tint: "bg-fresh-100 text-fresh-600" },
-  { href: "/fridge", label: "내 냉장고", icon: Refrigerator, tint: "bg-sky-100 text-sky-600", also: ["/ingredient"] },
-  { href: "/priority", label: "우선소비", icon: AlarmClock, tint: "bg-coral-100 text-coral-700" },
-  { href: "/recipes", label: "레시피 추천", icon: ChefHat, tint: "bg-amberish-100 text-amberish-700" },
-  { href: "/shopping", label: "장보기 리스트", icon: ShoppingBasket, tint: "bg-mint-100 text-mint-600" },
-  { href: "/history", label: "소비 기록", icon: History, tint: "bg-violet-100 text-violet-600" },
-  { href: "/report", label: "절약 리포트", icon: LineChart, tint: "bg-emerald-100 text-emerald-600" },
-  { href: "/my", label: "마이페이지", icon: UserRound, tint: "bg-rose-100 text-rose-500" },
+/** 메뉴는 한 가지 색으로 — 지금 있는 곳만 초록으로 표시한다 */
+const NAV_ITEMS: { href: string; label: string; icon: typeof Home; also?: string[] }[] = [
+  { href: "/", label: "홈", icon: Home },
+  { href: "/fridge", label: "내 냉장고", icon: Refrigerator, also: ["/ingredient"] },
+  { href: "/priority", label: "우선소비", icon: AlarmClock },
+  { href: "/recipes", label: "레시피 추천", icon: ChefHat },
+  { href: "/shopping", label: "장보기 리스트", icon: ShoppingBasket },
+  { href: "/history", label: "소비 기록", icon: History },
+  { href: "/report", label: "낭비 리포트", icon: LineChart },
+  { href: "/my", label: "마이페이지", icon: UserRound },
 ];
 
 /** also: 하단 탭에 없는 화면을 어느 탭 아래로 볼지 (현재 위치를 잃지 않게) */
 const MOBILE_NAV = [
-  { href: "/", label: "홈", icon: Home, tint: "text-fresh-500", also: ["/priority"] },
-  { href: "/fridge", label: "냉장고", icon: Refrigerator, tint: "text-sky-500", also: ["/ingredient"] },
-  { href: "/add", label: "추가", icon: Plus, emphasized: true, tint: "", also: [] },
-  { href: "/recipes", label: "레시피", icon: ChefHat, tint: "text-amberish-500", also: [] },
-  {
-    href: "/my",
-    label: "마이",
-    icon: UserRound,
-    tint: "text-rose-400",
-    also: ["/shopping", "/history", "/report", "/notifications"],
-  },
+  { href: "/", label: "홈", icon: Home, also: ["/priority"] },
+  { href: "/fridge", label: "냉장고", icon: Refrigerator, also: ["/ingredient"] },
+  { href: "/add", label: "추가", icon: Plus, emphasized: true, also: [] },
+  { href: "/recipes", label: "레시피", icon: ChefHat, also: [] },
+  { href: "/my", label: "마이", icon: UserRound, also: ["/shopping", "/history", "/report", "/notifications"] },
 ];
 
 function isActive(pathname: string, href: string, also: string[] = []): boolean {
@@ -100,7 +94,7 @@ function MvpBanner() {
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { ready } = useStore();
+  const { ready, state } = useStore();
   const notifications = useNotifications();
   // 저장된 데이터를 불러온 뒤에만 배지를 그린다 (서버/클라이언트 불일치 방지)
   const unread = ready ? notifications.filter((n) => !n.read).length : 0;
@@ -123,7 +117,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <Logo />
           </div>
           <nav aria-label="주 메뉴" className="flex flex-1 flex-col gap-1">
-            {NAV_ITEMS.map(({ href, label, icon: Icon, tint, also }) => {
+            {NAV_ITEMS.map(({ href, label, icon: Icon, also }) => {
               const active = isActive(pathname, href, also);
               return (
                 <Link
@@ -135,11 +129,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                   }`}
                 >
                   <span
-                    className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl transition-transform duration-200 ${tint} ${
-                      active ? "scale-105 shadow-soft" : ""
+                    className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl transition-colors duration-200 ${
+                      active ? "bg-fresh-600 text-white" : "bg-ink-300/10 text-ink-500"
                     }`}
                   >
-                    <Icon size={21} strokeWidth={active ? 2.6 : 2.2} />
+                    <Icon size={21} strokeWidth={active ? 2.4 : 2} aria-hidden />
                   </span>
                   {label}
                 </Link>
@@ -147,9 +141,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             })}
           </nav>
           <div className="rounded-card border border-fresh-100 bg-gradient-to-br from-fresh-50 to-mint-50 p-4">
-            <p className="text-xs font-semibold text-fresh-700">음식 낭비를 줄여요! 🌱</p>
+            <p className="text-[15px] font-bold text-fresh-700">버리기 전에, 먼저 먹기</p>
             <p className="mt-1 text-[14.5px] leading-relaxed text-ink-500">
-              버리기 전에 먼저 먹는 습관, FreshFridge가 도와드려요.
+              기한이 가까운 재료와 그걸로 만들 요리를 매일 챙겨드려요.
             </p>
             <div className="mt-3 border-t border-fresh-200/70 pt-3">
               <p className="text-[12.5px] font-semibold text-ink-400">Made by</p>
@@ -207,9 +201,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 <Link
                   href="/my"
                   aria-label="마이페이지"
-                  className="hidden h-12 w-12 place-items-center rounded-2xl bg-fresh-100 text-base transition-transform hover:scale-105 lg:grid"
+                  className="hidden h-12 w-12 place-items-center rounded-2xl bg-fresh-100 text-[18px] font-extrabold text-fresh-700 transition-colors hover:bg-fresh-200 lg:grid"
                 >
-                  🧑‍🍳
+                  <span aria-hidden>{state.userName.slice(0, 1)}</span>
                 </Link>
               </div>
             </div>
@@ -246,7 +240,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         className="fixed inset-x-0 bottom-0 z-40 border-t border-fresh-100 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
       >
         <div className="mx-auto flex max-w-md items-end justify-between px-6 pb-2 pt-1.5">
-          {MOBILE_NAV.map(({ href, label, icon: Icon, emphasized, tint, also }) => {
+          {MOBILE_NAV.map(({ href, label, icon: Icon, emphasized, also }) => {
             const active = isActive(pathname, href, also);
             if (emphasized) {
               return (
@@ -256,10 +250,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                   aria-label={label}
                   className="-mt-6 flex shrink-0 flex-col items-center gap-1"
                 >
-                  <span className="grid h-[58px] w-[58px] place-items-center rounded-full bg-fresh-500 text-white shadow-lift transition-transform duration-200 active:scale-95">
+                  <span className="grid h-[58px] w-[58px] place-items-center rounded-full bg-fresh-600 text-white shadow-lift transition-transform duration-200 active:scale-95">
                     <Icon size={30} strokeWidth={2.6} />
                   </span>
-                  <span className="text-[13px] font-semibold text-fresh-600">{label}</span>
+                  <span className="text-[13px] font-semibold text-fresh-700">{label}</span>
                 </Link>
               );
             }
@@ -270,8 +264,15 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 aria-current={active ? "page" : undefined}
                 className="flex min-w-0 flex-1 flex-col items-center gap-1 py-1.5 transition-colors duration-200"
               >
-                <Icon size={25} strokeWidth={active ? 2.6 : 2} className={active ? tint : "text-ink-400"} />
-                <span className={`text-[13px] font-semibold ${active ? "text-ink-900" : "text-ink-400"}`}>{label}</span>
+                <Icon
+                  size={25}
+                  strokeWidth={active ? 2.5 : 2}
+                  className={active ? "text-fresh-700" : "text-ink-400"}
+                  aria-hidden
+                />
+                <span className={`text-[13px] font-semibold ${active ? "text-fresh-700" : "text-ink-500"}`}>
+                  {label}
+                </span>
               </Link>
             );
           })}

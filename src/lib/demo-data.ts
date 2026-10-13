@@ -28,9 +28,14 @@ interface Seed {
   expiresIn: number | null; // n일 후 만료 (null = 정보 없음)
   price: number;
   memo?: string;
+  /** 처음 산 양 (일부를 이미 쓴 재료) — 없으면 qty 와 같다 */
+  bought?: number;
+  /** false 면 카탈로그(기본값)에만 있고 데모 냉장고에는 없다 */
+  stocked?: boolean;
 }
 
-// 데모 스토리: 우유 D-1, 두부 D-1, 새송이버섯 D-2, 시금치 D-3 가 홈 상단에 뜨도록 구성
+// 데모 스토리: 우유 D-1, 두부 D-1, 새송이버섯 D-2, 시금치 D-3 가 홈 상단에 뜨도록 구성.
+// 요거트는 거의 다 먹었고(1/4), 바나나·레몬·새우·우동면은 냉장고에 없어 일부 레시피는 장보기가 필요하다.
 const INGREDIENT_SEEDS: Seed[] = [
   {
     name: "우유",
@@ -156,6 +161,7 @@ const INGREDIENT_SEEDS: Seed[] = [
   },
   {
     name: "청양고추",
+    bought: 10,
     emoji: "🌶️",
     qty: 5,
     unit: "개",
@@ -179,6 +185,7 @@ const INGREDIENT_SEEDS: Seed[] = [
   },
   {
     name: "계란",
+    bought: 10,
     emoji: "🥚",
     qty: 8,
     unit: "개",
@@ -190,6 +197,7 @@ const INGREDIENT_SEEDS: Seed[] = [
   },
   {
     name: "체다치즈",
+    bought: 10,
     emoji: "🧀",
     qty: 6,
     unit: "장",
@@ -201,8 +209,9 @@ const INGREDIENT_SEEDS: Seed[] = [
   },
   {
     name: "요거트",
+    bought: 4,
     emoji: "🍶",
-    qty: 2,
+    qty: 1,
     unit: "개",
     cat: "dairy",
     storage: "fridge",
@@ -223,6 +232,7 @@ const INGREDIENT_SEEDS: Seed[] = [
   },
   {
     name: "돼지고기 앞다리살",
+    bought: 600,
     emoji: "🥩",
     qty: 400,
     unit: "g",
@@ -267,6 +277,7 @@ const INGREDIENT_SEEDS: Seed[] = [
   },
   {
     name: "새우",
+    stocked: false,
     emoji: "🦐",
     qty: 1,
     unit: "봉",
@@ -289,6 +300,7 @@ const INGREDIENT_SEEDS: Seed[] = [
   },
   {
     name: "바나나",
+    stocked: false,
     emoji: "🍌",
     qty: 4,
     unit: "개",
@@ -311,6 +323,7 @@ const INGREDIENT_SEEDS: Seed[] = [
   },
   {
     name: "레몬",
+    stocked: false,
     emoji: "🍋",
     qty: 2,
     unit: "개",
@@ -388,6 +401,7 @@ const INGREDIENT_SEEDS: Seed[] = [
   },
   {
     name: "우동면",
+    stocked: false,
     emoji: "🍜",
     qty: 2,
     unit: "개",
@@ -412,11 +426,12 @@ const INGREDIENT_SEEDS: Seed[] = [
 
 export function buildDemoIngredients(): Ingredient[] {
   const today = todayStart();
-  return INGREDIENT_SEEDS.map((s) => ({
+  return INGREDIENT_SEEDS.filter((s) => s.stocked !== false).map((s) => ({
     id: id("ing"),
     name: s.name,
     emoji: s.emoji,
     quantity: s.qty,
+    initialQuantity: s.bought ?? s.qty,
     unit: s.unit,
     category: s.cat,
     storage: s.storage,
@@ -789,6 +804,8 @@ export interface IngredientDefaults {
   unit: string;
   shelfDays: number | null;
   price: number;
+  /** 보통 한 번에 사는 양 (예: 계란 10개) */
+  typicalQty?: number;
 }
 
 const EXTRA_CATALOG: IngredientDefaults[] = [
@@ -807,9 +824,15 @@ const CATALOG: IngredientDefaults[] = [
     unit: s.unit,
     shelfDays: s.expiresIn === null ? null : s.expiresIn + s.boughtAgo,
     price: s.price,
+    typicalQty: s.bought ?? s.qty,
   })),
   ...EXTRA_CATALOG,
 ];
+
+/** 이름이 정확히 같은 재료의 기본값 — 모르는 재료면 null (추가 화면은 이때 값을 지어내지 않는다) */
+export function knownIngredient(name: string): IngredientDefaults | null {
+  return CATALOG.find((c) => c.name === name.trim()) ?? null;
+}
 
 /** 이름으로 기본값을 찾는다. 모르는 재료는 무난한 값으로 채운다. */
 export function ingredientDefaults(name: string): IngredientDefaults {

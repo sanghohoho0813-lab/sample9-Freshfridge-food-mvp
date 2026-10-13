@@ -1,7 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { AlarmClock, BarChart3, CheckCheck, ChefHat, ChevronRight, Snowflake, ShoppingBasket } from "lucide-react";
+import {
+  AlarmClock,
+  BarChart3,
+  BellOff,
+  CheckCheck,
+  ChefHat,
+  ChevronRight,
+  ShoppingBasket,
+  Snowflake,
+} from "lucide-react";
 import { useStore } from "@/lib/store";
 import { useNotifications } from "@/lib/notifications";
 import type { AppNotification } from "@/lib/types";
@@ -9,12 +18,14 @@ import EmptyState from "@/components/EmptyState";
 import PageHeader from "@/components/ui/PageHeader";
 import PageLoading from "@/components/ui/PageLoading";
 
+// 색은 기한 상태(빨강)에만 쓰고, 나머지 알림은 아이콘 모양으로만 구분한다
+const NEUTRAL = "bg-ink-300/15 text-ink-600";
 const KIND_ICON: Record<AppNotification["kind"], { icon: typeof AlarmClock; tone: string }> = {
   expiry: { icon: AlarmClock, tone: "bg-coral-50 text-coral-700" },
-  recipe: { icon: ChefHat, tone: "bg-amberish-50 text-amberish-700" },
-  freezer: { icon: Snowflake, tone: "bg-sky-50 text-sky-600" },
-  shopping: { icon: ShoppingBasket, tone: "bg-ink-300/15 text-ink-600" },
-  report: { icon: BarChart3, tone: "bg-fresh-50 text-fresh-700" },
+  recipe: { icon: ChefHat, tone: NEUTRAL },
+  freezer: { icon: Snowflake, tone: NEUTRAL },
+  shopping: { icon: ShoppingBasket, tone: NEUTRAL },
+  report: { icon: BarChart3, tone: NEUTRAL },
 };
 
 export default function NotificationsPage() {
@@ -46,7 +57,7 @@ export default function NotificationsPage() {
 
       {notifications.length === 0 ? (
         <EmptyState
-          emoji="🔕"
+          icon={BellOff}
           title="지금은 알림이 없어요"
           description="급하게 먹어야 할 재료가 생기면 알려드릴게요."
         />

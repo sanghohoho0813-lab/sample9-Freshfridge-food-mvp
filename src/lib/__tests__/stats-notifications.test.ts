@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { monthlyReport, periodSummary, relativeDay } from "../stats";
+import {
+  daysSinceLastWaste,
+  monthCompare,
+  monthSpan,
+  monthlyReport,
+  periodSummary,
+  relativeDay,
+  wasteByFood,
+} from "../stats";
 import { deriveNotifications } from "../notifications";
 import type { ConsumptionLog } from "../types";
 import { inDays, ing, stateWith } from "./fixtures";
@@ -50,6 +58,51 @@ describe("stats", () => {
   it("이전 30일과 폐기 수를 비교한다", () => {
     const r = monthlyReport([log(1, "discarded"), log(35, "discarded"), log(36, "discarded")], []);
     expect(r.wasteCountDelta).toBe(-1);
+  });
+
+  it("이번 달 = 1일~오늘, 지난달 같은 기간과 비교 (짧은 달은 말일까지)", () => {
+    expect(monthSpan(new Date(2026, 9, 6))).toMatchObject({
+      from: "2026-10-01",
+      to: "2026-10-06",
+      prevFrom: "2026-09-01",
+      prevTo: "2026-09-06",
+    });
+    expect(monthSpan(new Date(2026, 2, 31))).toMatchObject({
+      prevFrom: "2026-02-01",
+      prevTo: "2026-02-28",
+      prevMonth: 2,
+    });
+    expect(monthSpan(new Date(2026, 0, 10))).toMatchObject({ prevFrom: "2025-12-01", prevMonth: 12 });
+  });
+
+  it("월 비교: 지난달 같은 기간 기록이 없으면 비교하지 않는다", () => {
+    const thisMonth = monthCompare([log(1, "discarded", 2000), log(3, "consumed")], [], new Date(2026, 9, 6));
+    expect(thisMonth.current).toMatchObject({ wastedAmount: 2000, wastedCount: 1, usedCount: 1 });
+    expect(thisMonth.previous).toBeNull();
+    // 9월 2일 기록(34일 전)은 9월 1~6일 안에 들어간다
+    const withPrev = monthCompare(
+      [log(1, "discarded"), log(34, "discarded"), log(33, "discarded")],
+      [],
+      new Date(2026, 9, 6)
+    );
+    expect(withPrev.previous?.wastedCount).toBe(2);
+  });
+
+  it("버린 식재료를 이름별로 — 가장 많은 이유 포함", () => {
+    const logs: ConsumptionLog[] = [
+      { ...log(1, "discarded", 2500), ingredientName: "상추", reason: "보관 실패" },
+      { ...log(9, "discarded", 2500), id: "x", ingredientName: "상추", reason: "보관 실패" },
+      { ...log(4, "discarded", 800), id: "y", ingredientName: "당근", reason: "너무 많이 구매" },
+    ];
+    expect(wasteByFood(logs, inDays(-30), inDays(0))).toEqual([
+      { name: "상추", count: 2, amount: 5000, topReason: "보관 실패" },
+      { name: "당근", count: 1, amount: 800, topReason: "너무 많이 구매" },
+    ]);
+  });
+
+  it("마지막으로 버린 지 며칠", () => {
+    expect(daysSinceLastWaste([log(5, "discarded"), log(2, "consumed")], new Date(2026, 9, 6))).toBe(5);
+    expect(daysSinceLastWaste([log(2, "consumed")])).toBeNull();
   });
 
   it("상대 날짜", () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { findOwned, matchRecipe, rankRecipes } from "../recipe-matcher";
+import { explainMatch, findOwned, matchRecipe, rankRecipes } from "../recipe-matcher";
 import type { Recipe } from "../types";
 import { inDays, ing } from "./fixtures";
 import { useFixedToday } from "./setup-clock";
@@ -51,6 +51,45 @@ describe("recipe-matcher", () => {
     expect(m.missing.map((x) => x.name)).toEqual(["간장"]);
     expect(m.matched.find((x) => x.name === "버섯")?.short).toBe(true);
     expect(m.urgentOwned.map((x) => x.name)).toEqual(["두부"]);
+  });
+
+  it("추천 순서: 급한 재료 활용 > 사야 할 재료 > 조리 시간", () => {
+    const fridge = [ing({ name: "두부", expiresAt: inDays(1) }), ing({ name: "감자", expiresAt: inDays(20) })];
+    const ranked = rankRecipes(
+      [
+        recipe("감자볶음", [["감자", 1]]),
+        recipe("두부김치", [
+          ["두부", 1],
+          ["김치", 1],
+        ]), // 두부는 급하지만 김치를 사야 한다
+        recipe("두부부침", [["두부", 1]]),
+      ],
+      fridge
+    );
+    expect(ranked.map((m) => m.recipe.id)).toEqual(["두부부침", "두부김치", "감자볶음"]);
+    expect(ranked[1].readyToCook).toBe(false);
+  });
+
+  it("추천 근거 문구 — 급한 재료·살 것·시간", () => {
+    const m = matchRecipe(
+      recipe("두부김치", [
+        ["두부", 1],
+        ["김치", 1],
+        ["간장", 0, false],
+      ]),
+      [ing({ name: "두부", expiresAt: inDays(1) })]
+    );
+    expect(explainMatch(m)).toEqual({
+      urgent: "두부 D-1 사용",
+      shopping: "김치만 사면 돼요",
+      ready: false,
+      minutes: "10분",
+    });
+  });
+
+  it("양념처럼 차감하지 않는 재료는 '급한 재료 사용'으로 치지 않는다", () => {
+    const m = matchRecipe(recipe("무침", [["간장", 0]]), [ing({ name: "간장", expiresAt: inDays(1) })]);
+    expect(m.urgentOwned).toEqual([]);
   });
 
   it("임박 재료를 쓰는 레시피가 앞에 온다", () => {

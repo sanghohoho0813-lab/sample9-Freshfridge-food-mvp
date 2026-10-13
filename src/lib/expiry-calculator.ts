@@ -30,12 +30,16 @@ export function daysLeft(expiresAt: string | null): number | null {
 
 export type ExpiryLevel = "expired" | "urgent" | "soon" | "ok" | "unknown";
 
+/**
+ * 앱 전체가 쓰는 하나의 기한 단계 — 색은 급한 정도만 나타낸다.
+ * expired: 지남 / urgent: 오늘·내일 / soon: 2~3일 / ok: 그 이후 / unknown: 기한 모름
+ */
 export function expiryLevel(expiresAt: string | null): ExpiryLevel {
   const d = daysLeft(expiresAt);
   if (d === null) return "unknown";
   if (d < 0) return "expired";
-  if (d <= 2) return "urgent";
-  if (d <= 5) return "soon";
+  if (d <= 1) return "urgent";
+  if (d <= 3) return "soon";
   return "ok";
 }
 
@@ -104,4 +108,28 @@ export function shelfLabel(days: number): string {
   if (days === 14) return "2주";
   if (days === 30) return "한 달";
   return `${days}일`;
+}
+
+/** 목록을 나누는 기한 구간 — 냉장고·우선소비 화면이 같은 구간을 쓴다 */
+export type ExpiryGroup = "expired" | "today" | "soon" | "week" | "later" | "unknown";
+
+export const EXPIRY_GROUP_LABEL: Record<ExpiryGroup, string> = {
+  expired: "기한 지남",
+  today: "오늘·내일",
+  soon: "2~3일 안",
+  week: "이번 주 안",
+  later: "여유 있어요",
+  unknown: "기한 모름",
+};
+
+export const EXPIRY_GROUP_ORDER: ExpiryGroup[] = ["expired", "today", "soon", "week", "later", "unknown"];
+
+export function expiryGroup(expiresAt: string | null): ExpiryGroup {
+  const d = daysLeft(expiresAt);
+  if (d === null) return "unknown";
+  if (d < 0) return "expired";
+  if (d <= 1) return "today";
+  if (d <= 3) return "soon";
+  if (d <= 7) return "week";
+  return "later";
 }

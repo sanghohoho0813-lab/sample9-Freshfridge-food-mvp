@@ -2,7 +2,7 @@
 
 import { use, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Check, ChefHat, PencilLine, Trash2 } from "lucide-react";
+import { ArrowRight, Check, ChefHat, PencilLine, ShoppingBasket, Trash2 } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { isInFridge } from "@/lib/state/ops";
 import { RECIPES } from "@/lib/demo-data";
@@ -59,7 +59,7 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ id:
       <div className="mx-auto max-w-3xl space-y-4">
         <BackButton fallback="/fridge" />
         <EmptyState
-          emoji="🧺"
+          icon={ShoppingBasket}
           title="이 식재료를 찾을 수 없어요"
           description="이미 정리되었거나 잘못된 주소예요."
           ctaLabel="내 냉장고로 가기"
@@ -77,7 +77,7 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ id:
         <div className="card flex flex-col items-center gap-3 px-6 py-10 text-center">
           <IngredientThumb
             name={ingredient.name}
-            emoji={ingredient.emoji}
+            category={ingredient.category}
             className={`h-24 w-24 text-5xl ${eaten ? "bg-fresh-50" : "bg-coral-50 grayscale"}`}
             sizes="96px"
           />
@@ -85,9 +85,7 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ id:
             {eaten ? `${ingredient.name}, 다 먹었어요` : `${ingredient.name}, 정리했어요`}
           </p>
           <p className="text-[16.5px] text-ink-500">
-            {eaten
-              ? "버리지 않고 먹은 기록이 절약 리포트에 반영됐어요."
-              : "폐기 기록이 리포트의 낭비 분석에 반영됐어요."}
+            {eaten ? "먹은 기록이 낭비 리포트에 반영됐어요." : "폐기 기록이 리포트의 낭비 분석에 반영됐어요."}
           </p>
           <Link href="/priority" className="btn-primary mt-3">
             다음으로 먹을 재료 보기
@@ -116,7 +114,7 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ id:
         <div className={`flex items-center gap-4 p-5 sm:gap-5 sm:p-6 ${HERO_BG[level]}`}>
           <IngredientThumb
             name={ingredient.name}
-            emoji={ingredient.emoji}
+            category={ingredient.category}
             className="w-20 rounded-3xl bg-white/80 text-[40px] shadow-soft sm:w-24"
             sizes="96px"
           />
@@ -162,7 +160,7 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ id:
               onSave={(patch) => {
                 updateIngredient(ingredient.id, patch);
                 setEditing(false);
-                showToast("정보를 저장했어요", "✅");
+                showToast("정보를 저장했어요");
               }}
             />
           ) : (

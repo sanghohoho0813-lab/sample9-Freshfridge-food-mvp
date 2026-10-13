@@ -25,7 +25,19 @@ export function periodSummary(
   newestDaysAgo: number,
   oldestDaysAgo: number
 ): PeriodSummary {
-  const inPeriod = logs.filter((l) => inRange(l.date, newestDaysAgo, oldestDaysAgo));
+  const today = todayStart();
+  return summaryBetween(
+    logs,
+    cooks,
+    toISODate(addDays(today, -oldestDaysAgo)),
+    toISODate(addDays(today, -newestDaysAgo))
+  );
+}
+
+/** from ~ to (YYYY-MM-DD, 양끝 포함) 사이의 기록 요약 */
+export function summaryBetween(logs: ConsumptionLog[], cooks: CookLog[], from: string, to: string): PeriodSummary {
+  const within = (d: string) => d >= from && d <= to;
+  const inPeriod = logs.filter((l) => within(l.date));
   const used = inPeriod.filter((l) => l.type === "consumed");
   const wasted = inPeriod.filter((l) => l.type === "discarded");
   const total = used.length + wasted.length;
@@ -36,8 +48,109 @@ export function periodSummary(
     savedAmount: used.reduce((s, l) => s + l.price, 0),
     wastedAmount: wasted.reduce((s, l) => s + l.price, 0),
     rescuedCount: used.filter((l) => isRescue(l.dLeft)).length,
-    cookCount: cooks.filter((c) => inRange(c.date, newestDaysAgo, oldestDaysAgo)).length,
+    cookCount: cooks.filter((c) => within(c.date)).length,
   };
+}
+
+export interface MonthSpan {
+  /** 이번 달 1일 ~ 오늘 */
+  from: string;
+  to: string;
+  month: number;
+  /** 지난달 같은 기간 (1일 ~ 같은 날짜, 지난달이 짧으면 말일까지) */
+  prevFrom: string;
+  prevTo: string;
+  prevMonth: number;
+  /** 오늘이 이번 달 며칠째인가 */
+  day: number;
+}
+
+export function monthSpan(today: Date = todayStart()): MonthSpan {
+  const y = today.getFullYear();
+  const m = today.getMonth();
+  const day = today.getDate();
+  const prevLastDay = new Date(y, m, 0).getDate();
+  return {
+    from: toISODate(new Date(y, m, 1)),
+    to: toISODate(today),
+    month: m + 1,
+    prevFrom: toISODate(new Date(y, m - 1, 1)),
+    prevTo: toISODate(new Date(y, m - 1, Math.min(day, prevLastDay))),
+    prevMonth: ((m + 11) % 12) + 1,
+    day,
+  };
+}
+
+export interface MonthCompare {
+  span: MonthSpan;
+  current: PeriodSummary;
+  /** 지난달 같은 기간 — 그 기간에 기록이 하나도 없으면 null (비교를 지어내지 않는다) */
+  previous: PeriodSummary | null;
+}
+
+/** 이번 달(1일~오늘)과 지난달 같은 기간을 비교 — 날짜 수를 맞춰야 공정하다 */
+export function monthCompare(logs: ConsumptionLog[], cooks: CookLog[], today: Date = todayStart()): MonthCompare {
+  const span = monthSpan(today);
+  const current = summaryBetween(logs, cooks, span.from, span.to);
+  const prev = summaryBetween(logs, cooks, span.prevFrom, span.prevTo);
+  return { span, current, previous: prev.usedCount + prev.wastedCount > 0 ? prev : null };
+}
+
+export interface FoodWaste {
+  name: string;
+  count: number;
+  amount: number;
+  /** 가장 많았던 버린 이유 */
+  topReason: string | null;
+}
+
+/** 기간 안에 버린 식재료를 이름별로 (많이 버린 순) */
+export function wasteByFood(logs: ConsumptionLog[], from: string, to: string): FoodWaste[] {
+  const map = new Map<string, { count: number; amount: number; reasons: Map<string, number> }>();
+  for (const l of logs) {
+    if (l.type !== "discarded" || l.date < from || l.date > to) continue;
+    const cur = map.get(l.ingredientName) ?? { count: 0, amount: 0, reasons: new Map<string, number>() };
+    cur.count += 1;
+    cur.amount += l.price;
+    if (l.reason) cur.reasons.set(l.reason, (cur.reasons.get(l.reason) ?? 0) + 1);
+    map.set(l.ingredientName, cur);
+  }
+  return [...map.entries()]
+    .map(([name, v]) => ({
+      name,
+      count: v.count,
+      amount: v.amount,
+      topReason: [...v.reasons.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null,
+    }))
+    .sort((a, b) => b.count - a.count || b.amount - a.amount);
+}
+
+/** 기간 안의 버린 이유별 횟수 */
+export function wasteReasonsBetween(
+  logs: ConsumptionLog[],
+  from: string,
+  to: string
+): { reason: string; count: number; amount: number }[] {
+  const map = new Map<string, { count: number; amount: number }>();
+  for (const l of logs) {
+    if (l.type !== "discarded" || l.date < from || l.date > to) continue;
+    const key = l.reason ?? "기타";
+    const cur = map.get(key) ?? { count: 0, amount: 0 };
+    cur.count += 1;
+    cur.amount += l.price;
+    map.set(key, cur);
+  }
+  return [...map.entries()].map(([reason, v]) => ({ reason, ...v })).sort((a, b) => b.count - a.count);
+}
+
+/** 마지막으로 재료를 버린 뒤 며칠이 지났는가 (버린 기록이 없으면 null) */
+export function daysSinceLastWaste(logs: ConsumptionLog[], today: Date = todayStart()): number | null {
+  const last = logs
+    .filter((l) => l.type === "discarded")
+    .reduce<string | null>((m, l) => (!m || l.date > m ? l.date : m), null);
+  if (!last) return null;
+  const [y, mo, d] = last.split("-").map(Number);
+  return Math.max(0, Math.round((today.getTime() - new Date(y, mo - 1, d).getTime()) / 86_400_000));
 }
 
 /** 최근 7일 */

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { TriangleAlert } from "lucide-react";
 
 /**
  * 화면을 그리다 예기치 못한 오류가 나면 앱 전체가 하얗게 멈추지 않고 이 화면으로 대신한다.
@@ -17,8 +18,8 @@ export default function RouteError({ error, reset }: { error: Error & { digest?:
       role="alert"
       className="mx-auto flex max-w-xl animate-fade-up flex-col items-center px-2 py-10 text-center sm:py-16"
     >
-      <span className="text-[52px]" aria-hidden>
-        🥲
+      <span className="grid h-16 w-16 place-items-center rounded-full bg-coral-50 text-coral-700" aria-hidden>
+        <TriangleAlert size={30} />
       </span>
       <h1 className="mt-3 text-[26px] font-extrabold leading-tight text-ink-900">화면을 불러오지 못했어요</h1>
       <p className="mt-2 text-[17px] text-ink-500">잠시 후 다시 시도해주세요. 저장된 재료와 기록은 그대로 있어요.</p>

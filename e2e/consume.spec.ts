@@ -1,9 +1,13 @@
 import { test, expect, open } from "./fixtures";
 
 test.describe("먹었어요 · 버렸어요", () => {
-  test("홈: 오늘 먹을 재료를 이름으로 안내하고, 1회분은 바로 기록 → 되돌리기", async ({ page, app }) => {
+  test("홈: 오늘 할 일을 재료 이름으로 안내하고, 1회분은 바로 기록 → 되돌리기", async ({ page, app }) => {
     await open(page, "/");
-    await expect(page.getByText("오늘은 우유와 두부를 먼저 먹어주세요.")).toBeVisible();
+    const focus = page.getByRole("region", { name: "우유·두부 내일까지예요" });
+    await expect(focus).toBeVisible();
+    // 급한 재료를 쓰는 요리를 근거(어떤 재료를 쓰는지 · 살 것)와 함께 바로 제안한다
+    await expect(focus.getByRole("link", { name: /버섯 두부전골 만들기/ })).toBeVisible();
+    await expect(focus.getByText(/두부·새송이버섯 함께 사용 · 재료 다 있어요/)).toBeVisible();
 
     const logsBefore = (await app.state()).logs.length;
     await page.getByRole("button", { name: "우유 먹었어요", exact: true }).click();

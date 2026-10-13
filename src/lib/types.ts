@@ -10,13 +10,15 @@ export interface Ingredient {
   name: string;
   emoji: string;
   quantity: number;
+  /** 처음 넣었을 때(또는 더 채웠을 때)의 양 — "얼마나 남았는지"를 비율로 보여줄 때 쓴다 */
+  initialQuantity?: number;
   unit: string;
   category: IngredientCategory;
   storage: StorageType;
   purchasedAt: string; // ISO date
   expiresAt: string | null; // ISO date, null = 정보 없음
   memo?: string;
-  price: number; // 예상 금액(원) — 절약 리포트 데모용
+  price: number; // 예상 금액(원) — 낭비 리포트 계산용
   status: IngredientStatus;
 }
 
@@ -75,6 +77,8 @@ export interface ShoppingItem {
   name: string;
   checked: boolean;
   fromRecipe?: string;
+  /** 냉장고에서 거의 다 먹었거나 자주 먹는데 떨어져서 담은 항목 */
+  restock?: boolean;
   addedToFridge?: boolean; // 구매 후 사용자가 직접 냉장고에 넣었는지
 }
 

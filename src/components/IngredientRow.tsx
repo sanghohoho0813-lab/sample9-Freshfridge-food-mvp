@@ -6,6 +6,7 @@ import type { Ingredient } from "@/lib/types";
 import { STORAGE_LABELS } from "@/lib/types";
 import { daysLeft, expiryLevel, formatKoreanDate } from "@/lib/expiry-calculator";
 import { formatAmount } from "@/lib/quantity";
+import { isRunningLow, remainingRatio } from "@/lib/insights";
 import ExpiryBadge from "./ExpiryBadge";
 import IngredientThumb from "./IngredientThumb";
 
@@ -21,8 +22,8 @@ const HINT_TONE: Record<string, string> = {
   expired: "text-coral-700",
   urgent: "text-coral-700",
   soon: "text-amberish-700",
-  ok: "text-ink-400",
-  unknown: "text-ink-400",
+  ok: "text-ink-500",
+  unknown: "text-ink-500",
 };
 
 /** 행에 들어가는 짧은 기한 문구 — 배지(D-1)를 보완하는 날짜 정보 */
@@ -35,6 +36,26 @@ function shortExpiry(expiresAt: string | null): string | null {
   return `${formatKoreanDate(expiresAt)}까지`;
 }
 
+/** 남은 양 — 일부를 썼으면 "8/10개"와 작은 막대로, 손대지 않았으면 "2개" */
+function Remaining({ ingredient }: { ingredient: Ingredient }) {
+  const initial = ingredient.initialQuantity ?? ingredient.quantity;
+  if (!(initial > ingredient.quantity)) return <>{formatAmount(ingredient.quantity, ingredient.unit)}</>;
+  const ratio = remainingRatio(ingredient);
+  return (
+    <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+      <span>
+        {formatAmount(ingredient.quantity)}/{formatAmount(initial, ingredient.unit)}
+      </span>
+      <span className="relative inline-block h-1.5 w-8 overflow-hidden rounded-full bg-ink-300/30" aria-hidden>
+        <span
+          className={`absolute inset-y-0 left-0 rounded-full ${isRunningLow(ingredient) ? "bg-amberish-500" : "bg-fresh-500"}`}
+          style={{ width: `${Math.max(8, ratio * 100)}%` }}
+        />
+      </span>
+    </span>
+  );
+}
+
 /**
  * 재료 목록의 한 줄. 행을 누르면 상세로 가고,
  * onEat 이 있으면 오른쪽에 "먹었어요" 버튼을 둬서 목록에서 바로 기록할 수 있다.
@@ -43,11 +64,14 @@ export default function IngredientRow({
   ingredient,
   onEat,
   highlight = false,
+  showStorage = true,
 }: {
   ingredient: Ingredient;
   onEat?: (ingredient: Ingredient) => void;
   /** 방금 추가한 재료 — 잠깐 강조해서 찾기 쉽게 */
   highlight?: boolean;
+  /** 보관위치 탭으로 이미 걸러 보는 화면에서는 끄고, 그 자리에 날짜를 보여준다 */
+  showStorage?: boolean;
 }) {
   const level = expiryLevel(ingredient.expiresAt);
   const hint = shortExpiry(ingredient.expiresAt);
@@ -64,7 +88,7 @@ export default function IngredientRow({
       >
         <IngredientThumb
           name={ingredient.name}
-          emoji={ingredient.emoji}
+          category={ingredient.category}
           className={`h-12 w-12 text-[24px] sm:h-14 sm:w-14 sm:text-[28px] ${TILE_BG[level]}`}
           sizes="56px"
         />
@@ -72,9 +96,17 @@ export default function IngredientRow({
           <p className="line-clamp-2 text-[18.5px] font-bold leading-snug text-ink-900">{ingredient.name}</p>
           <div className="mt-1 flex min-w-0 items-center gap-1.5">
             <ExpiryBadge expiresAt={ingredient.expiresAt} size="sm" />
-            <p className="min-w-0 text-[15.5px] leading-snug text-ink-500">
-              {formatAmount(ingredient.quantity, ingredient.unit)} · {STORAGE_LABELS[ingredient.storage]}
-              {hint && <span className={`hidden sm:inline ${HINT_TONE[level]}`}> · {hint}</span>}
+            <p className="min-w-0 text-[15.5px] tabular-nums leading-snug text-ink-500">
+              <Remaining ingredient={ingredient} />
+              {showStorage ? (
+                <>
+                  {" "}
+                  · {STORAGE_LABELS[ingredient.storage]}
+                  {hint && <span className={`hidden sm:inline ${HINT_TONE[level]}`}> · {hint}</span>}
+                </>
+              ) : (
+                hint && <span className={HINT_TONE[level]}> · {hint}</span>
+              )}
             </p>
           </div>
         </div>
