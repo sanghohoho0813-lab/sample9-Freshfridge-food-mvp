@@ -43,7 +43,8 @@ const config: Config = {
           800: "#165143",
           900: "#134338",
         },
-        cream: "#fdfbf5",
+        // 요리·재료 사진 무대색 — 흰 카드와 구분되는 따뜻한 베이지 (글자는 올리지 않는다)
+        cream: "#f4efe3",
         warmwhite: "#fbfaf6",
         coral: {
           50: "#fef3f1",
@@ -76,9 +77,12 @@ const config: Config = {
         card: "18px",
         chip: "999px",
       },
+      // 그림자는 아주 옅게 두 겹 — 테두리(머리카락 선)와 함께 써서 떠 있는 느낌만 준다
       boxShadow: {
-        soft: "0 2px 12px rgba(46, 74, 52, 0.06)",
-        lift: "0 6px 24px rgba(46, 74, 52, 0.10)",
+        soft: "0 1px 2px rgba(38, 48, 42, 0.04), 0 6px 20px -10px rgba(38, 48, 42, 0.12)",
+        lift: "0 2px 6px rgba(38, 48, 42, 0.05), 0 16px 36px -14px rgba(38, 48, 42, 0.22)",
+        cta: "0 8px 20px -8px rgba(46, 127, 57, 0.55)",
+        bar: "0 -1px 0 rgba(38, 48, 42, 0.06), 0 -10px 30px -12px rgba(38, 48, 42, 0.14)",
       },
       fontFamily: {
         sans: [

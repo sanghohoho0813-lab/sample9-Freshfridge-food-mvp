@@ -22,7 +22,7 @@ export default function LiveClock({ compact = false }: { compact?: boolean }) {
 
   if (!now) {
     // 마운트 전에는 자리만 잡아둔다 (레이아웃 흔들림 방지)
-    return <span className="block h-[22px] w-full max-w-[300px] rounded-lg bg-fresh-100/60" aria-hidden />;
+    return <span className="block h-[22px] w-full max-w-[300px] rounded-lg bg-ink-900/[0.04]" aria-hidden />;
   }
 
   const dateText = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일 ${WEEKDAYS[now.getDay()]}요일`;
@@ -35,14 +35,14 @@ export default function LiveClock({ compact = false }: { compact?: boolean }) {
   return (
     <time
       dateTime={now.toISOString()}
-      className={`flex flex-wrap items-center gap-x-3 gap-y-0.5 ${compact ? "text-[15.5px]" : "text-[16.5px]"}`}
+      className={`flex flex-wrap items-center gap-x-3 gap-y-0.5 ${compact ? "text-[15px]" : "text-[16px]"}`}
     >
-      <span className="inline-flex items-center gap-1.5 font-semibold text-ink-600">
-        <CalendarDays size={compact ? 16 : 18} className="text-fresh-500" aria-hidden />
+      <span className="inline-flex items-center gap-1.5 font-medium text-ink-600">
+        <CalendarDays size={compact ? 16 : 17} className="text-ink-400" aria-hidden />
         {dateText}
       </span>
-      <span className="inline-flex items-center gap-1.5 font-bold tabular-nums text-fresh-700">
-        <Clock size={compact ? 16 : 18} className="text-mint-500" aria-hidden />
+      <span className="inline-flex items-center gap-1.5 font-semibold tabular-nums text-ink-800">
+        <Clock size={compact ? 16 : 17} className="text-fresh-600" aria-hidden />
         {timeText}
       </span>
     </time>

@@ -386,7 +386,7 @@ function AddIngredientContent() {
                     <label
                       key={o.value}
                       className={`flex cursor-pointer gap-2.5 rounded-xl border bg-white p-3 transition-colors ${
-                        mode === o.value ? "border-fresh-400 ring-2 ring-fresh-100" : "border-ink-300/30"
+                        mode === o.value ? "border-fresh-400 ring-2 ring-fresh-100" : "border-ink-900/[0.1]"
                       }`}
                     >
                       <input
@@ -529,7 +529,7 @@ function AddIngredientContent() {
                     <button
                       type="button"
                       onClick={() => setDetailsOpen(true)}
-                      className="-mr-1 inline-flex min-h-[44px] shrink-0 items-center rounded-xl px-2.5 text-[15.5px] font-semibold text-fresh-700 hover:bg-fresh-50"
+                      className="-mr-1 inline-flex min-h-[44px] shrink-0 items-center rounded-full px-2.5 text-[15.5px] font-semibold text-fresh-700 hover:bg-fresh-50"
                     >
                       바꾸기
                     </button>
@@ -715,7 +715,7 @@ function AddIngredientContent() {
                   </p>
                 </div>
                 {recognized.length > 0 && (
-                  <ul className="divide-y divide-ink-300/20 rounded-2xl border border-ink-300/25">
+                  <ul className="divide-y divide-ink-900/[0.06] rounded-2xl border border-ink-900/[0.07]">
                     {recognized.map((r, idx) => {
                       const have = fridge.some((f) => f.name === r.name);
                       return (

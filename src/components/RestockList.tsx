@@ -26,7 +26,7 @@ export default function RestockList({ items }: { items: RestockSuggestion[] }) {
             sizes="44px"
           />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[17.5px] font-bold text-ink-900">{s.name}</p>
+            <p className="truncate text-[17.5px] font-semibold text-ink-900">{s.name}</p>
             <p className="text-[15px] leading-snug text-ink-500">{s.detail}</p>
           </div>
           <button
@@ -36,7 +36,7 @@ export default function RestockList({ items }: { items: RestockSuggestion[] }) {
               const token = addShoppingItem(s.name, { restock: true });
               undoToast(`${josa(s.name, "을/를")} 장보기에 담았어요`, token);
             }}
-            className="inline-flex min-h-[44px] shrink-0 items-center gap-1 rounded-xl border border-ink-300/40 bg-white px-3 text-[15.5px] font-semibold text-ink-700 transition-all hover:border-fresh-300 active:scale-[0.97]"
+            className="inline-flex min-h-[42px] shrink-0 items-center gap-1 rounded-full border border-ink-900/[0.12] bg-white px-3.5 text-[15.5px] font-semibold text-ink-800 transition-all hover:border-fresh-500 hover:text-fresh-700 active:scale-[0.97]"
           >
             <Plus size={17} aria-hidden />
             담기

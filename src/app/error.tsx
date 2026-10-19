@@ -21,7 +21,7 @@ export default function RouteError({ error, reset }: { error: Error & { digest?:
       <span className="grid h-16 w-16 place-items-center rounded-full bg-coral-50 text-coral-700" aria-hidden>
         <TriangleAlert size={30} />
       </span>
-      <h1 className="mt-3 text-[26px] font-extrabold leading-tight text-ink-900">화면을 불러오지 못했어요</h1>
+      <h1 className="mt-3 text-[26px] font-bold leading-tight text-ink-900">화면을 불러오지 못했어요</h1>
       <p className="mt-2 text-[17px] text-ink-500">잠시 후 다시 시도해주세요. 저장된 재료와 기록은 그대로 있어요.</p>
       <div className="mt-7 grid w-full max-w-sm grid-cols-2 gap-2">
         <button type="button" onClick={reset} className="btn-primary min-h-[52px]">

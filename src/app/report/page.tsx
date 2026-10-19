@@ -81,7 +81,7 @@ export default function ReportPage() {
           {span.month}월에 버린 식재료
         </h2>
         <p className="mt-1.5 flex items-baseline gap-2">
-          <span className="text-[38px] font-extrabold tabular-nums leading-none tracking-tight text-ink-900 sm:text-[44px]">
+          <span className="text-[38px] font-bold tabular-nums leading-none tracking-tight text-ink-900 sm:text-[44px]">
             {formatWon(cur.wastedAmount)}
           </span>
           <span className="text-[18px] font-bold tabular-nums text-ink-500">{cur.wastedCount}개</span>
@@ -94,20 +94,18 @@ export default function ReportPage() {
           </p>
         )}
 
-        <dl className="mt-5 grid grid-cols-3 divide-x divide-ink-300/25 border-t border-ink-300/25 pt-4 text-center">
+        <dl className="mt-5 grid grid-cols-3 divide-x divide-ink-900/[0.06] border-t border-ink-900/[0.07] pt-4 text-center">
           <div className="px-1">
             <dt className="text-[14.5px] text-ink-500">아낀 금액</dt>
-            <dd className="mt-0.5 text-[19px] font-extrabold tabular-nums text-ink-900">
-              {formatWon(cur.savedAmount)}
-            </dd>
+            <dd className="mt-0.5 text-[19px] font-bold tabular-nums text-ink-900">{formatWon(cur.savedAmount)}</dd>
           </div>
           <div className="px-1">
             <dt className="text-[14.5px] text-ink-500">버린 비율</dt>
-            <dd className="mt-0.5 text-[19px] font-extrabold tabular-nums text-ink-900">{cur.wasteRate}%</dd>
+            <dd className="mt-0.5 text-[19px] font-bold tabular-nums text-ink-900">{cur.wasteRate}%</dd>
           </div>
           <div className="px-1">
             <dt className="text-[14.5px] text-ink-500">임박 재료 살림</dt>
-            <dd className="mt-0.5 text-[19px] font-extrabold tabular-nums text-ink-900">{cur.rescuedCount}개</dd>
+            <dd className="mt-0.5 text-[19px] font-bold tabular-nums text-ink-900">{cur.rescuedCount}개</dd>
           </div>
         </dl>
       </section>
@@ -121,18 +119,18 @@ export default function ReportPage() {
         <>
           {/* 2. 가장 많이 버린 식품 */}
           <section aria-labelledby="foods-title">
-            <h2 id="foods-title" className="text-[20.5px] font-extrabold text-ink-900">
+            <h2 id="foods-title" className="section-title">
               많이 버린 식재료
             </h2>
             <p className="mb-3 mt-0.5 text-[15px] text-ink-500">최근 두 달 기준, 버린 금액이 큰 순이에요.</p>
-            <ul className="overflow-hidden rounded-card border border-ink-300/25 bg-white">
+            <ul className="overflow-hidden rounded-card border border-ink-900/[0.07] bg-white">
               {[...foods]
                 .sort((a, b) => b.amount - a.amount)
                 .slice(0, 5)
                 .map((f) => (
                   <li
                     key={f.name}
-                    className="flex items-center gap-3 border-b border-ink-300/20 px-3.5 py-3 last:border-b-0 sm:px-4"
+                    className="flex items-center gap-3 border-b border-ink-900/[0.06] px-3.5 py-3 last:border-b-0 sm:px-4"
                   >
                     <IngredientThumb
                       name={f.name}
@@ -164,11 +162,11 @@ export default function ReportPage() {
 
           {/* 3. 주요 폐기 이유 */}
           <section aria-labelledby="reasons-title">
-            <h2 id="reasons-title" className="text-[20.5px] font-extrabold text-ink-900">
+            <h2 id="reasons-title" className="section-title">
               버린 이유
             </h2>
             <p className="mb-3 mt-0.5 text-[15px] text-ink-500">최근 두 달 기준이에요.</p>
-            <ul className="space-y-3 rounded-card border border-ink-300/25 bg-white p-4 sm:p-5">
+            <ul className="space-y-3 rounded-card border border-ink-900/[0.07] bg-white p-4 sm:p-5">
               {reasons.map((r) => (
                 <li key={r.reason} aria-label={`${r.reason} ${r.count}번, ${formatWon(r.amount)}`}>
                   <div className="mb-1 flex items-baseline justify-between gap-2 text-[16px]">
@@ -190,14 +188,14 @@ export default function ReportPage() {
           {/* 4. 다음 달에 줄일 수 있는 행동 — 위의 재료·이유를 근거로 */}
           {actions.length > 0 && (
             <section aria-labelledby="actions-title">
-              <h2 id="actions-title" className="text-[20.5px] font-extrabold text-ink-900">
+              <h2 id="actions-title" className="section-title">
                 다음 달엔 이렇게 줄여봐요
               </h2>
               <p className="mb-3 mt-0.5 text-[15px] text-ink-500">위에서 많이 버린 재료와 버린 이유를 보고 골랐어요.</p>
               <ol className="space-y-2.5">
                 {actions.map((a, i) => (
                   <li key={a.name} className="card flex gap-3 p-4">
-                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-fresh-100 text-[16px] font-extrabold tabular-nums text-fresh-700">
+                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-fresh-100 text-[16px] font-bold tabular-nums text-fresh-700">
                       {i + 1}
                     </span>
                     <div className="min-w-0 flex-1">
@@ -223,7 +221,7 @@ export default function ReportPage() {
       {/* 5. 최근 4주 — 먹음 vs 버림 (범례 + 행마다 숫자) */}
       <section aria-labelledby="trend-title">
         <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
-          <h2 id="trend-title" className="text-[20.5px] font-extrabold text-ink-900">
+          <h2 id="trend-title" className="section-title">
             최근 4주
           </h2>
           <div className="flex items-center gap-4 text-[15px] text-ink-600" aria-hidden>
@@ -237,7 +235,7 @@ export default function ReportPage() {
             </span>
           </div>
         </div>
-        <ul className="space-y-3 rounded-card border border-ink-300/25 bg-white p-4 sm:p-5">
+        <ul className="space-y-3 rounded-card border border-ink-900/[0.07] bg-white p-4 sm:p-5">
           {trend.map((w) => (
             <li
               key={w.label}

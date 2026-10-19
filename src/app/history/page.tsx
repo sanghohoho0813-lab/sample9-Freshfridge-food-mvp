@@ -120,7 +120,7 @@ export default function HistoryPage() {
             {periods.map(([period, list]) => (
               <section key={period}>
                 <h2 className="mb-2 text-[16.5px] font-bold text-ink-700">{period}</h2>
-                <ul className="divide-y divide-ink-300/20 overflow-hidden rounded-card border border-ink-300/25 bg-white">
+                <ul className="divide-y divide-ink-900/[0.06] overflow-hidden rounded-card border border-ink-900/[0.07] bg-white">
                   {list.map((row) =>
                     row.kind === "cook" ? (
                       <CookRow

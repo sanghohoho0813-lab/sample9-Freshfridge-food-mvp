@@ -9,7 +9,7 @@ export default function NotFound() {
         <MapPinOff size={30} />
       </span>
       <p className="mt-3 text-[15.5px] font-bold tracking-wide text-fresh-700">404</p>
-      <h1 className="mt-1 text-[26px] font-extrabold leading-tight text-ink-900 sm:text-[28.5px]">
+      <h1 className="mt-1 text-[26px] font-bold leading-tight text-ink-900 sm:text-[28.5px]">
         페이지를 찾을 수 없어요
       </h1>
       <p className="mt-2 text-[17px] text-ink-500">주소가 바뀌었거나 없는 페이지예요.</p>

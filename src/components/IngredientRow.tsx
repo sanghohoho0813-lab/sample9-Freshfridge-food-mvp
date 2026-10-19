@@ -79,7 +79,7 @@ export default function IngredientRow({
     <li
       id={`ing-${ingredient.id}`}
       className={`flex scroll-mt-28 items-center gap-2 pr-2.5 transition-colors duration-700 sm:pr-3 ${
-        highlight ? "bg-fresh-50" : "bg-white hover:bg-warmwhite/70"
+        highlight ? "bg-fresh-50" : "bg-white hover:bg-warmwhite"
       }`}
     >
       <Link
@@ -93,7 +93,7 @@ export default function IngredientRow({
           sizes="56px"
         />
         <div className="min-w-0 flex-1">
-          <p className="line-clamp-2 text-[18.5px] font-bold leading-snug text-ink-900">{ingredient.name}</p>
+          <p className="line-clamp-2 text-[18px] font-semibold leading-snug text-ink-900">{ingredient.name}</p>
           <div className="mt-1 flex min-w-0 items-center gap-1.5">
             <ExpiryBadge expiresAt={ingredient.expiresAt} size="sm" />
             <p className="min-w-0 text-[15.5px] tabular-nums leading-snug text-ink-500">
@@ -115,7 +115,7 @@ export default function IngredientRow({
         <button
           type="button"
           onClick={() => onEat(ingredient)}
-          className="min-h-[44px] shrink-0 rounded-xl bg-fresh-50 px-3 text-[15.5px] font-semibold text-fresh-700 transition-colors hover:bg-fresh-100 active:scale-[0.97] sm:px-3.5"
+          className="min-h-[42px] shrink-0 rounded-full bg-fresh-50 px-3.5 text-[15.5px] font-semibold text-fresh-700 transition-colors hover:bg-fresh-100 active:scale-[0.97] sm:px-4"
           aria-label={`${ingredient.name} 먹었어요`}
         >
           먹었어요

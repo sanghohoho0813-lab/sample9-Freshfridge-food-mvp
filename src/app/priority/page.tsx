@@ -104,7 +104,7 @@ export default function PriorityPage() {
             <p className="text-[15px] font-semibold text-amberish-700">
               급한 재료 {rescue.urgentOwned.length}개를 한 번에 쓰는 요리
             </p>
-            <p className="truncate text-[19.5px] font-extrabold text-ink-900">{rescue.recipe.name}</p>
+            <p className="truncate text-[19.5px] font-bold text-ink-900">{rescue.recipe.name}</p>
             <p className="line-clamp-2 text-[15.5px] leading-snug text-ink-500">
               {explainMatch(rescue).urgent} · {explainMatch(rescue).shopping} · {rescue.recipe.minutes}분
             </p>
@@ -167,18 +167,16 @@ export default function PriorityPage() {
 }
 
 function GroupTitle({ group, count }: { group: ExpiryGroup; count: number }) {
-  const tone =
-    group === "expired" || group === "today"
-      ? "text-coral-700"
-      : group === "soon"
-        ? "text-amberish-700"
-        : "text-ink-900";
+  const dot =
+    group === "expired" || group === "today" ? "bg-coral-500" : group === "soon" ? "bg-amberish-500" : "bg-ink-300";
   return (
-    <div className="mb-3 flex flex-wrap items-baseline gap-x-2.5 gap-y-0.5">
-      <h2 id={`group-${group}`} className={`text-[20.5px] font-extrabold ${tone}`}>
-        {EXPIRY_GROUP_LABEL[group]} <span className="text-[16.5px] font-bold tabular-nums text-ink-400">{count}</span>
+    <div className="mb-3">
+      <h2 id={`group-${group}`} className="section-title flex items-center gap-2">
+        <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${dot}`} aria-hidden />
+        {EXPIRY_GROUP_LABEL[group]}
+        <span className="text-[16.5px] font-medium tabular-nums text-ink-500">{count}</span>
       </h2>
-      <span className="text-[15.5px] text-ink-500">{GROUP_SUB[group]}</span>
+      <p className="mt-0.5 pl-[18px] text-[15.5px] text-ink-500">{GROUP_SUB[group]}</p>
     </div>
   );
 }
@@ -212,7 +210,7 @@ function PriorityItem({
         />
         <div className="min-w-0 flex-1">
           <p className="flex items-center gap-2">
-            <span className="truncate text-[19px] font-extrabold text-ink-900">{ingredient.name}</span>
+            <span className="truncate text-[19px] font-bold tracking-[-0.01em] text-ink-900">{ingredient.name}</span>
             <ExpiryBadge expiresAt={ingredient.expiresAt} size="sm" />
           </p>
           <p className="mt-0.5 text-[15.5px] leading-snug text-ink-600">{whyNow(ingredient)}</p>
@@ -229,7 +227,7 @@ function PriorityItem({
                 <li key={m.recipe.id}>
                   <Link
                     href={`/recipes/${m.recipe.id}`}
-                    className="flex items-center gap-2.5 rounded-xl bg-warmwhite p-2 pr-2.5 transition-colors hover:bg-fresh-50"
+                    className="flex items-center gap-2.5 rounded-2xl bg-warmwhite p-2 pr-3 ring-1 ring-inset ring-ink-900/[0.04] transition-colors hover:bg-fresh-50"
                   >
                     <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-cream">
                       <Image
@@ -270,7 +268,7 @@ function PriorityItem({
             type="button"
             onClick={() => onDiscard(ingredient)}
             aria-label={`${ingredient.name} 버렸어요`}
-            className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-2xl border border-coral-100 bg-coral-50 text-[16px] font-semibold text-coral-700 hover:bg-coral-100"
+            className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-full border border-coral-100 bg-coral-50 text-[16px] font-semibold text-coral-700 hover:bg-coral-100"
           >
             버렸어요
           </button>

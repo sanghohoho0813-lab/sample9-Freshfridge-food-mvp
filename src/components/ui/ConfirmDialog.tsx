@@ -37,7 +37,7 @@ export default function ConfirmDialog({
           tabIndex={-1}
           onClick={(e) => e.stopPropagation()}
         >
-          <h3 id="confirm-title" className="text-[20.5px] font-extrabold text-ink-900">
+          <h3 id="confirm-title" className="text-[20.5px] font-bold text-ink-900">
             {title}
           </h3>
           {description && <p className="mt-2 text-[16.5px] leading-relaxed text-ink-500">{description}</p>}

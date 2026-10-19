@@ -7,7 +7,8 @@ test.describe("먹었어요 · 버렸어요", () => {
     await expect(focus).toBeVisible();
     // 급한 재료를 쓰는 요리를 근거(어떤 재료를 쓰는지 · 살 것)와 함께 바로 제안한다
     await expect(focus.getByRole("link", { name: /버섯 두부전골 만들기/ })).toBeVisible();
-    await expect(focus.getByText(/두부·새송이버섯 함께 사용 · 재료 다 있어요/)).toBeVisible();
+    await expect(focus.getByText("두부·새송이버섯 함께 사용")).toBeVisible();
+    await expect(focus.getByText("재료 다 있어요")).toBeVisible();
 
     const logsBefore = (await app.state()).logs.length;
     await page.getByRole("button", { name: "우유 먹었어요", exact: true }).click();

@@ -24,8 +24,8 @@ export function StepButton({
       aria-label={label ?? (dir === "down" ? "수량 줄이기" : "수량 늘리기")}
       onClick={onClick}
       disabled={disabled}
-      className={`grid shrink-0 place-items-center border border-ink-300/40 bg-white text-ink-700 transition-all hover:border-fresh-300 active:scale-95 disabled:pointer-events-none disabled:opacity-30 ${
-        size === "sm" ? "h-11 w-11 rounded-xl" : "h-[52px] w-[52px] rounded-2xl"
+      className={`grid shrink-0 place-items-center border border-ink-900/[0.12] bg-white text-ink-700 transition-all hover:border-fresh-300 active:scale-95 disabled:pointer-events-none disabled:opacity-30 ${
+        size === "sm" ? "h-11 w-11 rounded-full" : "h-[52px] w-[52px] rounded-full"
       }`}
     >
       <Icon size={size === "sm" ? 18 : 20} aria-hidden />

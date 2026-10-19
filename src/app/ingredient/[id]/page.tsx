@@ -20,7 +20,9 @@ import ChoiceChip from "@/components/ui/ChoiceChip";
 import Field, { INPUT_ERROR } from "@/components/ui/Field";
 import { QuantityInput } from "@/components/ui/Stepper";
 import { toAmount, validateDates, validateQuantity } from "@/lib/validation";
-import RecipeCard from "@/components/RecipeCard";
+import RecipeCard, { RecipeList } from "@/components/RecipeCard";
+import SectionHeader from "@/components/SectionHeader";
+import StickyActionBar from "@/components/ui/StickyActionBar";
 import { useIngredientActions } from "@/components/useIngredientActions";
 
 export default function IngredientDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -81,7 +83,7 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ id:
             className={`h-24 w-24 text-5xl ${eaten ? "bg-fresh-50" : "bg-coral-50 grayscale"}`}
             sizes="96px"
           />
-          <p className="text-[22px] font-extrabold text-ink-900">
+          <p className="text-[22px] font-bold text-ink-900">
             {eaten ? `${ingredient.name}, 다 먹었어요` : `${ingredient.name}, 정리했어요`}
           </p>
           <p className="text-[16.5px] text-ink-500">
@@ -107,50 +109,37 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ id:
   const level = expiryLevel(ingredient.expiresAt);
 
   return (
-    <div className="mx-auto max-w-3xl space-y-5">
+    <div className="mx-auto max-w-6xl">
       <BackButton fallback="/fridge" />
 
-      <div className="card overflow-hidden">
-        <div className={`flex items-center gap-4 p-5 sm:gap-5 sm:p-6 ${HERO_BG[level]}`}>
-          <IngredientThumb
-            name={ingredient.name}
-            category={ingredient.category}
-            className="w-20 rounded-3xl bg-white/80 text-[40px] shadow-soft sm:w-24"
-            sizes="96px"
-          />
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              <h1 className="text-[26px] font-extrabold leading-tight text-ink-900 sm:text-[28.5px]">
-                {ingredient.name}
-              </h1>
+      <div className="mt-2 grid gap-6 lg:mt-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-start lg:gap-10">
+        {/* 재료 사진 — 바탕색이 기한 상태를 따른다 */}
+        <div className="-mx-4 sm:mx-0 lg:sticky lg:top-24">
+          <div
+            className={`relative aspect-[16/10] w-full overflow-hidden sm:aspect-[4/3] sm:rounded-card ${HERO_BG[level]}`}
+          >
+            <IngredientThumb
+              name={ingredient.name}
+              category={ingredient.category}
+              className="absolute inset-0 h-full w-full rounded-none p-8 sm:p-12"
+              sizes="(max-width: 1024px) 100vw, 560px"
+            />
+            <span className="absolute left-4 top-4">
               <ExpiryBadge expiresAt={ingredient.expiresAt} size="lg" />
-            </div>
-            <p className="mt-1 text-[17.5px] font-semibold text-ink-700">{expiryLine(ingredient.expiresAt)}</p>
-            <p className="mt-0.5 text-[16px] text-ink-500">
-              {formatAmount(ingredient.quantity, ingredient.unit)} 남음 · {CATEGORY_LABELS[ingredient.category]}
-            </p>
+            </span>
           </div>
         </div>
 
-        <div className="space-y-5 p-4 sm:p-6">
-          {/* 핵심 행동 */}
-          <div className="grid grid-cols-2 gap-2">
-            <button type="button" onClick={() => eat(ingredient)} className="btn-primary min-h-[52px]">
-              <Check size={21} />
-              먹었어요
-            </button>
-            <button
-              type="button"
-              onClick={() => discard(ingredient)}
-              className="inline-flex min-h-[52px] items-center justify-center gap-1.5 rounded-2xl border border-coral-100 bg-coral-50 px-4 text-[18px] font-semibold text-coral-700 transition-all duration-200 hover:bg-coral-100 active:scale-[0.98]"
-            >
-              <Trash2 size={21} />
-              버렸어요
-            </button>
+        <div className="min-w-0 space-y-7">
+          <div>
+            <h1 className="text-[28px] font-bold leading-tight tracking-[-0.025em] text-ink-900 sm:text-[32px]">
+              {ingredient.name}
+            </h1>
+            <p className={`mt-1.5 text-[18px] font-semibold ${LINE_TONE[level]}`}>{expiryLine(ingredient.expiresAt)}</p>
+            <p className="mt-0.5 text-[16.5px] text-ink-500">
+              {formatAmount(ingredient.quantity, ingredient.unit)} 남음 · {CATEGORY_LABELS[ingredient.category]}
+            </p>
           </div>
-          <Link href={`/recipes?with=${encodeURIComponent(ingredient.name)}`} className="btn-soft min-h-[52px] w-full">
-            <ChefHat size={21} />이 재료로 만들 요리
-          </Link>
 
           {editing ? (
             <IngredientEditForm
@@ -164,35 +153,40 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ id:
               }}
             />
           ) : (
-            <div className="rounded-2xl bg-warmwhite">
-              <div className="flex items-center justify-between gap-2 px-4 pt-2">
-                <h2 className="text-[16.5px] font-bold text-ink-700">보관 정보</h2>
+            <section
+              aria-labelledby="storage-title"
+              className="rounded-card bg-white ring-1 ring-inset ring-ink-900/[0.07]"
+            >
+              <div className="flex items-center justify-between gap-2 px-4 pt-2 sm:px-5">
+                <h2 id="storage-title" className="text-[16px] font-semibold text-ink-500">
+                  보관 정보
+                </h2>
                 <button
                   type="button"
                   onClick={() => setEditing(true)}
-                  className="-mr-2 inline-flex min-h-[44px] items-center gap-1 rounded-xl px-2 text-[15.5px] font-semibold text-fresh-700 hover:bg-fresh-50"
+                  className="-mr-2 inline-flex min-h-[44px] items-center gap-1 rounded-full px-2.5 text-[15.5px] font-semibold text-fresh-700 hover:bg-fresh-50"
                 >
-                  <PencilLine size={17} />
+                  <PencilLine size={17} aria-hidden />
                   정보 수정
                 </button>
               </div>
-              <dl className="grid grid-cols-2 gap-x-3 gap-y-3 px-4 pb-4 pt-1 text-[16.5px]">
+              <dl className="grid grid-cols-2 gap-x-3 gap-y-3 px-4 pb-4 pt-1 text-[17px] sm:px-5">
                 <div>
-                  <dt className="text-[15px] text-ink-500">보관 위치</dt>
-                  <dd className="font-bold text-ink-800">{STORAGE_LABELS[ingredient.storage]}</dd>
+                  <dt className="text-[14.5px] text-ink-500">보관 위치</dt>
+                  <dd className="font-semibold text-ink-900">{STORAGE_LABELS[ingredient.storage]}</dd>
                 </div>
                 <div>
-                  <dt className="text-[15px] text-ink-500">구매일</dt>
-                  <dd className="font-bold text-ink-800">{formatKoreanDate(ingredient.purchasedAt)}</dd>
+                  <dt className="text-[14.5px] text-ink-500">구매일</dt>
+                  <dd className="font-semibold text-ink-900">{formatKoreanDate(ingredient.purchasedAt)}</dd>
                 </div>
                 {ingredient.memo && (
                   <div className="col-span-2">
-                    <dt className="text-[15px] text-ink-500">메모</dt>
+                    <dt className="text-[14.5px] text-ink-500">메모</dt>
                     <dd className="font-medium text-ink-800">{ingredient.memo}</dd>
                   </div>
                 )}
               </dl>
-            </div>
+            </section>
           )}
 
           {lastUse && (
@@ -201,24 +195,54 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ id:
             </p>
           )}
 
+          <section aria-labelledby="related-title">
+            <SectionHeader
+              id="related-title"
+              title={`${josa(ingredient.name, "으로/로")} 만들 수 있어요`}
+              moreHref={`/recipes?with=${encodeURIComponent(ingredient.name)}`}
+              moreLabel="이 재료로 만들 요리"
+            />
+            {relatedRecipes.length > 0 ? (
+              <RecipeList auto={false}>
+                {relatedRecipes.map((m) => (
+                  <li key={m.recipe.id}>
+                    <RecipeCard match={m} layout="row" />
+                  </li>
+                ))}
+              </RecipeList>
+            ) : (
+              <p className="rounded-card bg-white px-4 py-4 text-[16px] text-ink-500 ring-1 ring-inset ring-ink-900/[0.07]">
+                <ChefHat size={18} className="mr-1.5 inline -translate-y-px text-ink-400" aria-hidden />
+                지금 냉장고 재료로 함께 만들 요리가 없어요.
+              </p>
+            )}
+          </section>
+
           <p className="text-[14.5px] leading-relaxed text-ink-500">
             보관 상태가 좋지 않다면 기한 전이라도 드시지 마세요.
           </p>
+
+          {/* 핵심 행동 — 모바일은 화면 아래 고정 */}
+          {!editing && (
+            <StickyActionBar>
+              <div className="grid grid-cols-[1fr_1.5fr] gap-2">
+                <button
+                  type="button"
+                  onClick={() => discard(ingredient)}
+                  className="inline-flex min-h-[56px] items-center justify-center gap-1.5 rounded-full border border-coral-100 bg-coral-50 px-4 text-[18px] font-semibold text-coral-700 transition-all duration-200 hover:bg-coral-100 active:scale-[0.98]"
+                >
+                  <Trash2 size={20} aria-hidden />
+                  버렸어요
+                </button>
+                <button type="button" onClick={() => eat(ingredient)} className="btn-primary min-h-[56px]">
+                  <Check size={21} aria-hidden />
+                  먹었어요
+                </button>
+              </div>
+            </StickyActionBar>
+          )}
         </div>
       </div>
-
-      {relatedRecipes.length > 0 && (
-        <section>
-          <h2 className="mb-3 text-[20.5px] font-extrabold text-ink-900">
-            {josa(ingredient.name, "으로/로")} 만들 수 있어요
-          </h2>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
-            {relatedRecipes.map((m) => (
-              <RecipeCard key={m.recipe.id} match={m} layout="row" />
-            ))}
-          </div>
-        </section>
-      )}
 
       {actionSheet}
     </div>
@@ -234,6 +258,14 @@ function expiryLine(expiresAt: string | null): string {
   if (d === 1) return "내일까지예요";
   return `${formatKoreanDate(expiresAt)}까지`;
 }
+
+const LINE_TONE: Record<string, string> = {
+  expired: "text-coral-700",
+  urgent: "text-coral-700",
+  soon: "text-amberish-700",
+  ok: "text-ink-800",
+  unknown: "text-ink-600",
+};
 
 const HERO_BG: Record<string, string> = {
   expired: "bg-coral-50",
@@ -281,9 +313,9 @@ function IngredientEditForm({
       onSubmit={save}
       noValidate
       aria-labelledby="edit-title"
-      className="animate-pop-in space-y-5 rounded-2xl border border-fresh-200 bg-white p-4"
+      className="animate-pop-in space-y-5 rounded-card bg-white p-4 ring-1 ring-inset ring-fresh-600/30 sm:p-5"
     >
-      <h2 id="edit-title" className="text-[17.5px] font-extrabold text-ink-900">
+      <h2 id="edit-title" className="text-[17.5px] font-bold text-ink-900">
         정보 수정
       </h2>
 

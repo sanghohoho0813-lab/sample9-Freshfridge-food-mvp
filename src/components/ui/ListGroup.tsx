@@ -16,11 +16,11 @@ export default function ListGroup({
 }) {
   const grid =
     columns === 2
-      ? "xl:grid xl:grid-cols-2 xl:[&>li:nth-child(odd)]:border-r xl:[&>li:nth-child(odd):last-child]:border-r-0"
+      ? "xl:grid xl:grid-cols-2 xl:[&>li:nth-child(odd)]:border-r xl:[&>li:nth-child(odd)]:border-ink-900/[0.06] xl:[&>li:nth-child(odd):last-child]:border-r-0"
       : "";
   return (
-    <div className={`overflow-hidden rounded-card border border-ink-300/25 bg-white ${className}`}>
-      <ul className={`-mb-px [&>li]:border-b [&>li]:border-ink-300/20 ${grid}`}>{children}</ul>
+    <div className={`overflow-hidden rounded-card border border-ink-900/[0.07] bg-white shadow-soft ${className}`}>
+      <ul className={`-mb-px [&>li]:border-b [&>li]:border-ink-900/[0.06] ${grid}`}>{children}</ul>
     </div>
   );
 }

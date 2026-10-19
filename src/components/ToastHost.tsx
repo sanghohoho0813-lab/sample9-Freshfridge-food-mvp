@@ -29,7 +29,7 @@ export default function ToastHost() {
                 t.action?.onClick();
                 dismissToast(t.id);
               }}
-              className="ml-1 min-h-[40px] shrink-0 rounded-xl px-3 text-[16.5px] font-bold text-mint-300 transition-colors hover:bg-white/10"
+              className="ml-1 min-h-[40px] shrink-0 rounded-full px-3 text-[16.5px] font-bold text-mint-300 transition-colors hover:bg-white/10"
             >
               {t.action.label}
             </button>

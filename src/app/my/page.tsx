@@ -82,13 +82,13 @@ export default function MyPage() {
       <section className="card overflow-hidden">
         <div className="flex items-center gap-4 p-4 sm:p-5">
           <span
-            className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-fresh-100 text-[26px] font-extrabold text-fresh-700"
+            className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-fresh-100 text-[26px] font-bold text-fresh-700"
             aria-hidden
           >
             {state.userName.slice(0, 1)}
           </span>
           <div className="min-w-0">
-            <p className="text-[22px] font-extrabold text-ink-900">{state.userName}님</p>
+            <p className="text-[22px] font-bold text-ink-900">{state.userName}님</p>
             <p className="mt-0.5 text-[16px] text-ink-500">
               {report.savedAmount > 0
                 ? `최근 30일 동안 ${formatWon(report.savedAmount)}을 아꼈어요`
@@ -96,11 +96,11 @@ export default function MyPage() {
             </p>
           </div>
         </div>
-        <dl className="grid grid-cols-3 border-t border-ink-300/20">
+        <dl className="grid grid-cols-3 border-t border-ink-900/[0.06]">
           {stats.map((s, i) => (
-            <div key={s.label} className={`px-2 py-3.5 text-center ${i > 0 ? "border-l border-ink-300/20" : ""}`}>
+            <div key={s.label} className={`px-2 py-3.5 text-center ${i > 0 ? "border-l border-ink-900/[0.06]" : ""}`}>
               <dt className="whitespace-nowrap text-[14.5px] text-ink-500">{s.label}</dt>
-              <dd className="mt-0.5 text-[20.5px] font-extrabold text-ink-900">{s.value}</dd>
+              <dd className="mt-0.5 text-[20.5px] font-bold text-ink-900">{s.value}</dd>
             </div>
           ))}
         </dl>
@@ -114,10 +114,10 @@ export default function MyPage() {
               href={href}
               className="flex min-h-[64px] items-center gap-3.5 px-4 py-3 transition-colors hover:bg-warmwhite/70"
             >
-              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-ink-300/10 text-ink-600">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-ink-900/[0.04] text-ink-600">
                 <Icon size={22} aria-hidden />
               </span>
-              <span className="min-w-0 flex-1 text-[18px] font-bold text-ink-900">{label}</span>
+              <span className="min-w-0 flex-1 text-[18px] font-semibold text-ink-900">{label}</span>
               <span className="shrink-0 text-[15.5px] font-medium text-ink-500">{value}</span>
               <ChevronRight size={20} className="shrink-0 text-ink-300" aria-hidden />
             </Link>
@@ -126,7 +126,7 @@ export default function MyPage() {
       </ListGroup>
 
       {/* 데모 데이터 */}
-      <section className="flex items-center justify-between gap-3 rounded-card border border-ink-300/25 bg-white px-4 py-3.5">
+      <section className="flex items-center justify-between gap-3 rounded-card border border-ink-900/[0.07] bg-white px-4 py-3.5">
         <div className="min-w-0">
           <p className="text-[17px] font-bold text-ink-800">데모 데이터 초기화</p>
           <p className="text-[15px] text-ink-500">처음 예시 상태로 되돌려요</p>

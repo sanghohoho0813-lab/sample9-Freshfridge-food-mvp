@@ -4,6 +4,7 @@ import { use, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
+  AlarmClock,
   ArrowRight,
   Check,
   ChefHat,
@@ -28,6 +29,7 @@ import EmptyState from "@/components/EmptyState";
 import IngredientThumb from "@/components/IngredientThumb";
 import BackButton from "@/components/ui/BackButton";
 import ChoiceChip from "@/components/ui/ChoiceChip";
+import StickyActionBar from "@/components/ui/StickyActionBar";
 
 interface CookLine {
   name: string;
@@ -140,55 +142,68 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ id: str
   };
 
   return (
-    <div className="mx-auto max-w-3xl space-y-5">
+    <div className="mx-auto max-w-6xl">
       <BackButton fallback="/recipes" />
 
-      <div className="card overflow-hidden">
-        {/* 레시피 대표이미지 (16:9) */}
-        <div className="relative aspect-video w-full bg-cream">
-          <Image
-            src={recipeImage(recipe.image)}
-            alt={`${recipe.name} 완성 사진`}
-            fill
-            priority
-            sizes="(max-width: 768px) 100vw, 768px"
-            className="object-contain p-4"
-          />
+      <div className="mt-2 grid gap-6 lg:mt-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-start lg:gap-10">
+        {/* 대표 이미지 — 모바일은 화면 폭 가득, 데스크톱은 왼쪽에 고정 */}
+        <div className="-mx-4 sm:mx-0 lg:sticky lg:top-24">
+          <div className="relative aspect-[4/3] w-full overflow-hidden bg-cream sm:rounded-card sm:border sm:border-ink-900/[0.06]">
+            <Image
+              src={recipeImage(recipe.image)}
+              alt={`${recipe.name} 완성 사진`}
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 560px"
+              className="object-contain p-6 sm:p-8"
+            />
+          </div>
         </div>
 
-        <div className="space-y-7 p-4 sm:p-6">
+        <div className="min-w-0 space-y-8">
           <div>
-            <h1 className="text-[26px] font-extrabold leading-tight tracking-tight text-ink-900 sm:text-[28.5px]">
+            <h1 className="text-[28px] font-bold leading-tight tracking-[-0.025em] text-ink-900 sm:text-[32px]">
               {recipe.name}
             </h1>
-            <p className="mt-1 text-[17px] text-ink-500">{recipe.description}</p>
-            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[16px] text-ink-600">
-              <span className="inline-flex items-center gap-1.5">
-                <Clock3 size={18} aria-hidden /> {recipe.minutes}분
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <Gauge size={18} aria-hidden /> {recipe.difficulty}
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <Users size={18} aria-hidden /> {recipe.servings}인분
-              </span>
-              {lastCooked && <span className="text-ink-500">· {relativeDay(lastCooked)} 만들었어요</span>}
-            </div>
+            <p className="mt-1.5 text-[17px] leading-relaxed text-ink-500">{recipe.description}</p>
+            <ul className="mt-4 flex flex-wrap gap-2 text-[15.5px] font-medium text-ink-700">
+              <li className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 ring-1 ring-inset ring-ink-900/[0.08]">
+                <Clock3 size={17} className="text-ink-400" aria-hidden /> {recipe.minutes}분
+              </li>
+              <li className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 ring-1 ring-inset ring-ink-900/[0.08]">
+                <Gauge size={17} className="text-ink-400" aria-hidden /> {recipe.difficulty}
+              </li>
+              <li className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 ring-1 ring-inset ring-ink-900/[0.08]">
+                <Users size={17} className="text-ink-400" aria-hidden /> {recipe.servings}인분
+              </li>
+              {lastCooked && (
+                <li className="inline-flex items-center px-1 py-1.5 text-ink-500">
+                  {relativeDay(lastCooked)} 만들었어요
+                </li>
+              )}
+            </ul>
           </div>
 
           {/* 왜 이 요리인지 — 데이터로 확인되는 사실만 */}
           {!showResult && (
-            <section aria-labelledby="why-title" className="rounded-2xl bg-warmwhite p-4">
-              <h2 id="why-title" className="text-[16.5px] font-bold text-ink-700">
+            <section
+              aria-labelledby="why-title"
+              className="rounded-card bg-white p-4 ring-1 ring-inset ring-ink-900/[0.07] sm:p-5"
+            >
+              <h2 id="why-title" className="text-[16px] font-semibold text-ink-500">
                 지금 이 요리를 하면
               </h2>
-              <ul className="mt-2 space-y-1.5 text-[16.5px] leading-snug text-ink-800">
-                <li className="flex gap-2">
-                  <span className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-amberish-500" aria-hidden />
+              <ul className="mt-2.5 space-y-2 text-[16.5px] leading-snug text-ink-800">
+                <li className="flex gap-2.5">
+                  <AlarmClock
+                    size={19}
+                    className={`mt-px shrink-0 ${match.urgentOwned.length > 0 ? "text-amberish-600" : "text-ink-300"}`}
+                    aria-hidden
+                  />
                   {match.urgentOwned.length > 0 ? (
                     <span>
                       기한이 급한{" "}
-                      <b className="text-amberish-700">
+                      <b className="font-semibold text-amberish-700">
                         {match.urgentOwned
                           .map((u) => `${u.name}(${dDayLabel(u.ingredient?.expiresAt ?? null)})`)
                           .join(" · ")}
@@ -199,8 +214,12 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ id: str
                     <span>기한이 급한 재료는 쓰지 않아요</span>
                   )}
                 </li>
-                <li className="flex gap-2">
-                  <span className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-fresh-500" aria-hidden />
+                <li className="flex gap-2.5">
+                  <ShoppingBasket
+                    size={19}
+                    className={`mt-px shrink-0 ${why.ready ? "text-fresh-600" : "text-ink-400"}`}
+                    aria-hidden
+                  />
                   <span>
                     {why.ready
                       ? "필요한 재료가 모두 냉장고에 있어요"
@@ -213,11 +232,11 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ id: str
           )}
 
           {/* 재료 */}
-          <section>
-            <div className="mb-3 flex items-end justify-between gap-3">
-              <h2 className="text-[20.5px] font-extrabold text-ink-900">
+          <section aria-labelledby="ingredients-title">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h2 id="ingredients-title" className="section-title">
                 재료{" "}
-                <span className="text-[16.5px] font-bold tabular-nums text-ink-400">
+                <span className="text-[16px] font-medium tabular-nums text-ink-500">
                   {match.ownedCount}/{match.matched.length} 있음
                 </span>
               </h2>
@@ -232,19 +251,19 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ id: str
                     );
                     undoToast(`없는 재료 ${missingToAdd.length}개를 장보기에 담았어요`, token);
                   }}
-                  className="-mr-2 inline-flex min-h-[44px] shrink-0 items-center gap-1 rounded-xl px-2 text-[15.5px] font-semibold text-fresh-700 hover:bg-fresh-50"
+                  className="-mr-2 inline-flex min-h-[44px] shrink-0 items-center gap-1 rounded-full px-2.5 text-[15.5px] font-semibold text-fresh-700 hover:bg-fresh-50"
                 >
                   <ShoppingBasket size={18} aria-hidden />
                   없는 재료 모두 담기
                 </button>
               )}
             </div>
-            <ul className="divide-y divide-ink-300/20 overflow-hidden rounded-2xl border border-ink-300/25">
+            <ul className="divide-y divide-ink-900/[0.06] overflow-hidden rounded-card border border-ink-900/[0.07] bg-white">
               {match.matched.map((m) => {
                 const urgent = m.owned && m.dLeft !== null && m.dLeft <= 3;
                 const ing = m.ingredient;
                 return (
-                  <li key={m.name} className="flex items-center gap-3 bg-white px-3 py-2.5 sm:px-4">
+                  <li key={m.name} className="flex items-center gap-3 px-3.5 py-3 sm:px-4">
                     <IngredientThumb
                       name={m.name}
                       category={ing?.category ?? ingredientDefaults(m.name).category}
@@ -252,14 +271,18 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ id: str
                       sizes="48px"
                     />
                     <div className="min-w-0 flex-1">
-                      <p className="text-[18px] font-bold text-ink-900">
-                        {m.name} <span className="font-medium text-ink-500">{m.amount}</span>
-                        {!m.essential && <span className="ml-1 text-[14px] font-semibold text-ink-400">선택</span>}
+                      <p className="text-[17.5px] font-semibold text-ink-900">
+                        {m.name} <span className="font-normal text-ink-500">{m.amount}</span>
+                        {!m.essential && (
+                          <span className="ml-1.5 rounded-full bg-ink-900/[0.05] px-2 py-0.5 align-[2px] text-[13px] font-medium text-ink-500">
+                            선택
+                          </span>
+                        )}
                       </p>
                       {m.owned && ing ? (
                         <p
-                          className={`text-[15.5px] ${
-                            m.short || urgent ? "font-semibold text-amberish-700" : "text-fresh-700"
+                          className={`text-[15px] ${
+                            m.short || urgent ? "font-medium text-amberish-700" : "text-fresh-700"
                           }`}
                         >
                           {m.short
@@ -269,7 +292,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ id: str
                               : `냉장고 ${formatAmount(ing.quantity, ing.unit)}`}
                         </p>
                       ) : (
-                        <p className="text-[15.5px] text-ink-500">
+                        <p className="text-[15px] text-ink-500">
                           {m.essential ? "냉장고에 없어요" : "없어도 만들 수 있어요"}
                         </p>
                       )}
@@ -291,7 +314,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ id: str
                             const token = addShoppingItem(m.name, { fromRecipe: recipe.name });
                             undoToast(`${josa(m.name, "을/를")} 장보기에 담았어요`, token);
                           }}
-                          className="inline-flex min-h-[44px] shrink-0 items-center gap-1 rounded-xl border border-ink-300/40 bg-white px-3 text-[15.5px] font-semibold text-ink-700 transition-all hover:border-fresh-300 active:scale-95"
+                          className="inline-flex min-h-[42px] shrink-0 items-center gap-1 rounded-full border border-ink-900/[0.12] bg-white px-3.5 text-[15.5px] font-semibold text-ink-800 transition-all hover:border-fresh-500 hover:text-fresh-700 active:scale-95"
                         >
                           <Plus size={17} aria-hidden />
                           장보기
@@ -307,15 +330,17 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ id: str
           </section>
 
           {/* 조리방법 */}
-          <section>
-            <h2 className="mb-2.5 text-[20.5px] font-extrabold text-ink-900">조리방법</h2>
-            <ol className="space-y-3">
+          <section aria-labelledby="steps-title">
+            <h2 id="steps-title" className="section-title mb-3.5">
+              조리방법
+            </h2>
+            <ol className="space-y-4">
               {recipe.steps.map((step, i) => (
-                <li key={i} className="flex gap-3">
-                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-fresh-100 text-[16.5px] font-extrabold text-fresh-700">
+                <li key={i} className="flex gap-3.5">
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ink-900 text-[15px] font-semibold tabular-nums text-white">
                     {i + 1}
                   </span>
-                  <p className="pt-0.5 text-[18px] leading-relaxed text-ink-700">{step}</p>
+                  <p className="pt-0.5 text-[17.5px] leading-relaxed text-ink-700">{step}</p>
                 </li>
               ))}
             </ol>
@@ -341,29 +366,39 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ id: str
               urgentLeft={urgentLeft}
             />
           ) : (
-            <div>
-              {!why.ready && match.ownedCount > 0 && (
-                <p className="mb-2 flex items-start gap-1.5 text-[15.5px] text-amberish-700">
-                  <TriangleAlert size={17} className="mt-[3px] shrink-0" aria-hidden />
-                  {josa(match.missingEssential.map((m) => m.name).join(", "), "이/가")} 냉장고에 없어요. 그래도
-                  만들었다면 있는 재료만 빠져요.
+            <>
+              <div className="space-y-2">
+                {!why.ready && match.ownedCount > 0 && (
+                  <p className="flex items-start gap-1.5 text-[15.5px] text-amberish-700">
+                    <TriangleAlert size={17} className="mt-[3px] shrink-0" aria-hidden />
+                    {josa(match.missingEssential.map((m) => m.name).join(", "), "이/가")} 냉장고에 없어요. 그래도
+                    만들었다면 있는 재료만 빠져요.
+                  </p>
+                )}
+                <p className="text-[15px] text-ink-500">
+                  {match.ownedCount === 0
+                    ? "냉장고에 있는 재료가 없어요. 먼저 장보기에 담아보세요."
+                    : "요리했어요를 누르면 쓴 만큼 냉장고에서 빠지고, 소비 기록과 리포트에 남아요."}
                 </p>
-              )}
-              <button
-                type="button"
-                onClick={handleCook}
-                disabled={match.ownedCount === 0}
-                className="btn-primary min-h-[58px] w-full text-[20px]"
-              >
-                <ChefHat size={23} aria-hidden />
-                요리했어요
-              </button>
-              <p className="mt-2 text-center text-[15px] text-ink-500">
-                {match.ownedCount === 0
-                  ? "냉장고에 있는 재료가 없어요. 먼저 장보기에 담아보세요."
-                  : "쓴 만큼 냉장고에서 빠지고, 소비 기록과 리포트에 남아요."}
-              </p>
-            </div>
+              </div>
+              <StickyActionBar>
+                <div className="flex items-center gap-4">
+                  <div className="hidden min-w-0 flex-1 sm:block lg:hidden">
+                    <p className="text-[14.5px] text-ink-500">냉장고 재료 사용</p>
+                    <p className="text-[18px] font-bold tabular-nums text-ink-900">{formatWon(usesWorth)}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCook}
+                    disabled={match.ownedCount === 0}
+                    className="btn-primary min-h-[56px] flex-1 text-[19px] sm:flex-[1.4] lg:w-full"
+                  >
+                    <ChefHat size={22} aria-hidden />
+                    요리했어요
+                  </button>
+                </div>
+              </StickyActionBar>
+            </>
           )}
         </div>
       </div>
@@ -401,10 +436,10 @@ function CookDone({
   return (
     <div
       ref={innerRef}
-      className="animate-pop-in scroll-mt-24 space-y-4 rounded-2xl border border-fresh-100 bg-fresh-50/70 p-4 sm:p-5"
+      className="animate-pop-in scroll-mt-24 space-y-3 rounded-card bg-fresh-50 p-4 ring-1 ring-inset ring-fresh-600/10 sm:p-5"
     >
       <div role="status">
-        <p className="flex items-center gap-2 text-[21px] font-extrabold text-ink-900">
+        <p className="flex items-center gap-2 text-[22px] font-bold tracking-[-0.02em] text-ink-900">
           <CircleCheck size={24} className="text-fresh-600" aria-hidden />
           {recipeName} 완성
         </p>
@@ -416,7 +451,7 @@ function CookDone({
 
       {/* 1. 무엇이 얼마나 줄었는지 */}
       {result.lines.length > 0 && (
-        <ul className="divide-y divide-fresh-100 rounded-xl bg-white px-4" aria-label="냉장고에서 뺀 재료">
+        <ul className="divide-y divide-ink-900/[0.06] rounded-2xl bg-white px-4" aria-label="냉장고에서 뺀 재료">
           {result.lines.map((l) => (
             <li key={l.name} className="flex items-center justify-between gap-3 py-2.5 text-[16.5px]">
               <span className="font-semibold text-ink-800">{l.name}</span>
@@ -434,8 +469,8 @@ function CookDone({
 
       {/* 2. 다 쓴 재료 — 다시 살 것만 골라 담기 */}
       {result.usedUp.length > 0 && (
-        <div className="rounded-xl bg-white p-4">
-          <p className="text-[16.5px] font-bold text-ink-900">다 쓴 재료, 다시 살까요?</p>
+        <div className="rounded-2xl bg-white p-4">
+          <p className="text-[16.5px] font-semibold text-ink-900">다 쓴 재료, 다시 살까요?</p>
           {rebuyDone ? (
             <p className="mt-1.5 flex items-center gap-1.5 text-[16px] font-semibold text-fresh-700">
               <Check size={18} aria-hidden /> 장보기에 담았어요 ·{" "}
@@ -479,7 +514,7 @@ function CookDone({
       {/* 3. 이번 달 누적 효과 */}
       <Link
         href="/report"
-        className="flex items-center justify-between gap-3 rounded-xl bg-white px-4 py-3 transition-colors hover:bg-warmwhite"
+        className="flex items-center justify-between gap-3 rounded-2xl bg-white px-4 py-3.5 transition-colors hover:bg-warmwhite"
       >
         <span className="text-[16px] text-ink-700">
           {month}월에 먹어서 아낀 금액 <b className="tabular-nums text-ink-900">{formatWon(monthSaved)}</b>

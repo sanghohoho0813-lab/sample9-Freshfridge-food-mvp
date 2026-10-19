@@ -20,34 +20,47 @@ body {
 
 /* 키보드로 이동할 때만 보이는 포커스 표시 (입력칸은 자체 포커스 링을 쓴다) */
 :focus-visible:not(input):not(select):not(textarea) {
-  outline: 2px solid #3f9c4b;
+  outline: 2px solid #2e7f39;
   outline-offset: 2px;
 }
 
 @layer components {
+  /* 카드: 중립색 머리카락 테두리 + 옅은 그림자 (초록 테두리는 쓰지 않는다 — 색은 상태와 행동에만) */
   .card {
-    @apply rounded-card border border-fresh-100/80 bg-white shadow-soft;
+    @apply rounded-card border border-ink-900/[0.07] bg-white shadow-soft;
   }
   .card-hover {
-    @apply transition-all duration-200 hover:-translate-y-0.5 hover:border-fresh-200 hover:shadow-lift;
+    @apply transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lift;
   }
   .chip {
     @apply inline-flex items-center gap-1.5 rounded-chip px-3.5 py-1.5 text-[16.5px] font-medium transition-colors duration-200;
   }
+  /* 버튼은 알약 모양 — 중요도에 따라 채움(주요) · 옅은 채움(보조) · 테두리(그 밖) */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-2xl bg-fresh-600 px-4 py-2.5 text-[18px] font-semibold text-white shadow-soft transition-all duration-200 hover:bg-fresh-700 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-full bg-fresh-600 px-5 py-2.5 text-[18px] font-semibold text-white shadow-cta transition-all duration-200 hover:bg-fresh-700 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 disabled:shadow-none;
   }
   .btn-soft {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-2xl bg-fresh-50 px-4 py-2.5 text-[18px] font-semibold text-fresh-700 transition-all duration-200 hover:bg-fresh-100 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40;
+    @apply inline-flex items-center justify-center gap-1.5 rounded-full bg-fresh-50 px-5 py-2.5 text-[18px] font-semibold text-fresh-700 transition-all duration-200 hover:bg-fresh-100 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40;
   }
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-2xl border border-ink-300/40 bg-white px-4 py-2.5 text-[18px] font-semibold text-ink-700 transition-all duration-200 hover:border-fresh-200 hover:bg-fresh-50 active:scale-[0.98];
+    @apply inline-flex items-center justify-center gap-1.5 rounded-full border border-ink-900/[0.12] bg-white px-5 py-2.5 text-[18px] font-semibold text-ink-800 transition-all duration-200 hover:border-ink-900/20 hover:bg-ink-900/[0.03] active:scale-[0.98];
   }
   .input {
-    @apply w-full rounded-2xl border border-ink-300/40 bg-white px-4 py-2.5 text-[19.5px] text-ink-900 outline-none transition-all duration-200 placeholder:text-ink-400 focus:border-fresh-400 focus:ring-2 focus:ring-fresh-100;
+    @apply w-full rounded-2xl border border-ink-900/[0.12] bg-white px-4 py-2.5 text-[19.5px] text-ink-900 outline-none transition-all duration-200 placeholder:text-ink-400 focus:border-fresh-500 focus:ring-4 focus:ring-fresh-100;
   }
   .skeleton {
-    @apply animate-shimmer rounded-2xl bg-gradient-to-r from-fresh-50 via-white to-fresh-50 bg-[length:400px_100%];
+    @apply animate-shimmer rounded-2xl bg-gradient-to-r from-ink-900/[0.04] via-ink-900/[0.07] to-ink-900/[0.04] bg-[length:400px_100%];
+  }
+  /* 가로로 넘기는 목록 — 스크롤바는 숨기고 카드 단위로 멈춘다 */
+  .rail {
+    @apply -mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:-mx-6 sm:scroll-px-6 sm:px-6 [&::-webkit-scrollbar]:hidden;
+  }
+  .rail > * {
+    @apply snap-start;
+  }
+  /* 섹션 제목 */
+  .section-title {
+    @apply text-[21px] font-bold tracking-[-0.02em] text-ink-900;
   }
 }
 
@@ -61,6 +74,11 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* 상세 화면의 하단 고정 행동 바가 떠 있는 동안 하단 탭은 숨긴다 (모바일) */
+html.has-action-bar .tab-bar {
+  display: none;
 }
 
 /* 시트·대화상자가 열려 있는 동안 공용 뒤로·앞으로 버튼 숨김 */

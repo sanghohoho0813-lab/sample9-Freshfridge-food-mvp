@@ -58,10 +58,10 @@ function Logo({ compact = false }: { compact?: boolean }) {
       <LogoMark className="h-10 w-10 shrink-0 drop-shadow-sm sm:h-11 sm:w-11" />
       {!compact && (
         <span className="min-w-0 leading-tight">
-          <span className="block truncate text-[22px] font-extrabold tracking-tight text-ink-900 max-[380px]:text-[19px]">
+          <span className="block truncate text-[21px] font-bold tracking-[-0.02em] text-ink-900 max-[380px]:text-[19px]">
             FreshFridge
           </span>
-          <span className="hidden text-[14.5px] font-medium text-ink-500 sm:block">냉장고 식재료 관리</span>
+          <span className="hidden text-[14px] font-medium text-ink-500 sm:block">버리기 전에, 먼저 먹기</span>
         </span>
       )}
     </Link>
@@ -70,7 +70,7 @@ function Logo({ compact = false }: { compact?: boolean }) {
 
 function MvpBanner() {
   return (
-    <div className="border-b border-fresh-100 bg-white">
+    <div className="border-b border-ink-900/[0.06] bg-white">
       <div className="mx-auto flex max-w-[1720px] items-center justify-center gap-3 whitespace-nowrap px-4 py-2 sm:gap-4 sm:py-2.5">
         <Image
           src="/images/mirae-ai-lab-logo.png"
@@ -80,10 +80,10 @@ function MvpBanner() {
           className="h-6 w-auto sm:h-8"
           priority
         />
-        <span className="h-5 w-px shrink-0 bg-fresh-200 sm:h-6" aria-hidden />
+        <span className="h-5 w-px shrink-0 bg-ink-900/10 sm:h-6" aria-hidden />
         <p className="flex items-center gap-2 text-[15.5px] font-semibold text-ink-600">
           <span className="hidden sm:inline">
-            미래에이아이랩이 만든 <span className="font-extrabold text-fresh-700">FreshFridge</span>
+            미래에이아이랩이 만든 <span className="font-bold text-fresh-700">FreshFridge</span>
           </span>
           <span className="rounded-chip bg-fresh-600 px-2.5 py-0.5 text-[13px] font-bold text-white">MVP Sample</span>
         </p>
@@ -112,7 +112,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       <div className="mx-auto flex w-full max-w-[1720px]">
         {/* Desktop sidebar */}
-        <aside className="sticky top-0 hidden h-dvh w-[248px] shrink-0 flex-col gap-6 overflow-y-auto border-r border-fresh-100 bg-white/70 px-3 py-6 backdrop-blur lg:flex">
+        <aside className="sticky top-0 hidden h-dvh w-[248px] shrink-0 flex-col gap-7 overflow-y-auto border-r border-ink-900/[0.06] bg-white px-3 py-6 lg:flex">
           <div className="px-2">
             <Logo />
           </div>
@@ -124,28 +124,32 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                   key={href}
                   href={href}
                   aria-current={active ? "page" : undefined}
-                  className={`flex items-center gap-2.5 rounded-2xl px-2.5 py-2 text-[18.5px] font-semibold transition-colors duration-200 ${
-                    active ? "bg-fresh-50 text-fresh-700" : "text-ink-500 hover:bg-fresh-50/60 hover:text-ink-700"
+                  className={`relative flex min-h-[48px] items-center gap-3 rounded-xl px-3.5 text-[18px] transition-colors duration-200 ${
+                    active
+                      ? "bg-fresh-600/[0.08] font-semibold text-fresh-800"
+                      : "font-medium text-ink-600 hover:bg-ink-900/[0.035] hover:text-ink-900"
                   }`}
                 >
-                  <span
-                    className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl transition-colors duration-200 ${
-                      active ? "bg-fresh-600 text-white" : "bg-ink-300/10 text-ink-500"
-                    }`}
-                  >
-                    <Icon size={21} strokeWidth={active ? 2.4 : 2} aria-hidden />
-                  </span>
+                  {active && (
+                    <span className="absolute inset-y-2.5 left-0 w-[3px] rounded-full bg-fresh-600" aria-hidden />
+                  )}
+                  <Icon
+                    size={22}
+                    strokeWidth={active ? 2.3 : 1.9}
+                    className={active ? "text-fresh-700" : "text-ink-400"}
+                    aria-hidden
+                  />
                   {label}
                 </Link>
               );
             })}
           </nav>
-          <div className="rounded-card border border-fresh-100 bg-gradient-to-br from-fresh-50 to-mint-50 p-4">
-            <p className="text-[15px] font-bold text-fresh-700">버리기 전에, 먼저 먹기</p>
+          <div className="rounded-card bg-warmwhite p-4 ring-1 ring-inset ring-ink-900/[0.05]">
+            <p className="text-[15px] font-semibold text-ink-800">버리기 전에, 먼저 먹기</p>
             <p className="mt-1 text-[14.5px] leading-relaxed text-ink-500">
               기한이 가까운 재료와 그걸로 만들 요리를 매일 챙겨드려요.
             </p>
-            <div className="mt-3 border-t border-fresh-200/70 pt-3">
+            <div className="mt-3 border-t border-ink-900/[0.06] pt-3">
               <p className="text-[12.5px] font-semibold text-ink-400">Made by</p>
               <Image
                 src="/images/mirae-ai-lab-logo.png"
@@ -161,16 +165,16 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         {/* Main column */}
         <div className="flex min-h-dvh w-full min-w-0 flex-col">
           {/* Header */}
-          <header className="sticky top-0 z-30 border-b border-fresh-100/80 bg-warmwhite/90 backdrop-blur">
+          <header className="sticky top-0 z-30 border-b border-ink-900/[0.06] bg-warmwhite/85 backdrop-blur-md backdrop-saturate-150">
             <div className="flex h-16 items-center justify-between gap-2 px-3 sm:h-[72px] sm:gap-3 sm:px-5">
               <div className="min-w-0 flex-1 lg:hidden">
                 <Logo />
               </div>
               <Link
                 href="/search"
-                className="hidden w-full max-w-sm items-center gap-2 rounded-2xl border border-ink-300/30 bg-white px-4 py-2.5 text-sm text-ink-500 transition-colors hover:border-fresh-300 lg:flex"
+                className="hidden w-full max-w-sm items-center gap-2.5 rounded-full border border-ink-900/[0.08] bg-white px-5 py-2.5 text-[17px] text-ink-500 shadow-[0_1px_2px_rgba(38,48,42,0.04)] transition-colors hover:border-ink-900/20 lg:flex"
               >
-                <Search size={22} aria-hidden />
+                <Search size={20} aria-hidden />
                 식재료·레시피 검색
               </Link>
               {/* 오늘 날짜·요일·현재 시각 (데스크톱) */}
@@ -181,18 +185,18 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 <Link
                   href="/search"
                   aria-label="검색"
-                  className="grid h-12 w-12 place-items-center rounded-2xl text-ink-500 transition-colors hover:bg-fresh-50 lg:hidden"
+                  className="grid h-12 w-12 place-items-center rounded-full text-ink-700 transition-colors hover:bg-ink-900/[0.05] lg:hidden"
                 >
-                  <Search size={26} aria-hidden />
+                  <Search size={24} strokeWidth={2.1} aria-hidden />
                 </Link>
                 <Link
                   href="/notifications"
-                  className="relative grid h-12 w-12 place-items-center rounded-2xl text-ink-500 transition-colors hover:bg-fresh-50"
+                  className="relative grid h-12 w-12 place-items-center rounded-full text-ink-700 transition-colors hover:bg-ink-900/[0.05]"
                 >
-                  <Bell size={26} aria-hidden />
+                  <Bell size={24} strokeWidth={2.1} aria-hidden />
                   <span className="sr-only">알림</span>
                   {unread > 0 && (
-                    <span className="absolute right-0.5 top-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-coral-700 px-1 text-[12.5px] font-bold leading-none text-white">
+                    <span className="absolute right-1 top-1 grid h-5 min-w-5 place-items-center rounded-full bg-coral-700 px-1 text-[12.5px] font-bold leading-none text-white ring-2 ring-warmwhite">
                       {unread}
                       <span className="sr-only">개 안 읽음</span>
                     </span>
@@ -201,7 +205,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 <Link
                   href="/my"
                   aria-label="마이페이지"
-                  className="hidden h-12 w-12 place-items-center rounded-2xl bg-fresh-100 text-[18px] font-extrabold text-fresh-700 transition-colors hover:bg-fresh-200 lg:grid"
+                  className="hidden h-11 w-11 place-items-center rounded-full bg-fresh-100 text-[17px] font-bold text-fresh-800 transition-colors hover:bg-fresh-200 lg:grid"
                 >
                   <span aria-hidden>{state.userName.slice(0, 1)}</span>
                 </Link>
@@ -209,11 +213,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           </header>
           {/* 오늘 날짜·요일·현재 시각 (모바일·태블릿) — 스크롤하면 자연스럽게 사라지도록 고정하지 않는다 */}
-          <div className="border-b border-fresh-100/70 px-4 py-2 sm:px-5 lg:hidden">
+          <div className="px-4 pt-2.5 sm:px-6 lg:hidden">
             <LiveClock compact />
           </div>
 
-          <main id="main" tabIndex={-1} className="w-full flex-1 px-4 pb-28 pt-5 outline-none sm:px-6 sm:pt-6 lg:pb-12">
+          <main id="main" tabIndex={-1} className="w-full flex-1 px-4 pb-28 pt-4 outline-none sm:px-6 sm:pt-6 lg:pb-12">
             {/* 본문이 짧거나 아직 불러오는 중이어도 아래 CTA 가 첫 화면에 들어와 있다가 밀려나지 않게(CLS) */}
             <div className="min-h-[calc(100dvh-220px)]">{children}</div>
 
@@ -237,7 +241,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       {/* Mobile bottom navigation */}
       <nav
         aria-label="하단 메뉴"
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-fresh-100 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
+        className="tab-bar fixed inset-x-0 bottom-0 z-40 bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-bar backdrop-blur-md lg:hidden"
       >
         <div className="mx-auto flex max-w-md items-end justify-between px-6 pb-2 pt-1.5">
           {MOBILE_NAV.map(({ href, label, icon: Icon, emphasized, also }) => {
@@ -250,8 +254,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                   aria-label={label}
                   className="-mt-6 flex shrink-0 flex-col items-center gap-1"
                 >
-                  <span className="grid h-[58px] w-[58px] place-items-center rounded-full bg-fresh-600 text-white shadow-lift transition-transform duration-200 active:scale-95">
-                    <Icon size={30} strokeWidth={2.6} />
+                  <span className="grid h-[56px] w-[56px] place-items-center rounded-full bg-fresh-600 text-white shadow-cta ring-[5px] ring-white transition-transform duration-200 active:scale-95">
+                    <Icon size={28} strokeWidth={2.5} aria-hidden />
                   </span>
                   <span className="text-[13px] font-semibold text-fresh-700">{label}</span>
                 </Link>
@@ -265,12 +269,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 className="flex min-w-0 flex-1 flex-col items-center gap-1 py-1.5 transition-colors duration-200"
               >
                 <Icon
-                  size={25}
-                  strokeWidth={active ? 2.5 : 2}
+                  size={24}
+                  strokeWidth={active ? 2.4 : 1.9}
                   className={active ? "text-fresh-700" : "text-ink-400"}
                   aria-hidden
                 />
-                <span className={`text-[13px] font-semibold ${active ? "text-fresh-700" : "text-ink-500"}`}>
+                <span className={`text-[13px] ${active ? "font-bold text-fresh-800" : "font-medium text-ink-500"}`}>
                   {label}
                 </span>
               </Link>

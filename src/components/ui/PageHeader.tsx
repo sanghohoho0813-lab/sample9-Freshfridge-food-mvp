@@ -26,12 +26,10 @@ export default function PageHeader({
       )}
       <div className="flex items-end justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="text-[26px] font-extrabold leading-tight tracking-tight text-ink-900 sm:text-[28.5px]">
+          <h1 className="text-[27px] font-bold leading-[1.2] tracking-[-0.025em] text-ink-900 sm:text-[30px]">
             {title}
           </h1>
-          {description && (
-            <p className="mt-1.5 text-[16.5px] leading-snug text-ink-500 sm:text-[17.5px]">{description}</p>
-          )}
+          {description && <p className="mt-2 text-[16.5px] leading-snug text-ink-500 sm:text-[17px]">{description}</p>}
         </div>
         {action && <div className="shrink-0">{action}</div>}
       </div>

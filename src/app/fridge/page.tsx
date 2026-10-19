@@ -171,13 +171,13 @@ function FridgeContent() {
             segments={STORAGE_TABS.map((t) => ({ value: t.key, label: t.label, count: storageCounts[t.key] }))}
           />
 
-          <div id="fridge-panel" role="tabpanel" aria-label="보관 중인 식재료" className="space-y-5">
+          <div id="fridge-panel" role="tabpanel" aria-label="보관 중인 식재료" className="space-y-6">
             {/* 찾기 · 종류 — 필터는 이 두 가지로만 */}
             <div className="flex gap-2">
               <div className="relative min-w-0 flex-1">
                 <Search
                   size={19}
-                  className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400"
+                  className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-400"
                   aria-hidden
                 />
                 <input
@@ -187,7 +187,7 @@ function FridgeContent() {
                   value={query}
                   maxLength={20}
                   onChange={(e) => setQuery(e.target.value)}
-                  className="input min-h-[48px] py-2 pl-10 text-[17px] [&::-webkit-search-cancel-button]:hidden"
+                  className="input min-h-[48px] rounded-full py-2 pl-11 text-[17px] [&::-webkit-search-cancel-button]:hidden"
                 />
               </div>
               {categories.length > 1 && (
@@ -195,7 +195,7 @@ function FridgeContent() {
                   aria-label="종류"
                   value={activeCategory}
                   onChange={(e) => setCategory(e.target.value as IngredientCategory | "all")}
-                  className="input min-h-[48px] w-[118px] shrink-0 py-2 text-[17px] sm:w-[150px]"
+                  className="input min-h-[48px] w-[122px] shrink-0 rounded-full py-2 pl-4 text-[17px] sm:w-[150px]"
                 >
                   <option value="all">모든 종류</option>
                   {categories.map((c) => (
@@ -219,16 +219,20 @@ function FridgeContent() {
                 <section key={group} aria-labelledby={`fridge-${group}`}>
                   <h2
                     id={`fridge-${group}`}
-                    className={`mb-2 flex items-baseline gap-2 text-[16.5px] font-bold ${
-                      group === "expired" || group === "today"
-                        ? "text-coral-700"
-                        : group === "soon"
-                          ? "text-amberish-700"
-                          : "text-ink-700"
-                    }`}
+                    className="mb-2.5 flex items-center gap-2 px-1 text-[17px] font-semibold text-ink-900"
                   >
+                    <span
+                      className={`h-2 w-2 shrink-0 rounded-full ${
+                        group === "expired" || group === "today"
+                          ? "bg-coral-500"
+                          : group === "soon"
+                            ? "bg-amberish-500"
+                            : "bg-ink-300"
+                      }`}
+                      aria-hidden
+                    />
                     {EXPIRY_GROUP_LABEL[group]}
-                    <span className="text-[15px] font-semibold tabular-nums text-ink-500">{items.length}</span>
+                    <span className="text-[15px] font-medium tabular-nums text-ink-500">{items.length}</span>
                   </h2>
                   <ListGroup columns={2}>
                     {items.map((ing) => (

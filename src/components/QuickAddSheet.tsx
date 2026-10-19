@@ -84,7 +84,7 @@ export default function QuickAddSheet({
                   구매한 것 {progress.index}/{progress.total}
                 </p>
               )}
-              <h3 id="quick-add-title" className="text-[20.5px] font-extrabold leading-snug text-ink-900">
+              <h3 id="quick-add-title" className="text-[20.5px] font-bold leading-snug text-ink-900">
                 {josa(name, "을/를")} 냉장고에 넣을까요?
               </h3>
             </div>
@@ -92,7 +92,7 @@ export default function QuickAddSheet({
               type="button"
               aria-label="닫기"
               onClick={onClose}
-              className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-ink-400 hover:bg-ink-300/10"
+              className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-ink-400 hover:bg-ink-900/[0.04]"
             >
               <X size={22} aria-hidden />
             </button>
@@ -134,7 +134,7 @@ export default function QuickAddSheet({
               <p className="pl-1 text-[16.5px] font-semibold text-ink-700">{merging ? "더할 양" : "수량"}</p>
               <div className="flex items-center gap-3">
                 <StepButton size="sm" dir="down" onClick={() => setQuantity((q) => Math.max(step, q - step))} />
-                <span className="min-w-[72px] text-center text-[20.5px] font-extrabold tabular-nums">
+                <span className="min-w-[72px] text-center text-[20.5px] font-bold tabular-nums">
                   {formatAmount(quantity, unit)}
                 </span>
                 <StepButton size="sm" dir="up" onClick={() => setQuantity((q) => q + step)} />

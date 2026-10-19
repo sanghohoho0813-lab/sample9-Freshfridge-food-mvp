@@ -54,7 +54,7 @@ export default function SegmentedControl<T extends string>({
   };
 
   return (
-    <div role="tablist" aria-label={label} className="flex gap-1 rounded-2xl bg-ink-300/15 p-1">
+    <div role="tablist" aria-label={label} className="flex gap-1 rounded-full bg-ink-900/[0.05] p-1">
       {segments.map((s, i) => {
         const active = s.value === value;
         return (
@@ -70,8 +70,10 @@ export default function SegmentedControl<T extends string>({
             tabIndex={active ? 0 : -1}
             onClick={() => onChange(s.value)}
             onKeyDown={(e) => onKeyDown(e, i)}
-            className={`flex min-h-[48px] flex-1 items-center justify-center gap-1.5 rounded-xl text-[17px] font-bold transition-all duration-200 ${
-              active ? "bg-white text-ink-900 shadow-soft" : "text-ink-600 hover:text-ink-900"
+            className={`flex min-h-[46px] flex-1 items-center justify-center gap-1.5 rounded-full px-2 text-[16.5px] transition-all duration-200 ${
+              active
+                ? "bg-white font-semibold text-ink-900 shadow-[0_1px_3px_rgba(38,48,42,0.12)]"
+                : "font-medium text-ink-600 hover:text-ink-900"
             }`}
           >
             {s.icon}

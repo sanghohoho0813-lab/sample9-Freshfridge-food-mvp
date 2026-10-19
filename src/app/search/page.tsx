@@ -59,7 +59,7 @@ export default function SearchPage() {
     );
 
   const chipCls =
-    "chip min-h-[44px] border border-ink-300/30 bg-white text-ink-700 hover:border-fresh-200 hover:bg-fresh-50/50";
+    "chip min-h-[44px] border border-ink-900/[0.1] bg-white text-ink-700 hover:border-fresh-200 hover:bg-fresh-50/50";
 
   return (
     <div className="mx-auto max-w-5xl space-y-5">
@@ -83,7 +83,7 @@ export default function SearchPage() {
           type="search"
           aria-label="식재료·레시피 검색"
           enterKeyHint="search"
-          className="input min-h-[56px] pl-12 pr-12 [&::-webkit-search-cancel-button]:hidden"
+          className="input min-h-[56px] rounded-full pl-12 pr-12 [&::-webkit-search-cancel-button]:hidden"
           placeholder="재료나 요리 이름"
           value={query}
           maxLength={30}
@@ -94,7 +94,7 @@ export default function SearchPage() {
             type="button"
             aria-label="검색어 지우기"
             onClick={() => setQuery("")}
-            className="absolute right-2 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-xl text-ink-400 hover:bg-ink-300/10 hover:text-ink-700"
+            className="absolute right-2 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-xl text-ink-400 hover:bg-ink-900/[0.04] hover:text-ink-700"
           >
             <X size={20} />
           </button>
@@ -138,7 +138,7 @@ export default function SearchPage() {
         <div className="space-y-7">
           {matchedIngredients.length > 0 && (
             <section>
-              <h2 className="mb-3 text-[20.5px] font-extrabold text-ink-900">
+              <h2 className="section-title mb-3">
                 내 냉장고 <span className="text-fresh-600">{matchedIngredients.length}</span>
               </h2>
               <ListGroup columns={2}>
@@ -150,7 +150,7 @@ export default function SearchPage() {
           )}
           {matchedRecipes.length > 0 && (
             <section>
-              <h2 className="mb-3 text-[20.5px] font-extrabold text-ink-900">
+              <h2 className="section-title mb-3">
                 레시피 <span className="text-fresh-600">{matchedRecipes.length}</span>
               </h2>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">

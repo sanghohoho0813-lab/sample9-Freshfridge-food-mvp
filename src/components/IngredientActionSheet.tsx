@@ -59,7 +59,7 @@ export default function IngredientActionSheet({
               sizes="56px"
             />
             <div className="min-w-0 flex-1">
-              <h3 id="action-sheet-title" className="text-[20.5px] font-extrabold text-ink-900">
+              <h3 id="action-sheet-title" className="text-[20.5px] font-bold text-ink-900">
                 {isEat ? `${ingredient.name}, 얼마나 먹었나요?` : `${ingredient.name}, 얼마나 버렸나요?`}
               </h3>
               <p className="mt-0.5 text-[15.5px] text-ink-500">지금 {formatAmount(quantity, unit)} 있어요</p>
@@ -68,7 +68,7 @@ export default function IngredientActionSheet({
               type="button"
               aria-label="닫기"
               onClick={onClose}
-              className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-ink-400 hover:bg-ink-300/10"
+              className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-ink-400 hover:bg-ink-900/[0.04]"
             >
               <X size={22} />
             </button>
@@ -81,12 +81,12 @@ export default function IngredientActionSheet({
               aria-label="줄이기"
               onClick={() => setAmount((a) => clamp(a - step))}
               disabled={amount <= Math.min(step, quantity)}
-              className="grid h-12 w-12 place-items-center rounded-xl border border-ink-300/40 bg-white text-ink-700 transition-all active:scale-95 disabled:opacity-30"
+              className="grid h-12 w-12 place-items-center rounded-full border border-ink-900/[0.12] bg-white text-ink-700 transition-all active:scale-95 disabled:opacity-30"
             >
               <Minus size={20} />
             </button>
             <div className="text-center">
-              <p className="text-[26px] font-extrabold tabular-nums text-ink-900">{formatAmount(amount, unit)}</p>
+              <p className="text-[26px] font-bold tabular-nums text-ink-900">{formatAmount(amount, unit)}</p>
               <p className={`text-[14.5px] font-semibold ${remaining <= 0 ? "text-ink-400" : "text-fresh-700"}`}>
                 {remaining <= 0 ? "모두 정리돼요" : `남는 양 ${formatAmount(remaining, unit)}`}
               </p>
@@ -96,7 +96,7 @@ export default function IngredientActionSheet({
               aria-label="늘리기"
               onClick={() => setAmount((a) => clamp(a + step))}
               disabled={amount >= quantity}
-              className="grid h-12 w-12 place-items-center rounded-xl border border-ink-300/40 bg-white text-ink-700 transition-all active:scale-95 disabled:opacity-30"
+              className="grid h-12 w-12 place-items-center rounded-full border border-ink-900/[0.12] bg-white text-ink-700 transition-all active:scale-95 disabled:opacity-30"
             >
               <Plus size={20} />
             </button>
@@ -105,7 +105,7 @@ export default function IngredientActionSheet({
             <button
               type="button"
               onClick={() => setAmount(quantity)}
-              className="mt-2 w-full rounded-xl py-2 text-[15.5px] font-semibold text-ink-500 transition-colors hover:bg-ink-300/10"
+              className="mt-2 w-full rounded-xl py-2 text-[15.5px] font-semibold text-ink-500 transition-colors hover:bg-ink-900/[0.04]"
             >
               전부 ({formatAmount(quantity, unit)})
             </button>
@@ -125,7 +125,7 @@ export default function IngredientActionSheet({
                     className={`chip border ${
                       reason === r
                         ? "border-coral-400 bg-coral-50 text-coral-700"
-                        : "border-ink-300/30 bg-white text-ink-500 hover:border-ink-300"
+                        : "border-ink-900/[0.1] bg-white text-ink-500 hover:border-ink-300"
                     }`}
                   >
                     {r}

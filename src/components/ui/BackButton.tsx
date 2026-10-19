@@ -18,9 +18,9 @@ export default function BackButton({ fallback, label = "뒤로" }: { fallback: s
         if (canGoBack) router.back();
         else router.push(fallback);
       }}
-      className="-ml-2 inline-flex min-h-[44px] items-center gap-1 rounded-xl px-2 text-[16.5px] font-semibold text-ink-500 transition-colors hover:bg-ink-300/10 hover:text-ink-800"
+      className="-ml-2.5 inline-flex min-h-[44px] items-center gap-1 rounded-full px-2.5 text-[16.5px] font-medium text-ink-600 transition-colors hover:bg-ink-900/[0.05] hover:text-ink-900"
     >
-      <ArrowLeft size={20} />
+      <ArrowLeft size={20} aria-hidden />
       {label}
     </button>
   );

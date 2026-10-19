@@ -128,7 +128,7 @@ export default function ShoppingPage() {
       <form onSubmit={add} noValidate>
         <div className="flex gap-2">
           <input
-            className={`input min-h-[52px] min-w-0 flex-1 ${inputError ? INPUT_ERROR : ""}`}
+            className={`input min-h-[52px] min-w-0 flex-1 rounded-full px-5 ${inputError ? INPUT_ERROR : ""}`}
             placeholder="살 재료 입력 (예: 간장)"
             value={input}
             maxLength={20}
@@ -165,7 +165,7 @@ export default function ShoppingPage() {
           {unchecked.length > 0 && (
             <ul
               aria-label="살 것"
-              className="divide-y divide-ink-300/20 overflow-hidden rounded-card border border-ink-300/25 bg-white"
+              className="divide-y divide-ink-900/[0.06] overflow-hidden rounded-card border border-ink-900/[0.07] bg-white"
             >
               {unchecked.map((item) => {
                 const src = sourceLine(item, findInFridge(item.name));
@@ -205,7 +205,7 @@ export default function ShoppingPage() {
 
           {suggestions.length > 0 && (
             <section aria-labelledby="restock-title">
-              <h2 id="restock-title" className="mb-1 text-[17.5px] font-bold text-ink-900">
+              <h2 id="restock-title" className="section-title mb-0.5">
                 냉장고를 보면, 이것도 필요해요
               </h2>
               <p className="mb-2.5 text-[15px] text-ink-500">거의 다 먹었거나, 자주 먹는데 떨어진 재료예요.</p>
@@ -222,7 +222,7 @@ export default function ShoppingPage() {
                 <button
                   type="button"
                   onClick={clearPurchased}
-                  className="-mr-2 inline-flex min-h-[44px] items-center rounded-xl px-2 text-[15.5px] font-semibold text-ink-500 hover:bg-ink-300/10 hover:text-ink-800"
+                  className="-mr-2 inline-flex min-h-[44px] items-center rounded-full px-2.5 text-[15.5px] font-semibold text-ink-500 hover:bg-ink-900/[0.04] hover:text-ink-800"
                 >
                   목록에서 비우기
                 </button>
@@ -236,7 +236,7 @@ export default function ShoppingPage() {
                   <Refrigerator size={20} aria-hidden />산 것 {notPutAway.length}개 차례로 냉장고에 넣기
                 </button>
               )}
-              <ul className="divide-y divide-ink-300/20 overflow-hidden rounded-card border border-ink-300/25 bg-white">
+              <ul className="divide-y divide-ink-900/[0.06] overflow-hidden rounded-card border border-ink-900/[0.07] bg-white">
                 {purchased.map((item) => (
                   <li key={item.id} className="flex items-center gap-3 py-3 pl-3 pr-2 sm:pl-3.5">
                     <button
@@ -262,7 +262,7 @@ export default function ShoppingPage() {
                         type="button"
                         onClick={() => setQueue({ ids: [item.id], total: 1 })}
                         aria-label={`${item.name} 냉장고에 넣기`}
-                        className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-xl bg-fresh-50 px-3 text-[15.5px] font-semibold text-fresh-700 transition-colors hover:bg-fresh-100"
+                        className="inline-flex min-h-[42px] shrink-0 items-center gap-1.5 rounded-full bg-fresh-50 px-3.5 text-[15.5px] font-semibold text-fresh-700 transition-colors hover:bg-fresh-100"
                       >
                         <Refrigerator size={18} aria-hidden />
                         냉장고에 넣기
