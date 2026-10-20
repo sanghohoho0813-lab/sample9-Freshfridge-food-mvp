@@ -219,7 +219,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
           <main id="main" tabIndex={-1} className="w-full flex-1 px-4 pb-28 pt-4 outline-none sm:px-6 sm:pt-6 lg:pb-12">
             {/* 본문이 짧거나 아직 불러오는 중이어도 아래 CTA 가 첫 화면에 들어와 있다가 밀려나지 않게(CLS) */}
-            <div className="min-h-[calc(100dvh-220px)]">{children}</div>
+            {/* 화면이 바뀔 때 본문만 살짝 떠오르며 나타난다 (움직임 줄이기 설정이면 생략) */}
+            <div key={pathname} className="min-h-[calc(100dvh-220px)] animate-page-in">
+              {children}
+            </div>
 
             {/* 샘플 공통 브릿지 CTA — 모든 페이지 하단에 동일하게 노출 */}
             <SampleBridgeCTA className="mx-auto mt-10 max-w-6xl sm:mt-12" />
@@ -266,14 +269,21 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 key={href}
                 href={href}
                 aria-current={active ? "page" : undefined}
-                className="flex min-w-0 flex-1 flex-col items-center gap-1 py-1.5 transition-colors duration-200"
+                className="flex min-w-0 flex-1 flex-col items-center gap-0.5 py-1.5 transition-colors duration-200 active:opacity-70"
               >
-                <Icon
-                  size={24}
-                  strokeWidth={active ? 2.4 : 1.9}
-                  className={active ? "text-fresh-700" : "text-ink-400"}
-                  aria-hidden
-                />
+                {/* 지금 있는 탭은 아이콘 뒤에 옅은 알약을 깔아 한눈에 보이게 */}
+                <span
+                  className={`grid h-8 w-14 place-items-center rounded-full transition-colors duration-200 ${
+                    active ? "bg-fresh-600/10" : ""
+                  }`}
+                >
+                  <Icon
+                    size={24}
+                    strokeWidth={active ? 2.4 : 1.9}
+                    className={active ? "text-fresh-700" : "text-ink-400"}
+                    aria-hidden
+                  />
+                </span>
                 <span className={`text-[13px] ${active ? "font-bold text-fresh-800" : "font-medium text-ink-500"}`}>
                   {label}
                 </span>

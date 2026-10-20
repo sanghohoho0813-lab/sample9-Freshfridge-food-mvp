@@ -58,6 +58,20 @@ body {
   .rail > * {
     @apply snap-start;
   }
+  /* 바텀시트 — 모바일은 아래에서 올라오고(손잡이 표시), 넓은 화면은 가운데 대화상자 */
+  .sheet-backdrop {
+    @apply fixed inset-0 z-50 flex animate-fade-in items-end justify-center bg-ink-900/40 backdrop-blur-[2px] sm:items-center sm:p-4;
+  }
+  .sheet-panel {
+    @apply max-h-[88dvh] w-full max-w-md animate-sheet-up overflow-y-auto rounded-t-[28px] bg-white px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-2.5 shadow-lift sm:animate-pop-in sm:rounded-3xl sm:p-6;
+  }
+  .sheet-grabber {
+    @apply mx-auto mb-3 block h-1.5 w-10 rounded-full bg-ink-900/15 sm:hidden;
+  }
+  /* 되돌리기 어려운 행동(버리기·초기화) — 흰 글자 대비 4.5:1 이상인 진한 빨강 */
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-full bg-coral-700 px-5 py-2.5 text-[18px] font-semibold text-white transition-all duration-200 hover:bg-[#a12f1f] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40;
+  }
   /* 섹션 제목 */
   .section-title {
     @apply text-[21px] font-bold tracking-[-0.02em] text-ink-900;

@@ -25,19 +25,15 @@ export default function ConfirmDialog({
   return (
     <Portal>
       <div
-        className="fixed inset-0 z-50 flex items-end justify-center bg-ink-900/40 p-0 backdrop-blur-[2px] sm:items-center sm:p-4"
+        className="sheet-backdrop"
         onClick={onClose}
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="confirm-title"
       >
-        <div
-          className="w-full animate-pop-in rounded-t-3xl bg-white p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] shadow-lift sm:max-w-sm sm:rounded-3xl sm:pb-6"
-          ref={boxRef}
-          tabIndex={-1}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <h3 id="confirm-title" className="text-[20.5px] font-bold text-ink-900">
+        <div className="sheet-panel sm:max-w-sm" ref={boxRef} tabIndex={-1} onClick={(e) => e.stopPropagation()}>
+          <span className="sheet-grabber" aria-hidden />
+          <h3 id="confirm-title" className="pt-1 text-[21px] font-bold tracking-[-0.02em] text-ink-900">
             {title}
           </h3>
           {description && <p className="mt-2 text-[16.5px] leading-relaxed text-ink-500">{description}</p>}
@@ -48,11 +44,7 @@ export default function ConfirmDialog({
             <button
               type="button"
               onClick={onConfirm}
-              className={
-                tone === "danger"
-                  ? "inline-flex min-h-[52px] items-center justify-center rounded-2xl bg-coral-500 px-4 text-[18px] font-semibold text-white transition-colors hover:bg-coral-600"
-                  : "btn-primary min-h-[52px]"
-              }
+              className={tone === "danger" ? "btn-danger min-h-[52px]" : "btn-primary min-h-[52px]"}
             >
               {confirmLabel}
             </button>

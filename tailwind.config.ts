@@ -108,8 +108,26 @@ const config: Config = {
           "100%": { opacity: "1", transform: "scale(1)" },
         },
         "toast-in": {
-          "0%": { opacity: "0", transform: "translateY(-8px) scale(0.97)" },
+          "0%": { opacity: "0", transform: "translateY(12px) scale(0.97)" },
           "100%": { opacity: "1", transform: "translateY(0) scale(1)" },
+        },
+        // 되돌릴 수 있는 시간이 줄어드는 막대
+        "toast-timer": {
+          "0%": { transform: "scaleX(1)" },
+          "100%": { transform: "scaleX(0)" },
+        },
+        "sheet-up": {
+          "0%": { transform: "translateY(100%)" },
+          "100%": { transform: "translateY(0)" },
+        },
+        "fade-in": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        // 투명도만 바꾼다 — transform 을 쓰면 본문 안 position:fixed(하단 고정 바)의 기준이 바뀐다
+        "page-in": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
         },
         shimmer: {
           "0%": { backgroundPosition: "-400px 0" },
@@ -127,9 +145,15 @@ const config: Config = {
         },
       },
       animation: {
-        "fade-up": "fade-up 0.28s ease-out both",
-        "pop-in": "pop-in 0.26s ease-out both",
-        "toast-in": "toast-in 0.24s ease-out both",
+        // transform 을 쓰는 등장 효과는 backwards — 끝난 뒤 transform 이 남으면
+        // 안쪽 position:fixed(하단 고정 바)가 화면이 아니라 그 상자를 기준으로 붙는다
+        "fade-up": "fade-up 0.28s ease-out backwards",
+        "pop-in": "pop-in 0.26s ease-out backwards",
+        "toast-in": "toast-in 0.24s ease-out backwards",
+        "toast-timer": "toast-timer linear both",
+        "sheet-up": "sheet-up 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) backwards",
+        "fade-in": "fade-in 0.2s ease-out both",
+        "page-in": "page-in 0.22s ease-out both",
         shimmer: "shimmer 1.4s linear infinite",
         "cta-sheen": "cta-sheen 6s ease-in-out infinite",
         "soft-pulse": "soft-pulse 3.2s ease-in-out infinite",

@@ -12,6 +12,8 @@ export interface ToastMsg {
   id: string;
   text: string;
   action?: ToastAction;
+  /** 화면에 머무는 시간(ms) — 되돌리기 남은 시간 막대에 쓴다 */
+  duration: number;
 }
 
 /** 되돌리기처럼 누를 것이 있는 토스트는 조금 더 오래 보여준다 */
@@ -41,10 +43,11 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const showToast = useCallback(
     (text: string, action?: ToastAction) => {
       const id = newId("toast");
-      setToasts((prev) => [...prev.slice(-(MAX_VISIBLE - 1)), { id, text, action }]);
+      const duration = action ? DURATION.withAction : DURATION.plain;
+      setToasts((prev) => [...prev.slice(-(MAX_VISIBLE - 1)), { id, text, action, duration }]);
       timers.current.set(
         id,
-        setTimeout(() => dismissToast(id), action ? DURATION.withAction : DURATION.plain)
+        setTimeout(() => dismissToast(id), duration)
       );
     },
     [dismissToast]

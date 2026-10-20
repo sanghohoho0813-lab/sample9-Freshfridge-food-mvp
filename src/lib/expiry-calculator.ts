@@ -92,9 +92,10 @@ export const PRIORITY_GROUP_META: Record<PriorityGroup, { title: string; sub: st
   later: { title: "여유 있어요", sub: "아직 시간이 충분해요" },
 };
 
-export function formatKoreanDate(iso: string): string {
-  const [, m, d] = iso.split("-").map(Number);
-  return `${m}월 ${d}일`;
+export function formatKoreanDate(iso: string, today: Date = todayStart()): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  // 올해가 아니면 연도를 붙인다 — "10월 20일까지"가 1년 뒤인지 오늘인지 헷갈리지 않게
+  return y === today.getFullYear() ? `${m}월 ${d}일` : `${y}년 ${m}월 ${d}일`;
 }
 
 /** 12500 → "12,500원" (문장 안에서 자연스럽게 읽히도록 ₩ 대신 "원") */
@@ -102,11 +103,14 @@ export function formatWon(n: number): string {
   return `${Math.round(n).toLocaleString("ko-KR")}원`;
 }
 
-/** 보관 기간 선택 칩 문구 — 7 → "일주일", 14 → "2주", 30 → "한 달" */
+/** 보관 기간 선택 칩 문구 — 7 → "일주일", 14 → "2주", 30 → "한 달", 180 → "6개월", 365 → "1년" */
 export function shelfLabel(days: number): string {
   if (days === 7) return "일주일";
-  if (days === 14) return "2주";
+  if (days > 7 && days < 30 && days % 7 === 0) return `${days / 7}주`;
   if (days === 30) return "한 달";
+  if (days === 60) return "두 달";
+  if (days >= 365 && days % 365 === 0) return `${days / 365}년`;
+  if (days > 60 && days % 30 === 0) return `${days / 30}개월`;
   return `${days}일`;
 }
 

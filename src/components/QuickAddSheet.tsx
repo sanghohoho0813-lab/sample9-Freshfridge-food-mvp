@@ -64,18 +64,14 @@ export default function QuickAddSheet({
   return (
     <Portal>
       <div
-        className="fixed inset-0 z-50 flex items-end justify-center bg-ink-900/40 backdrop-blur-[2px] sm:items-center"
+        className="sheet-backdrop"
         onClick={onClose}
         role="dialog"
         aria-modal="true"
         aria-labelledby="quick-add-title"
       >
-        <div
-          className="max-h-[88dvh] w-full max-w-md animate-pop-in overflow-y-auto rounded-t-3xl bg-white p-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))] shadow-lift sm:rounded-3xl sm:pb-5"
-          ref={boxRef}
-          tabIndex={-1}
-          onClick={(e) => e.stopPropagation()}
-        >
+        <div className="sheet-panel" ref={boxRef} tabIndex={-1} onClick={(e) => e.stopPropagation()}>
+          <span className="sheet-grabber" aria-hidden />
           <div className="flex items-start gap-3">
             <IngredientThumb name={name} category={d.category} className="h-14 w-14 bg-fresh-50" sizes="56px" />
             <div className="min-w-0 flex-1">

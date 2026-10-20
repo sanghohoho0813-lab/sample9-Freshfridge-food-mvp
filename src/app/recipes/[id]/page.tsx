@@ -28,6 +28,7 @@ import { josa } from "@/lib/text";
 import EmptyState from "@/components/EmptyState";
 import IngredientThumb from "@/components/IngredientThumb";
 import BackButton from "@/components/ui/BackButton";
+import DetailSkeleton from "@/components/ui/DetailSkeleton";
 import ChoiceChip from "@/components/ui/ChoiceChip";
 import StickyActionBar from "@/components/ui/StickyActionBar";
 
@@ -76,11 +77,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ id: str
   );
 
   if (!ready) {
-    return (
-      <div className="mx-auto max-w-3xl">
-        <div className="skeleton h-64 w-full" />
-      </div>
-    );
+    return <DetailSkeleton />;
   }
 
   if (!recipe || !match) {
@@ -436,107 +433,138 @@ function CookDone({
   return (
     <div
       ref={innerRef}
-      className="animate-pop-in scroll-mt-24 space-y-3 rounded-card bg-fresh-50 p-4 ring-1 ring-inset ring-fresh-600/10 sm:p-5"
+      className="animate-pop-in scroll-mt-24 overflow-hidden rounded-card bg-white shadow-soft ring-1 ring-inset ring-ink-900/[0.07]"
     >
-      <div role="status">
-        <p className="flex items-center gap-2 text-[22px] font-bold tracking-[-0.02em] text-ink-900">
-          <CircleCheck size={24} className="text-fresh-600" aria-hidden />
+      {/* 완료 머리 — 이번 요리로 살린 금액이 가장 크게 */}
+      <div role="status" className="bg-fresh-700 px-5 py-5 text-white sm:px-6">
+        <p className="flex items-center gap-2 text-[22px] font-bold tracking-[-0.02em]">
+          <CircleCheck size={24} aria-hidden />
           {recipeName} 완성
         </p>
-        <p className="mt-1 text-[16.5px] text-ink-700">
-          냉장고 재료 <b className="tabular-nums">{formatWon(result.saved)}</b>어치를 버리지 않고 썼어요
+        <p className="mt-1.5 text-[16.5px] leading-relaxed text-fresh-50">
+          냉장고 재료 <b className="font-bold tabular-nums text-white">{formatWon(result.saved)}</b>어치를 버리지 않고
+          썼어요
           {result.rescued > 0 && ` · 기한 임박 재료 ${result.rescued}개를 살렸어요`}
         </p>
       </div>
 
-      {/* 1. 무엇이 얼마나 줄었는지 */}
-      {result.lines.length > 0 && (
-        <ul className="divide-y divide-ink-900/[0.06] rounded-2xl bg-white px-4" aria-label="냉장고에서 뺀 재료">
-          {result.lines.map((l) => (
-            <li key={l.name} className="flex items-center justify-between gap-3 py-2.5 text-[16.5px]">
-              <span className="font-semibold text-ink-800">{l.name}</span>
-              <span className="tabular-nums text-ink-500">
-                {formatAmount(l.before, l.unit)}
-                <ArrowRight size={15} className="mx-1.5 inline -translate-y-px" aria-hidden />
-                <span className={l.after <= 0 ? "font-bold text-coral-700" : "font-bold text-ink-900"}>
-                  {l.after <= 0 ? "다 씀" : formatAmount(l.after, l.unit)}
-                </span>
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {/* 2. 다 쓴 재료 — 다시 살 것만 골라 담기 */}
-      {result.usedUp.length > 0 && (
-        <div className="rounded-2xl bg-white p-4">
-          <p className="text-[16.5px] font-semibold text-ink-900">다 쓴 재료, 다시 살까요?</p>
-          {rebuyDone ? (
-            <p className="mt-1.5 flex items-center gap-1.5 text-[16px] font-semibold text-fresh-700">
-              <Check size={18} aria-hidden /> 장보기에 담았어요 ·{" "}
-              <Link href="/shopping" className="underline underline-offset-2">
-                장보기 보기
-              </Link>
-            </p>
-          ) : (
-            <>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {result.usedUp.map((n) => (
-                  <ChoiceChip
-                    key={n}
-                    selected={rebuy.has(n)}
-                    onClick={() => {
-                      const next = new Set(rebuy);
-                      if (next.has(n)) next.delete(n);
-                      else next.add(n);
-                      setRebuy(next);
-                    }}
-                  >
-                    {rebuy.has(n) && <Check size={16} aria-hidden />}
-                    {n}
-                  </ChoiceChip>
-                ))}
-              </div>
-              <button
-                type="button"
-                onClick={onRebuy}
-                disabled={rebuy.size === 0}
-                className="btn-primary mt-3 min-h-[52px] w-full"
-              >
-                <ShoppingBasket size={20} aria-hidden />
-                {rebuy.size > 0 ? `${rebuy.size}개 장보기에 담기` : "다시 살 재료를 골라주세요"}
-              </button>
-            </>
-          )}
-        </div>
-      )}
-
-      {/* 3. 이번 달 누적 효과 */}
-      <Link
-        href="/report"
-        className="flex items-center justify-between gap-3 rounded-2xl bg-white px-4 py-3.5 transition-colors hover:bg-warmwhite"
-      >
-        <span className="text-[16px] text-ink-700">
-          {month}월에 먹어서 아낀 금액 <b className="tabular-nums text-ink-900">{formatWon(monthSaved)}</b>
-          <span className="ml-1 text-[15px] font-semibold tabular-nums text-fresh-700">+{formatWon(result.saved)}</span>
-        </span>
-        <ArrowRight size={18} className="shrink-0 text-ink-400" aria-hidden />
-      </Link>
-
-      {/* 4. 다음 행동 */}
-      <div className="flex flex-wrap justify-center gap-x-5 gap-y-1 text-[15.5px] font-semibold text-ink-600">
-        {urgentLeft > 0 ? (
-          <Link href="/priority" className="inline-flex min-h-[44px] items-center gap-1 text-fresh-700 hover:underline">
-            남은 급한 재료 {urgentLeft}개 보기 <ArrowRight size={17} aria-hidden />
-          </Link>
-        ) : (
-          <Link href="/fridge" className="inline-flex min-h-[44px] items-center hover:underline">
-            냉장고 보기
-          </Link>
+      <div className="space-y-5 p-4 sm:p-5">
+        {/* 1. 무엇이 얼마나 줄었는지 */}
+        {result.lines.length > 0 && (
+          <div>
+            <p className="mb-2 text-[15px] font-semibold text-ink-500">냉장고에서 뺐어요</p>
+            <ul className="divide-y divide-ink-900/[0.06]" aria-label="냉장고에서 뺀 재료">
+              {result.lines.map((l) => (
+                <li key={l.name} className="flex items-center gap-3 py-2.5 text-[16.5px]">
+                  <IngredientThumb
+                    name={l.name}
+                    category={ingredientDefaults(l.name).category}
+                    className="h-10 w-10 rounded-xl bg-warmwhite"
+                    sizes="40px"
+                  />
+                  <span className="min-w-0 flex-1 font-semibold text-ink-800">{l.name}</span>
+                  <span className="shrink-0 tabular-nums text-ink-500">
+                    {formatAmount(l.before, l.unit)}
+                    <ArrowRight size={15} className="mx-1.5 inline -translate-y-px" aria-hidden />
+                    <span className={l.after <= 0 ? "font-bold text-coral-700" : "font-bold text-ink-900"}>
+                      {l.after <= 0 ? "다 씀" : formatAmount(l.after, l.unit)}
+                    </span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
-        <Link href="/history" className="inline-flex min-h-[44px] items-center hover:underline">
-          소비 기록
+
+        {/* 2. 다 쓴 재료 — 다시 살 것만 골라 담기 */}
+        {result.usedUp.length > 0 && (
+          <div className="rounded-2xl bg-warmwhite p-4">
+            <p className="text-[17px] font-semibold text-ink-900">다 쓴 재료, 다시 살까요?</p>
+            {rebuyDone ? (
+              <p className="mt-2 flex items-center gap-1.5 text-[16px] font-semibold text-fresh-700">
+                <Check size={18} aria-hidden /> 장보기에 담았어요 ·{" "}
+                <Link href="/shopping" className="underline underline-offset-2">
+                  장보기 보기
+                </Link>
+              </p>
+            ) : (
+              <>
+                <p className="mt-0.5 text-[15px] text-ink-500">자주 먹는 재료는 미리 골라뒀어요.</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {result.usedUp.map((n) => (
+                    <ChoiceChip
+                      key={n}
+                      selected={rebuy.has(n)}
+                      className="gap-2 py-1 pl-1.5 pr-3.5"
+                      onClick={() => {
+                        const next = new Set(rebuy);
+                        if (next.has(n)) next.delete(n);
+                        else next.add(n);
+                        setRebuy(next);
+                      }}
+                    >
+                      <IngredientThumb
+                        name={n}
+                        category={ingredientDefaults(n).category}
+                        className="h-8 w-8 rounded-full bg-white"
+                        sizes="32px"
+                      />
+                      {n}
+                      {rebuy.has(n) && <Check size={16} aria-hidden />}
+                    </ChoiceChip>
+                  ))}
+                </div>
+                {rebuy.size > 0 ? (
+                  <button type="button" onClick={onRebuy} className="btn-primary mt-3.5 min-h-[52px] w-full">
+                    <ShoppingBasket size={20} aria-hidden />
+                    {rebuy.size}개 장보기에 담기
+                  </button>
+                ) : (
+                  <p className="mt-3 text-[15px] text-ink-500">다시 살 재료를 누르면 장보기에 담을 수 있어요.</p>
+                )}
+              </>
+            )}
+          </div>
+        )}
+
+        {/* 3. 이번 달 누적 효과 */}
+        <Link
+          href="/report"
+          className="group flex items-center justify-between gap-3 rounded-2xl px-1 transition-colors"
+        >
+          <span className="min-w-0">
+            <span className="block text-[15px] text-ink-500">{month}월에 먹어서 아낀 금액</span>
+            <span className="mt-0.5 flex flex-wrap items-baseline gap-x-2">
+              <b className="text-[24px] font-bold tabular-nums tracking-[-0.02em] text-ink-900">
+                {formatWon(monthSaved)}
+              </b>
+              <span className="text-[15.5px] font-semibold tabular-nums text-fresh-700">
+                +{formatWon(result.saved)}
+              </span>
+            </span>
+          </span>
+          <ArrowRight
+            size={20}
+            className="shrink-0 text-ink-400 transition-transform group-hover:translate-x-0.5"
+            aria-hidden
+          />
         </Link>
+
+        {/* 4. 다음 행동 */}
+        <div className="grid grid-cols-2 gap-2 border-t border-ink-900/[0.06] pt-4">
+          {urgentLeft > 0 ? (
+            <Link href="/priority" className="btn-soft min-h-[50px] px-3 text-[16px]">
+              남은 급한 재료 {urgentLeft}개 보기
+            </Link>
+          ) : (
+            <Link href="/fridge" className="btn-soft min-h-[50px] px-3 text-[16px]">
+              냉장고 보기
+            </Link>
+          )}
+          <Link href="/history" className="btn-ghost min-h-[50px] px-3 text-[16px]">
+            소비 기록
+          </Link>
+        </div>
       </div>
     </div>
   );

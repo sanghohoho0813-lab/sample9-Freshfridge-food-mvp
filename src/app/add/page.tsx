@@ -2,7 +2,7 @@
 
 import { Suspense, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Camera, Check, ChevronDown, ImagePlus, Loader2, PencilLine, Plus } from "lucide-react";
+import { Camera, Check, ChevronDown, ImagePlus, ListPlus, Loader2, PencilLine, X } from "lucide-react";
 import { useFridge, useStore, useUndoToast } from "@/lib/store";
 import {
   CATEGORY_LABELS,
@@ -29,6 +29,7 @@ import { frequentlyEaten } from "@/lib/insights";
 import IngredientThumb from "@/components/IngredientThumb";
 import CategoryIcon from "@/components/CategoryIcon";
 import PageHeader from "@/components/ui/PageHeader";
+import StickyActionBar from "@/components/ui/StickyActionBar";
 import Field, { INPUT_ERROR } from "@/components/ui/Field";
 import ChoiceChip from "@/components/ui/ChoiceChip";
 import SegmentedControl from "@/components/ui/SegmentedControl";
@@ -279,7 +280,7 @@ function AddIngredientContent() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-5">
-      <PageHeader title="식재료 추가" />
+      <PageHeader title="식재료 추가" back="/" />
 
       <SegmentedControl
         label="등록 방법"
@@ -630,24 +631,34 @@ function AddIngredientContent() {
               </>
             )}
 
-            <div className="space-y-2">
-              <button type="submit" disabled={saving} className="btn-primary min-h-[56px] w-full text-[19.5px]">
-                <Plus size={22} aria-hidden />
-                {merging
-                  ? `기존 ${trimmed}에 더하기`
-                  : trimmed && trimmed.length <= 8
-                    ? `${josa(trimmed, "을/를")} 냉장고에 추가`
-                    : "냉장고에 추가"}
-              </button>
-              <button
-                type="button"
-                disabled={saving}
-                onClick={() => save(true)}
-                className="inline-flex min-h-[48px] w-full items-center justify-center rounded-2xl text-[16.5px] font-semibold text-fresh-700 hover:bg-fresh-50"
-              >
-                추가하고 하나 더 입력
-              </button>
-            </div>
+            {/* 저장 — 모바일은 화면 아래 고정이라 긴 입력 중에도 바로 누를 수 있다 */}
+            <StickyActionBar>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  disabled={saving}
+                  onClick={() => save(true)}
+                  aria-label="추가하고 하나 더 입력"
+                  className="btn-ghost min-h-[56px] shrink-0 px-4 text-[17px] lg:px-5"
+                >
+                  <ListPlus size={20} aria-hidden />
+                  하나 더
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="btn-primary min-h-[56px] min-w-0 flex-1 whitespace-nowrap px-4 text-[18.5px]"
+                >
+                  {merging
+                    ? trimmed.length <= 4
+                      ? `기존 ${trimmed}에 더하기`
+                      : "기존 재료에 더하기"
+                    : trimmed && trimmed.length <= 4
+                      ? `${josa(trimmed, "을/를")} 냉장고에 추가`
+                      : "냉장고에 추가"}
+                </button>
+              </div>
+            </StickyActionBar>
           </form>
         ) : (
           <div className="space-y-4">
@@ -703,7 +714,7 @@ function AddIngredientContent() {
             )}
 
             {recognized && (
-              <div className="card animate-pop-in space-y-4 p-4 sm:p-5">
+              <div className="card animate-fade-in space-y-4 p-4 sm:p-5">
                 <div>
                   <p className="text-[20.5px] font-bold text-ink-900">
                     {recognized.length > 0 ? `식재료 ${recognized.length}개를 찾았어요` : "추가할 식재료가 없어요"}
@@ -719,88 +730,100 @@ function AddIngredientContent() {
                     {recognized.map((r, idx) => {
                       const have = fridge.some((f) => f.name === r.name);
                       return (
-                        <li key={r.name} className="space-y-2 px-3 py-3">
-                          <div className="flex items-center gap-3">
+                        <li key={r.name} className="px-3.5 py-3.5">
+                          <div className="flex items-start gap-3">
                             <IngredientThumb
                               name={r.name}
                               category={r.category}
-                              className="h-12 w-12 rounded-xl bg-fresh-50"
-                              sizes="48px"
+                              className="h-14 w-14 bg-warmwhite"
+                              sizes="56px"
                             />
                             <div className="min-w-0 flex-1">
-                              <p className="truncate text-[18px] font-bold text-ink-900">{r.name}</p>
-                              <p className="text-[14.5px] text-ink-500">
-                                {formatKoreanDate(toISODate(addDays(todayStart(), r.suggestedExpiryDays)))}까지 · 보통{" "}
-                                {shelfLabel(r.suggestedExpiryDays)}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <StepButton
-                                size="sm"
-                                dir="down"
-                                label={`${r.name} 수량 줄이기`}
-                                onClick={() => updateRecognized(idx, { quantity: Math.max(1, r.quantity - 1) })}
-                                disabled={r.quantity <= 1}
-                              />
-                              <span className="min-w-[44px] text-center text-[17.5px] font-bold tabular-nums">
-                                {r.quantity}
-                                {r.unit}
-                              </span>
-                              <StepButton
-                                size="sm"
-                                dir="up"
-                                label={`${r.name} 수량 늘리기`}
-                                onClick={() => updateRecognized(idx, { quantity: r.quantity + 1 })}
-                              />
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="min-w-0">
+                                  <p className="text-[18px] font-semibold leading-snug text-ink-900">{r.name}</p>
+                                  <p className="text-[15px] text-ink-500">
+                                    {formatKoreanDate(toISODate(addDays(todayStart(), r.suggestedExpiryDays)))}까지 ·
+                                    보통 {shelfLabel(r.suggestedExpiryDays)}
+                                  </p>
+                                </div>
+                                <button
+                                  type="button"
+                                  aria-label={`${r.name} 빼기`}
+                                  onClick={() =>
+                                    setRecognized((prev) => (prev ? prev.filter((_, i) => i !== idx) : prev))
+                                  }
+                                  className="-mr-1.5 -mt-1 grid h-10 w-10 shrink-0 place-items-center rounded-full text-ink-400 transition-colors hover:bg-coral-50 hover:text-coral-700"
+                                >
+                                  <X size={20} aria-hidden />
+                                </button>
+                              </div>
+                              <div className="mt-2.5 flex items-center gap-2">
+                                <StepButton
+                                  size="sm"
+                                  dir="down"
+                                  label={`${r.name} 수량 줄이기`}
+                                  onClick={() => updateRecognized(idx, { quantity: Math.max(1, r.quantity - 1) })}
+                                  disabled={r.quantity <= 1}
+                                />
+                                <span className="min-w-[56px] text-center text-[17.5px] font-bold tabular-nums">
+                                  {r.quantity}
+                                  {r.unit}
+                                </span>
+                                <StepButton
+                                  size="sm"
+                                  dir="up"
+                                  label={`${r.name} 수량 늘리기`}
+                                  onClick={() => updateRecognized(idx, { quantity: r.quantity + 1 })}
+                                />
+                              </div>
                             </div>
                           </div>
-                          <div className="flex flex-wrap items-center gap-2 pl-[60px]">
-                            {have && (
-                              <>
-                                <span className="text-[14.5px] font-semibold text-amberish-700">이미 있어요</span>
+                          {have && (
+                            <fieldset className="mt-3 rounded-2xl bg-amberish-50/70 p-2.5">
+                              <legend className="sr-only">{r.name} 넣는 방법</legend>
+                              <p className="px-0.5 text-[14.5px] font-semibold text-amberish-700">
+                                냉장고에 이미 있어요
+                              </p>
+                              <div className="mt-1.5 grid grid-cols-2 gap-1.5">
                                 <ChoiceChip
                                   selected={!r.merge}
                                   onClick={() => updateRecognized(idx, { merge: false })}
-                                  className="min-h-[36px] px-3 py-1 text-[14.5px]"
+                                  className="min-h-[42px] justify-center whitespace-nowrap px-1.5 text-[14.5px]"
                                 >
                                   따로 추가
                                 </ChoiceChip>
                                 <ChoiceChip
                                   selected={r.merge}
                                   onClick={() => updateRecognized(idx, { merge: true })}
-                                  className="min-h-[36px] px-3 py-1 text-[14.5px]"
+                                  className="min-h-[42px] justify-center whitespace-nowrap px-1.5 text-[14.5px]"
                                 >
                                   기존 것에 더하기
                                 </ChoiceChip>
-                              </>
-                            )}
-                            <button
-                              type="button"
-                              onClick={() => setRecognized((prev) => (prev ? prev.filter((_, i) => i !== idx) : prev))}
-                              className="inline-flex min-h-[36px] items-center text-[14.5px] font-semibold text-ink-500 underline-offset-2 hover:text-coral-700 hover:underline"
-                            >
-                              빼기
-                            </button>
-                          </div>
+                              </div>
+                            </fieldset>
+                          )}
                         </li>
                       );
                     })}
                   </ul>
                 )}
-                <div className="flex gap-2">
-                  <button type="button" onClick={() => setRecognized(null)} className="btn-ghost min-h-[52px] flex-1">
-                    다시 찍기
-                  </button>
-                  <button
-                    type="button"
-                    onClick={submitRecognized}
-                    disabled={recognized.length === 0}
-                    className="btn-primary min-h-[52px] flex-1"
-                  >
-                    <Check size={21} aria-hidden />
-                    {recognized.length > 0 ? `${recognized.length}개 추가` : "추가"}
-                  </button>
-                </div>
+                <StickyActionBar>
+                  <div className="flex gap-2">
+                    <button type="button" onClick={() => setRecognized(null)} className="btn-ghost min-h-[56px] flex-1">
+                      다시 찍기
+                    </button>
+                    <button
+                      type="button"
+                      onClick={submitRecognized}
+                      disabled={recognized.length === 0}
+                      className="btn-primary min-h-[56px] flex-[1.5]"
+                    >
+                      <Check size={21} aria-hidden />
+                      {recognized.length > 0 ? `${recognized.length}개 추가` : "추가"}
+                    </button>
+                  </div>
+                </StickyActionBar>
               </div>
             )}
           </div>

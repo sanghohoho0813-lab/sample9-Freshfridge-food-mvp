@@ -39,18 +39,14 @@ export default function IngredientActionSheet({
   return (
     <Portal>
       <div
-        className="fixed inset-0 z-50 flex items-end justify-center bg-ink-900/40 backdrop-blur-[2px] sm:items-center"
+        className="sheet-backdrop"
         onClick={onClose}
         role="dialog"
         aria-modal="true"
         aria-labelledby="action-sheet-title"
       >
-        <div
-          className="max-h-[88dvh] w-full max-w-md animate-pop-in overflow-y-auto rounded-t-3xl bg-white p-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))] shadow-lift sm:rounded-3xl sm:pb-5"
-          ref={boxRef}
-          tabIndex={-1}
-          onClick={(e) => e.stopPropagation()}
-        >
+        <div className="sheet-panel" ref={boxRef} tabIndex={-1} onClick={(e) => e.stopPropagation()}>
+          <span className="sheet-grabber" aria-hidden />
           <div className="flex items-start gap-3">
             <IngredientThumb
               name={ingredient.name}
@@ -136,17 +132,13 @@ export default function IngredientActionSheet({
           )}
 
           <div className="mt-5 flex gap-2">
-            <button type="button" onClick={onClose} className="btn-ghost flex-1">
+            <button type="button" onClick={onClose} className="btn-ghost min-h-[54px] flex-1">
               취소
             </button>
             <button
               type="button"
               onClick={() => onConfirm(amount, isEat ? undefined : reason)}
-              className={
-                isEat
-                  ? "btn-primary flex-[1.4]"
-                  : "inline-flex flex-[1.4] items-center justify-center gap-1.5 rounded-2xl bg-coral-500 px-4 py-2.5 text-[18.5px] font-semibold text-white transition-all duration-200 hover:bg-coral-600 active:scale-[0.98]"
-              }
+              className={isEat ? "btn-primary min-h-[54px] flex-[1.4]" : "btn-danger min-h-[54px] flex-[1.4]"}
             >
               {isEat ? "먹었어요" : "버렸어요"} · {formatAmount(amount, unit)}
             </button>

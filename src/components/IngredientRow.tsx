@@ -84,7 +84,7 @@ export default function IngredientRow({
     >
       <Link
         href={`/ingredient/${ingredient.id}`}
-        className="flex min-w-0 flex-1 items-center gap-3 py-3 pl-3 sm:gap-3.5 sm:pl-4"
+        className="flex min-w-0 flex-1 items-center gap-3 py-3 pl-3 transition-opacity active:opacity-70 sm:gap-3.5 sm:pl-4"
       >
         <IngredientThumb
           name={ingredient.name}

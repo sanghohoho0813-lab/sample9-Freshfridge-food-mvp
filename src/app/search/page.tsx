@@ -7,7 +7,9 @@ import { RECIPES } from "@/lib/demo-data";
 import { rankRecipes } from "@/lib/recipe-matcher";
 import { daysLeft, sortByExpiry } from "@/lib/expiry-calculator";
 import IngredientRow from "@/components/IngredientRow";
-import RecipeCard from "@/components/RecipeCard";
+import RecipeCard, { RecipeList } from "@/components/RecipeCard";
+import IngredientThumb from "@/components/IngredientThumb";
+import ExpiryBadge from "@/components/ExpiryBadge";
 import EmptyState from "@/components/EmptyState";
 import ListGroup from "@/components/ui/ListGroup";
 import PageHeader from "@/components/ui/PageHeader";
@@ -37,19 +39,19 @@ export default function SearchPage() {
     );
   }, [fridge, q]);
 
-  // 검색 전에는 곧 기한이 끝나는 재료를 먼저 제안한다
-  const urgentNames = useMemo(
+  // 검색 전에는 곧 기한이 끝나는 재료를 먼저 제안한다 (같은 이름은 한 번만)
+  const urgentItems = useMemo(
     () =>
       sortByExpiry(fridge)
         .filter((i) => {
           const d = daysLeft(i.expiresAt);
           return d !== null && d <= 3;
         })
-        .map((i) => i.name)
-        .filter((n, idx, arr) => arr.indexOf(n) === idx)
+        .filter((i, idx, arr) => arr.findIndex((x) => x.name === i.name) === idx)
         .slice(0, 6),
     [fridge]
   );
+  const urgentNames = urgentItems.map((i) => i.name);
 
   if (!ready)
     return (
@@ -58,8 +60,7 @@ export default function SearchPage() {
       </PageLoading>
     );
 
-  const chipCls =
-    "chip min-h-[44px] border border-ink-900/[0.1] bg-white text-ink-700 hover:border-fresh-200 hover:bg-fresh-50/50";
+  const chipCls = "chip min-h-[44px] border border-ink-900/[0.1] bg-white text-ink-800 hover:border-ink-900/25";
 
   return (
     <div className="mx-auto max-w-5xl space-y-5">
@@ -94,9 +95,9 @@ export default function SearchPage() {
             type="button"
             aria-label="검색어 지우기"
             onClick={() => setQuery("")}
-            className="absolute right-2 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-xl text-ink-400 hover:bg-ink-900/[0.04] hover:text-ink-700"
+            className="absolute right-2 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full text-ink-400 hover:bg-ink-900/[0.04] hover:text-ink-700"
           >
-            <X size={20} />
+            <X size={20} aria-hidden />
           </button>
         )}
       </form>
@@ -105,18 +106,30 @@ export default function SearchPage() {
         <div className="space-y-5">
           {urgentNames.length > 0 && (
             <section>
-              <h2 className="mb-2.5 text-[17px] font-bold text-ink-700">곧 기한이 끝나는 재료</h2>
+              <h2 className="mb-2.5 text-[16px] font-semibold text-ink-500">곧 기한이 끝나는 재료</h2>
               <div className="flex flex-wrap gap-2">
-                {urgentNames.map((s) => (
-                  <button key={s} type="button" onClick={() => setQuery(s)} className={chipCls}>
-                    {s}
+                {urgentItems.map((i) => (
+                  <button
+                    key={i.id}
+                    type="button"
+                    onClick={() => setQuery(i.name)}
+                    className={`${chipCls} gap-2 py-1 pl-1.5 pr-3`}
+                  >
+                    <IngredientThumb
+                      name={i.name}
+                      category={i.category}
+                      className="h-8 w-8 rounded-full bg-warmwhite"
+                      sizes="32px"
+                    />
+                    {i.name}
+                    <ExpiryBadge expiresAt={i.expiresAt} size="sm" />
                   </button>
                 ))}
               </div>
             </section>
           )}
           <section>
-            <h2 className="mb-2.5 text-[17px] font-bold text-ink-700">추천 검색어</h2>
+            <h2 className="mb-2.5 text-[16px] font-semibold text-ink-500">추천 검색어</h2>
             <div className="flex flex-wrap gap-2">
               {SUGGESTIONS.filter((s) => !urgentNames.includes(s)).map((s) => (
                 <button key={s} type="button" onClick={() => setQuery(s)} className={chipCls}>
@@ -139,7 +152,7 @@ export default function SearchPage() {
           {matchedIngredients.length > 0 && (
             <section>
               <h2 className="section-title mb-3">
-                내 냉장고 <span className="text-fresh-600">{matchedIngredients.length}</span>
+                내 냉장고 <span className="font-medium text-ink-500">{matchedIngredients.length}</span>
               </h2>
               <ListGroup columns={2}>
                 {matchedIngredients.map((i) => (
@@ -151,13 +164,15 @@ export default function SearchPage() {
           {matchedRecipes.length > 0 && (
             <section>
               <h2 className="section-title mb-3">
-                레시피 <span className="text-fresh-600">{matchedRecipes.length}</span>
+                레시피 <span className="font-medium text-ink-500">{matchedRecipes.length}</span>
               </h2>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+              <RecipeList>
                 {matchedRecipes.map((m) => (
-                  <RecipeCard key={m.recipe.id} match={m} />
+                  <li key={m.recipe.id}>
+                    <RecipeCard match={m} />
+                  </li>
                 ))}
-              </div>
+              </RecipeList>
             </section>
           )}
         </div>

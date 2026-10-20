@@ -38,8 +38,8 @@ export default function RecipeCard({
   const box = tile
     ? "card card-hover flex h-full flex-col overflow-hidden"
     : auto
-      ? "flex items-center gap-3.5 px-3.5 py-3 transition-colors hover:bg-warmwhite sm:card sm:card-hover sm:h-full sm:flex-col sm:items-stretch sm:gap-0 sm:overflow-hidden sm:p-0 sm:hover:bg-white"
-      : "flex items-center gap-3.5 px-3.5 py-3 transition-colors hover:bg-warmwhite sm:px-4";
+      ? "flex items-center gap-3.5 px-3.5 py-3 transition-colors hover:bg-warmwhite active:bg-ink-900/[0.03] sm:card sm:card-hover sm:h-full sm:flex-col sm:items-stretch sm:gap-0 sm:overflow-hidden sm:p-0 sm:hover:bg-white"
+      : "flex items-center gap-3.5 px-3.5 py-3 transition-colors hover:bg-warmwhite active:bg-ink-900/[0.03] sm:px-4";
   const media = tile
     ? "relative aspect-[4/3] w-full bg-cream"
     : auto

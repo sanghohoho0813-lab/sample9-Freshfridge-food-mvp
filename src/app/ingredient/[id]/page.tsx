@@ -16,6 +16,7 @@ import ExpiryBadge from "@/components/ExpiryBadge";
 import IngredientThumb from "@/components/IngredientThumb";
 import EmptyState from "@/components/EmptyState";
 import BackButton from "@/components/ui/BackButton";
+import DetailSkeleton from "@/components/ui/DetailSkeleton";
 import ChoiceChip from "@/components/ui/ChoiceChip";
 import Field, { INPUT_ERROR } from "@/components/ui/Field";
 import { QuantityInput } from "@/components/ui/Stepper";
@@ -49,11 +50,7 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ id:
   );
 
   if (!ready) {
-    return (
-      <div className="mx-auto max-w-3xl">
-        <div className="skeleton h-64 w-full" />
-      </div>
-    );
+    return <DetailSkeleton heroAspect="aspect-[16/10]" />;
   }
 
   if (!ingredient) {

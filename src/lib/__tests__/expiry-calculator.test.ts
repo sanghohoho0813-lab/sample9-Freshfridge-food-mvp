@@ -6,6 +6,7 @@ import {
   friendlyExpiryText,
   priorityGroup,
   shelfLabel,
+  formatKoreanDate,
   sortByExpiry,
 } from "../expiry-calculator";
 import { inDays, ing } from "./fixtures";
@@ -58,5 +59,18 @@ describe("expiry-calculator", () => {
 
   it("보관 기간 칩 문구", () => {
     expect([3, 7, 14, 30].map(shelfLabel)).toEqual(["3일", "일주일", "2주", "한 달"]);
+    expect([21, 60, 90, 180, 365, 730, 45].map(shelfLabel)).toEqual([
+      "3주",
+      "두 달",
+      "3개월",
+      "6개월",
+      "1년",
+      "2년",
+      "45일",
+    ]);
+  });
+  it("올해가 아닌 날짜에만 연도를 붙인다", () => {
+    expect(formatKoreanDate("2026-10-20")).toBe("10월 20일");
+    expect(formatKoreanDate("2027-10-20")).toBe("2027년 10월 20일");
   });
 });
