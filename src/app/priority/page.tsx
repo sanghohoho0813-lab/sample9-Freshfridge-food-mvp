@@ -28,6 +28,8 @@ import PageHeader from "@/components/ui/PageHeader";
 import PageLoading from "@/components/ui/PageLoading";
 import { useIngredientActions } from "@/components/useIngredientActions";
 import EmptyState from "@/components/EmptyState";
+import { GROUP_DOT } from "@/components/expiryTone";
+import SectionNav from "@/components/SectionNav";
 
 /** 자세히 보여줄 구간 (왜 지금 + 무엇을 만들지) / 목록으로 보여줄 구간 */
 const FOCUS_GROUPS: ExpiryGroup[] = ["expired", "today", "soon"];
@@ -116,6 +118,7 @@ export default function PriorityPage() {
       {isEmpty ? (
         <EmptyState
           icon={Leaf}
+          illustration={["사과", "당근", "양파"]}
           title="지금은 급한 재료가 없어요"
           description="기한이 일주일 안으로 다가오면 여기에 모아 보여드려요."
           ctaLabel="내 냉장고 보기"
@@ -123,11 +126,24 @@ export default function PriorityPage() {
         />
       ) : (
         <>
+          {[...FOCUS_GROUPS, ...LIST_GROUPS].filter((g) => groups.get(g)?.length).length >= 2 && (
+            <SectionNav
+              idPrefix="prio-sec-"
+              sections={[...FOCUS_GROUPS, ...LIST_GROUPS]
+                .filter((g) => groups.get(g)?.length)
+                .map((g) => ({ group: g, count: groups.get(g)!.length }))}
+            />
+          )}
           {FOCUS_GROUPS.map((g) => {
             const list = groups.get(g);
             if (!list?.length) return null;
             return (
-              <section key={g} aria-labelledby={`group-${g}`}>
+              <section
+                key={g}
+                id={`prio-sec-${g}`}
+                aria-labelledby={`group-${g}`}
+                className="scroll-mt-[136px] sm:scroll-mt-[150px]"
+              >
                 <GroupTitle group={g} count={list.length} />
                 <ul className="grid gap-3 xl:grid-cols-2">
                   {list.map((ing) => (
@@ -148,7 +164,12 @@ export default function PriorityPage() {
             const list = groups.get(g);
             if (!list?.length) return null;
             return (
-              <section key={g} aria-labelledby={`group-${g}`}>
+              <section
+                key={g}
+                id={`prio-sec-${g}`}
+                aria-labelledby={`group-${g}`}
+                className="scroll-mt-[136px] sm:scroll-mt-[150px]"
+              >
                 <GroupTitle group={g} count={list.length} />
                 <ListGroup columns={2}>
                   {list.map((ing) => (
@@ -167,8 +188,7 @@ export default function PriorityPage() {
 }
 
 function GroupTitle({ group, count }: { group: ExpiryGroup; count: number }) {
-  const dot =
-    group === "expired" || group === "today" ? "bg-coral-500" : group === "soon" ? "bg-amberish-500" : "bg-ink-300";
+  const dot = GROUP_DOT[group];
   return (
     <div className="mb-3">
       <h2 id={`group-${group}`} className="section-title flex items-center gap-2">

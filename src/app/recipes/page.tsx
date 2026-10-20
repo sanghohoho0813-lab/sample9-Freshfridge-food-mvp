@@ -160,6 +160,7 @@ function RecipesContent() {
         {fridge.length === 0 ? (
           <EmptyState
             icon={ShoppingBasket}
+            illustration={["계란", "토마토", "대파"]}
             title="냉장고에 재료가 없어요"
             description="재료를 등록하면 지금 만들 수 있는 요리부터 골라드려요."
             ctaLabel="식재료 추가하기"

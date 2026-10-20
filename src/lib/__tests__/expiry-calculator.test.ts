@@ -7,6 +7,7 @@ import {
   priorityGroup,
   shelfLabel,
   formatKoreanDate,
+  freshness,
   sortByExpiry,
 } from "../expiry-calculator";
 import { inDays, ing } from "./fixtures";
@@ -72,5 +73,12 @@ describe("expiry-calculator", () => {
   it("올해가 아닌 날짜에만 연도를 붙인다", () => {
     expect(formatKoreanDate("2026-10-20")).toBe("10월 20일");
     expect(formatKoreanDate("2027-10-20")).toBe("2027년 10월 20일");
+  });
+  it("신선도: 산 날부터 기한까지 중 지난 비율", () => {
+    expect(freshness(inDays(-3), inDays(1))).toEqual({ elapsed: 3, remaining: 1, total: 4, ratio: 0.75 });
+    expect(freshness(inDays(0), inDays(7))).toMatchObject({ elapsed: 0, ratio: 0 });
+    // 기한이 지나면 막대는 끝(1)에 머물고, 남은 날은 음수로 알려준다
+    expect(freshness(inDays(-10), inDays(-2))).toMatchObject({ remaining: -2, ratio: 1 });
+    expect(freshness(inDays(-1), null)).toBeNull();
   });
 });

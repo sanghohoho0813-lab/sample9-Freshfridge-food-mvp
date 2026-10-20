@@ -80,9 +80,9 @@ export default function MyPage() {
 
       {/* 프로필 + 핵심 숫자 */}
       <section className="card overflow-hidden">
-        <div className="flex items-center gap-4 p-4 sm:p-5">
+        <div className="flex items-center gap-4 bg-gradient-to-br from-fresh-50 via-white to-white p-4 sm:p-5">
           <span
-            className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-fresh-100 text-[26px] font-bold text-fresh-700"
+            className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-fresh-600 text-[26px] font-bold text-white shadow-cta"
             aria-hidden
           >
             {state.userName.slice(0, 1)}
@@ -90,9 +90,15 @@ export default function MyPage() {
           <div className="min-w-0">
             <p className="text-[22px] font-bold text-ink-900">{state.userName}님</p>
             <p className="mt-0.5 text-[16px] text-ink-500">
-              {report.savedAmount > 0
-                ? `최근 30일 동안 ${formatWon(report.savedAmount)}을 아꼈어요`
-                : "먹은 재료를 기록하면 아낀 금액이 쌓여요"}
+              {report.savedAmount > 0 ? (
+                <>
+                  최근 30일 동안{" "}
+                  <b className="font-semibold tabular-nums text-fresh-700">{formatWon(report.savedAmount)}</b>을
+                  아꼈어요
+                </>
+              ) : (
+                "먹은 재료를 기록하면 아낀 금액이 쌓여요"
+              )}
             </p>
           </div>
         </div>
@@ -100,30 +106,41 @@ export default function MyPage() {
           {stats.map((s, i) => (
             <div key={s.label} className={`px-2 py-3.5 text-center ${i > 0 ? "border-l border-ink-900/[0.06]" : ""}`}>
               <dt className="whitespace-nowrap text-[14.5px] text-ink-500">{s.label}</dt>
-              <dd className="mt-0.5 text-[20.5px] font-bold text-ink-900">{s.value}</dd>
+              <dd className="mt-0.5 text-[20.5px] font-bold tabular-nums text-ink-900">{s.value}</dd>
             </div>
           ))}
         </dl>
       </section>
 
-      {/* 바로가기 — 각 화면의 지금 상태를 함께 보여준다 */}
-      <ListGroup>
-        {menu.map(({ href, label, value, icon: Icon }) => (
-          <li key={href}>
-            <Link
-              href={href}
-              className="flex min-h-[64px] items-center gap-3.5 px-4 py-3 transition-colors hover:bg-warmwhite/70"
-            >
-              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-ink-900/[0.04] text-ink-600">
-                <Icon size={22} aria-hidden />
-              </span>
-              <span className="min-w-0 flex-1 text-[18px] font-semibold text-ink-900">{label}</span>
-              <span className="shrink-0 text-[15.5px] font-medium text-ink-500">{value}</span>
-              <ChevronRight size={20} className="shrink-0 text-ink-300" aria-hidden />
-            </Link>
-          </li>
-        ))}
-      </ListGroup>
+      {/* 바로가기 — 성격별로 묶고, 각 화면의 지금 상태를 함께 보여준다 */}
+      {[
+        {
+          title: "오늘 챙길 것",
+          items: menu.filter((m) => ["/priority", "/shopping", "/notifications"].includes(m.href)),
+        },
+        { title: "기록과 리포트", items: menu.filter((m) => ["/history", "/report"].includes(m.href)) },
+      ].map((group) => (
+        <section key={group.title} aria-label={group.title}>
+          <h2 className="mb-2 px-1 text-[15.5px] font-semibold text-ink-500">{group.title}</h2>
+          <ListGroup>
+            {group.items.map(({ href, label, value, icon: Icon }) => (
+              <li key={href}>
+                <Link
+                  href={href}
+                  className="flex min-h-[64px] items-center gap-3.5 px-4 py-3 transition-colors hover:bg-warmwhite active:bg-ink-900/[0.03]"
+                >
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-ink-900/[0.04] text-ink-600">
+                    <Icon size={22} aria-hidden />
+                  </span>
+                  <span className="min-w-0 flex-1 text-[18px] font-semibold text-ink-900">{label}</span>
+                  <span className="shrink-0 text-[15.5px] font-medium text-ink-500">{value}</span>
+                  <ChevronRight size={20} className="shrink-0 text-ink-300" aria-hidden />
+                </Link>
+              </li>
+            ))}
+          </ListGroup>
+        </section>
+      ))}
 
       {/* 데모 데이터 */}
       <section className="flex items-center justify-between gap-3 rounded-card border border-ink-900/[0.07] bg-white px-4 py-3.5">

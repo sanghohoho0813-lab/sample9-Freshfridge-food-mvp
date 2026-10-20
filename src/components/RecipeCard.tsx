@@ -7,6 +7,7 @@ import { explainMatch, type RecipeMatch } from "@/lib/recipe-matcher";
 import { daysLeft } from "@/lib/expiry-calculator";
 import { recipeImage } from "@/lib/images";
 import { relativeDay } from "@/lib/stats";
+import Highlight from "./Highlight";
 
 type Layout = "tile" | "row" | "auto";
 
@@ -21,6 +22,7 @@ export default function RecipeCard({
   lastCooked,
   layout = "auto",
   priority = false,
+  query,
 }: {
   match: RecipeMatch;
   /** 마지막으로 만든 날짜 (최근 일주일 안이면 "어제 만듦") */
@@ -28,6 +30,8 @@ export default function RecipeCard({
   layout?: Layout;
   /** 첫 화면에 바로 보이는 카드 — 이미지를 먼저 불러온다(LCP) */
   priority?: boolean;
+  /** 검색 화면 — 요리 이름에서 검색어와 맞는 부분 표시 */
+  query?: string;
 }) {
   const { recipe } = match;
   const why = explainMatch(match);
@@ -73,7 +77,9 @@ export default function RecipeCard({
         </span>
       </span>
       <span className={body}>
-        <span className="line-clamp-1 text-[18px] font-bold tracking-[-0.01em] text-ink-900">{recipe.name}</span>
+        <span className="line-clamp-1 text-[18px] font-bold tracking-[-0.01em] text-ink-900">
+          <Highlight text={recipe.name} query={query} />
+        </span>
         {why.urgent && (
           <span className="line-clamp-2 text-[15px] font-medium leading-snug text-amberish-700">{why.urgent}</span>
         )}

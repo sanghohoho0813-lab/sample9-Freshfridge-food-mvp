@@ -107,6 +107,7 @@ export default function HomePage() {
         <div className="mt-5">
           <EmptyState
             icon={Refrigerator}
+            illustration={["토마토", "우유", "계란"]}
             title="냉장고가 비어 있어요"
             description="재료를 등록하면 먼저 먹어야 할 순서와 지금 만들 수 있는 요리를 매일 알려드려요."
             ctaLabel="첫 식재료 추가하기"

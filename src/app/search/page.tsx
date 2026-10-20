@@ -156,7 +156,7 @@ export default function SearchPage() {
               </h2>
               <ListGroup columns={2}>
                 {matchedIngredients.map((i) => (
-                  <IngredientRow key={i.id} ingredient={i} />
+                  <IngredientRow key={i.id} ingredient={i} query={query} />
                 ))}
               </ListGroup>
             </section>
@@ -169,7 +169,7 @@ export default function SearchPage() {
               <RecipeList>
                 {matchedRecipes.map((m) => (
                   <li key={m.recipe.id}>
-                    <RecipeCard match={m} />
+                    <RecipeCard match={m} query={query} />
                   </li>
                 ))}
               </RecipeList>

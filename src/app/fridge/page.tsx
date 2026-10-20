@@ -21,6 +21,8 @@ import PageHeader from "@/components/ui/PageHeader";
 import PageLoading from "@/components/ui/PageLoading";
 import SegmentedControl from "@/components/ui/SegmentedControl";
 import EmptyState from "@/components/EmptyState";
+import { GROUP_DOT } from "@/components/expiryTone";
+import SectionNav from "@/components/SectionNav";
 import { useIngredientActions } from "@/components/useIngredientActions";
 
 const STORAGE_TABS: { key: StorageType | "all"; label: string }[] = [
@@ -156,6 +158,7 @@ function FridgeContent() {
       {fridge.length === 0 ? (
         <EmptyState
           icon={Refrigerator}
+          illustration={["토마토", "우유", "계란"]}
           title="아직 등록된 식재료가 없어요"
           description="재료를 등록하면 기한을 대신 챙겨드려요."
           ctaLabel="첫 식재료 추가하기"
@@ -207,6 +210,13 @@ function FridgeContent() {
               )}
             </div>
 
+            {sections.length >= 2 && (
+              <SectionNav
+                idPrefix="fridge-sec-"
+                sections={sections.map(({ group, items }) => ({ group, count: items.length }))}
+              />
+            )}
+
             {sections.length === 0 ? (
               <EmptyState
                 compact
@@ -216,21 +226,17 @@ function FridgeContent() {
               />
             ) : (
               sections.map(({ group, items }) => (
-                <section key={group} aria-labelledby={`fridge-${group}`}>
+                <section
+                  key={group}
+                  id={`fridge-sec-${group}`}
+                  aria-labelledby={`fridge-${group}`}
+                  className="scroll-mt-[136px] sm:scroll-mt-[150px]"
+                >
                   <h2
                     id={`fridge-${group}`}
                     className="mb-2.5 flex items-center gap-2 px-1 text-[17px] font-semibold text-ink-900"
                   >
-                    <span
-                      className={`h-2 w-2 shrink-0 rounded-full ${
-                        group === "expired" || group === "today"
-                          ? "bg-coral-500"
-                          : group === "soon"
-                            ? "bg-amberish-500"
-                            : "bg-ink-300"
-                      }`}
-                      aria-hidden
-                    />
+                    <span className={`h-2 w-2 shrink-0 rounded-full ${GROUP_DOT[group]}`} aria-hidden />
                     {EXPIRY_GROUP_LABEL[group]}
                     <span className="text-[15px] font-medium tabular-nums text-ink-500">{items.length}</span>
                   </h2>

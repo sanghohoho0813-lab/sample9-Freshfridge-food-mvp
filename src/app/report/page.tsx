@@ -94,6 +94,32 @@ export default function ReportPage() {
           </p>
         )}
 
+        {/* 이번 달 먹음 vs 버림 (개수) — 두 부분이라 막대 하나에 이름과 숫자를 바로 붙인다 */}
+        {cur.usedCount + cur.wastedCount > 0 && (
+          <div className="mt-5">
+            <div
+              className="flex h-3 gap-0.5"
+              role="img"
+              aria-label={`${span.month}월 먹은 재료 ${cur.usedCount}개, 버린 재료 ${cur.wastedCount}개`}
+            >
+              {cur.usedCount > 0 && <span className={`rounded-[4px] ${USED}`} style={{ flexGrow: cur.usedCount }} />}
+              {cur.wastedCount > 0 && (
+                <span className={`rounded-[4px] ${WASTED}`} style={{ flexGrow: cur.wastedCount }} />
+              )}
+            </div>
+            <div className="mt-2 flex justify-between gap-3 text-[15px] text-ink-600" aria-hidden>
+              <span className="inline-flex items-center gap-1.5">
+                <span className={`h-2.5 w-2.5 rounded-sm ${USED}`} />
+                먹음 <b className="font-semibold tabular-nums text-ink-900">{cur.usedCount}개</b>
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className={`h-2.5 w-2.5 rounded-sm ${WASTED}`} />
+                버림 <b className="font-semibold tabular-nums text-ink-900">{cur.wastedCount}개</b>
+              </span>
+            </div>
+          </div>
+        )}
+
         <dl className="mt-5 grid grid-cols-3 divide-x divide-ink-900/[0.06] border-t border-ink-900/[0.07] pt-4 text-center">
           <div className="px-1">
             <dt className="text-[14.5px] text-ink-500">아낀 금액</dt>

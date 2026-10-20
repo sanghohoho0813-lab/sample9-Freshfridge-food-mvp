@@ -58,6 +58,8 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ id: str
   /** 다 쓴 재료 중 다시 살 것 (요리 직후 고른다) */
   const [rebuy, setRebuy] = useState<Set<string>>(new Set());
   const [rebuyDone, setRebuyDone] = useState(false);
+  /** 조리하면서 끝낸 단계 (화면을 떠나면 초기화) */
+  const [doneSteps, setDoneSteps] = useState<Set<number>>(new Set());
   const resultRef = useRef<HTMLDivElement>(null);
 
   const recipe = RECIPES.find((r) => r.id === id);
@@ -328,18 +330,56 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ id: str
 
           {/* 조리방법 */}
           <section aria-labelledby="steps-title">
-            <h2 id="steps-title" className="section-title mb-3.5">
-              조리방법
-            </h2>
-            <ol className="space-y-4">
-              {recipe.steps.map((step, i) => (
-                <li key={i} className="flex gap-3.5">
-                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ink-900 text-[15px] font-semibold tabular-nums text-white">
-                    {i + 1}
-                  </span>
-                  <p className="pt-0.5 text-[17.5px] leading-relaxed text-ink-700">{step}</p>
-                </li>
-              ))}
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h2 id="steps-title" className="section-title">
+                조리방법
+              </h2>
+              <span className="text-[15px] font-medium tabular-nums text-ink-500">
+                {doneSteps.size > 0 ? `${doneSteps.size}/${recipe.steps.length} 단계 끝` : "끝낸 단계를 눌러 표시해요"}
+              </span>
+            </div>
+            {/* 진행 막대 — 요리하면서 어디까지 했는지 */}
+            <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-ink-900/[0.06]" aria-hidden>
+              <div
+                className="h-full rounded-full bg-fresh-500 transition-[width] duration-300"
+                style={{ width: `${(doneSteps.size / recipe.steps.length) * 100}%` }}
+              />
+            </div>
+            <ol className="space-y-1">
+              {recipe.steps.map((step, i) => {
+                const done = doneSteps.has(i);
+                return (
+                  <li key={i}>
+                    <button
+                      type="button"
+                      aria-pressed={done}
+                      onClick={() => {
+                        const next = new Set(doneSteps);
+                        if (done) next.delete(i);
+                        else next.add(i);
+                        setDoneSteps(next);
+                      }}
+                      className="-mx-2 flex w-[calc(100%+1rem)] gap-3.5 rounded-2xl px-2 py-2.5 text-left transition-colors hover:bg-ink-900/[0.03]"
+                    >
+                      <span
+                        className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-[15px] font-semibold tabular-nums transition-colors ${
+                          done ? "bg-fresh-600 text-white" : "bg-ink-900 text-white"
+                        }`}
+                      >
+                        <span aria-hidden>{done ? <Check size={17} strokeWidth={3} /> : i + 1}</span>
+                        <span className="sr-only">{done ? `${i + 1}단계 끝,` : `${i + 1}단계,`}</span>
+                      </span>
+                      <span
+                        className={`pt-0.5 text-[17.5px] leading-relaxed transition-colors ${
+                          done ? "text-ink-500 line-through decoration-ink-300" : "text-ink-700"
+                        }`}
+                      >
+                        {step}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
             </ol>
           </section>
 
@@ -370,6 +410,12 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ id: str
                     <TriangleAlert size={17} className="mt-[3px] shrink-0" aria-hidden />
                     {josa(match.missingEssential.map((m) => m.name).join(", "), "이/가")} 냉장고에 없어요. 그래도
                     만들었다면 있는 재료만 빠져요.
+                  </p>
+                )}
+                {doneSteps.size === recipe.steps.length && match.ownedCount > 0 && (
+                  <p className="flex items-center gap-1.5 text-[16px] font-semibold text-fresh-700" role="status">
+                    <CircleCheck size={18} aria-hidden />
+                    모든 단계를 끝냈어요. 요리했어요를 눌러 냉장고에서 빼주세요.
                   </p>
                 )}
                 <p className="text-[15px] text-ink-500">

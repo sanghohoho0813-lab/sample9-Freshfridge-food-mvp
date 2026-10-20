@@ -119,7 +119,10 @@ export default function HistoryPage() {
           <div className="space-y-6">
             {periods.map(([period, list]) => (
               <section key={period}>
-                <h2 className="mb-2 text-[16.5px] font-bold text-ink-700">{period}</h2>
+                {/* 기간 제목은 스크롤해도 위에 붙어 있어 지금 어느 날 기록인지 놓치지 않는다 */}
+                <h2 className="sticky top-16 z-10 -mx-4 mb-1 bg-warmwhite/90 px-5 py-2 text-[16.5px] font-semibold text-ink-700 backdrop-blur-md sm:top-[72px] sm:-mx-6 sm:px-7">
+                  {period}
+                </h2>
                 <ul className="divide-y divide-ink-900/[0.06] overflow-hidden rounded-card border border-ink-900/[0.07] bg-white">
                   {list.map((row) =>
                     row.kind === "cook" ? (
@@ -138,7 +141,7 @@ export default function HistoryPage() {
             ))}
             {rows.length > limit && (
               <button type="button" onClick={() => setLimit((n) => n + PAGE)} className="btn-ghost min-h-[52px] w-full">
-                이전 기록 더 보기 <span className="text-ink-400">({rows.length - limit})</span>
+                이전 기록 더 보기 <span className="text-ink-500">({rows.length - limit})</span>
               </button>
             )}
           </div>
@@ -151,7 +154,7 @@ export default function HistoryPage() {
           className="inline-flex min-h-[44px] w-full items-center justify-center gap-1 text-[16.5px] font-semibold text-fresh-700 hover:underline"
         >
           낭비 리포트 보기
-          <ArrowRight size={19} />
+          <ArrowRight size={19} aria-hidden />
         </Link>
       )}
     </div>

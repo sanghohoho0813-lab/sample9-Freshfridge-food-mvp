@@ -12,6 +12,7 @@ import { isRunningLow, restockSuggestions } from "@/lib/insights";
 import { josa } from "@/lib/text";
 import EmptyState from "@/components/EmptyState";
 import PageHeader from "@/components/ui/PageHeader";
+import StickyActionBar from "@/components/ui/StickyActionBar";
 import PageLoading from "@/components/ui/PageLoading";
 import IngredientThumb from "@/components/IngredientThumb";
 import QuickAddSheet from "@/components/QuickAddSheet";
@@ -125,6 +126,24 @@ export default function ShoppingPage() {
         }
       />
 
+      {/* 장 보는 중 — 몇 개 샀는지 한눈에 */}
+      {items.length > 0 && (
+        <div>
+          <div className="flex items-baseline justify-between text-[15.5px]">
+            <span className="font-semibold text-ink-800">
+              {items.length}개 중 {purchased.length}개 샀어요
+            </span>
+            {notPutAway.length > 0 && <span className="text-ink-500">냉장고에 넣을 것 {notPutAway.length}개</span>}
+          </div>
+          <div className="mt-2 h-2 overflow-hidden rounded-full bg-ink-900/[0.07]" aria-hidden>
+            <div
+              className="h-full rounded-full bg-fresh-500 transition-[width] duration-300"
+              style={{ width: `${(purchased.length / items.length) * 100}%` }}
+            />
+          </div>
+        </div>
+      )}
+
       <form onSubmit={add} noValidate>
         <div className="flex gap-2">
           <input
@@ -155,6 +174,7 @@ export default function ShoppingPage() {
       {items.length === 0 && suggestions.length === 0 ? (
         <EmptyState
           icon={ShoppingBasket}
+          illustration={["양파", "두부", "바나나"]}
           title="장보기 목록이 비어 있어요"
           description="레시피에서 부족한 재료를 담거나 직접 추가해보세요."
           ctaLabel="레시피 추천 보기"
@@ -163,44 +183,49 @@ export default function ShoppingPage() {
       ) : (
         <div className="space-y-7">
           {unchecked.length > 0 && (
-            <ul
-              aria-label="살 것"
-              className="divide-y divide-ink-900/[0.06] overflow-hidden rounded-card border border-ink-900/[0.07] bg-white"
-            >
-              {unchecked.map((item) => {
-                const src = sourceLine(item, findInFridge(item.name));
-                return (
-                  <li key={item.id} className="flex items-center gap-3 py-3 pl-3 pr-2 sm:pl-3.5">
-                    <button
-                      type="button"
-                      aria-label={`${item.name} 구매 완료`}
-                      onClick={() => markPurchased(item)}
-                      className="grid h-11 w-11 shrink-0 place-items-center rounded-full border-2 border-ink-300/60 text-transparent transition-all duration-200 hover:border-fresh-400 hover:text-fresh-400 active:scale-90"
-                    >
-                      <Check size={20} strokeWidth={3} aria-hidden />
-                    </button>
-                    <IngredientThumb
-                      name={item.name}
-                      category={ingredientDefaults(item.name).category}
-                      className="h-12 w-12 bg-warmwhite"
-                      sizes="48px"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="line-clamp-2 text-[18.5px] font-bold leading-snug text-ink-900">{item.name}</p>
-                      {src && <p className={`line-clamp-2 text-[15px] leading-snug ${src.tone}`}>{src.text}</p>}
-                    </div>
-                    <button
-                      type="button"
-                      aria-label={`${item.name} 삭제`}
-                      onClick={() => remove(item)}
-                      className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-ink-400 transition-colors hover:bg-coral-50 hover:text-coral-700"
-                    >
-                      <Trash2 size={20} aria-hidden />
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
+            <section aria-labelledby="to-buy-title">
+              <h2 id="to-buy-title" className="section-title mb-2.5">
+                살 것 <span className="text-[16.5px] font-medium tabular-nums text-ink-500">{unchecked.length}</span>
+              </h2>
+              <ul
+                aria-label="살 것"
+                className="divide-y divide-ink-900/[0.06] overflow-hidden rounded-card border border-ink-900/[0.07] bg-white"
+              >
+                {unchecked.map((item) => {
+                  const src = sourceLine(item, findInFridge(item.name));
+                  return (
+                    <li key={item.id} className="flex items-center gap-3 py-3 pl-3 pr-2 sm:pl-3.5">
+                      <button
+                        type="button"
+                        aria-label={`${item.name} 구매 완료`}
+                        onClick={() => markPurchased(item)}
+                        className="grid h-11 w-11 shrink-0 place-items-center rounded-full border-2 border-ink-900/20 text-transparent transition-all duration-200 hover:border-fresh-500 hover:text-fresh-500 active:scale-90"
+                      >
+                        <Check size={20} strokeWidth={3} aria-hidden />
+                      </button>
+                      <IngredientThumb
+                        name={item.name}
+                        category={ingredientDefaults(item.name).category}
+                        className="h-12 w-12 bg-warmwhite"
+                        sizes="48px"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className="line-clamp-2 text-[18px] font-semibold leading-snug text-ink-900">{item.name}</p>
+                        {src && <p className={`line-clamp-2 text-[15px] leading-snug ${src.tone}`}>{src.text}</p>}
+                      </div>
+                      <button
+                        type="button"
+                        aria-label={`${item.name} 삭제`}
+                        onClick={() => remove(item)}
+                        className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink-400 transition-colors hover:bg-coral-50 hover:text-coral-700"
+                      >
+                        <Trash2 size={20} aria-hidden />
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
           )}
 
           {suggestions.length > 0 && (
@@ -216,8 +241,9 @@ export default function ShoppingPage() {
           {purchased.length > 0 && (
             <section aria-labelledby="bought-title">
               <div className="mb-2.5 flex items-center justify-between">
-                <h2 id="bought-title" className="text-[16.5px] font-bold text-ink-600">
-                  구매 완료 {purchased.length}개
+                <h2 id="bought-title" className="section-title">
+                  구매 완료{" "}
+                  <span className="text-[16.5px] font-medium tabular-nums text-ink-500">{purchased.length}</span>
                 </h2>
                 <button
                   type="button"
@@ -227,15 +253,6 @@ export default function ShoppingPage() {
                   목록에서 비우기
                 </button>
               </div>
-              {notPutAway.length >= 2 && (
-                <button
-                  type="button"
-                  onClick={() => setQueue({ ids: notPutAway.map((i) => i.id), total: notPutAway.length })}
-                  className="btn-soft mb-2.5 min-h-[52px] w-full"
-                >
-                  <Refrigerator size={20} aria-hidden />산 것 {notPutAway.length}개 차례로 냉장고에 넣기
-                </button>
-              )}
               <ul className="divide-y divide-ink-900/[0.06] overflow-hidden rounded-card border border-ink-900/[0.07] bg-white">
                 {purchased.map((item) => (
                   <li key={item.id} className="flex items-center gap-3 py-3 pl-3 pr-2 sm:pl-3.5">
@@ -247,7 +264,9 @@ export default function ShoppingPage() {
                     >
                       <Check size={20} strokeWidth={3} aria-hidden />
                     </button>
-                    <p className="min-w-0 flex-1 text-[18.5px] font-bold text-ink-500 line-through">{item.name}</p>
+                    <p className="min-w-0 flex-1 text-[18px] font-semibold text-ink-500 line-through decoration-ink-300">
+                      {item.name}
+                    </p>
                     {item.addedToFridge ? (
                       <Link
                         href="/fridge"
@@ -274,6 +293,19 @@ export default function ShoppingPage() {
             </section>
           )}
         </div>
+      )}
+
+      {/* 산 것이 여러 개면 화면 아래에서 한 번에 차례로 넣는다 */}
+      {notPutAway.length >= 2 && !queue && (
+        <StickyActionBar>
+          <button
+            type="button"
+            onClick={() => setQueue({ ids: notPutAway.map((i) => i.id), total: notPutAway.length })}
+            className="btn-primary min-h-[56px] w-full text-[18.5px]"
+          >
+            <Refrigerator size={21} aria-hidden />산 것 {notPutAway.length}개 차례로 냉장고에 넣기
+          </button>
+        </StickyActionBar>
       )}
 
       {queue && current && (

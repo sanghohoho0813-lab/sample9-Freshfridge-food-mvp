@@ -13,6 +13,7 @@ import { josa } from "@/lib/text";
 import { relativeDay } from "@/lib/stats";
 import { CATEGORY_LABELS, STORAGE_LABELS, type Ingredient, type StorageType } from "@/lib/types";
 import ExpiryBadge from "@/components/ExpiryBadge";
+import FreshnessTimeline from "@/components/FreshnessTimeline";
 import IngredientThumb from "@/components/IngredientThumb";
 import EmptyState from "@/components/EmptyState";
 import BackButton from "@/components/ui/BackButton";
@@ -138,6 +139,13 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ id:
             </p>
           </div>
 
+          <section
+            aria-label="신선도"
+            className="rounded-card bg-white px-4 py-4 ring-1 ring-inset ring-ink-900/[0.07] sm:px-5"
+          >
+            <FreshnessTimeline purchasedAt={ingredient.purchasedAt} expiresAt={ingredient.expiresAt} />
+          </section>
+
           {editing ? (
             <IngredientEditForm
               key={ingredient.id}
@@ -172,12 +180,8 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ id:
                   <dt className="text-[14.5px] text-ink-500">보관 위치</dt>
                   <dd className="font-semibold text-ink-900">{STORAGE_LABELS[ingredient.storage]}</dd>
                 </div>
-                <div>
-                  <dt className="text-[14.5px] text-ink-500">구매일</dt>
-                  <dd className="font-semibold text-ink-900">{formatKoreanDate(ingredient.purchasedAt)}</dd>
-                </div>
                 {ingredient.memo && (
-                  <div className="col-span-2">
+                  <div>
                     <dt className="text-[14.5px] text-ink-500">메모</dt>
                     <dd className="font-medium text-ink-800">{ingredient.memo}</dd>
                   </div>

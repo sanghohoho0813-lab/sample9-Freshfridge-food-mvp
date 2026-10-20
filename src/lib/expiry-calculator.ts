@@ -28,6 +28,27 @@ export function daysLeft(expiresAt: string | null): number | null {
   return Math.round(diff / (1000 * 60 * 60 * 24));
 }
 
+/** 산 날부터 기한까지 중 얼마나 지났는지 — 상세 화면의 신선도 막대 */
+export interface Freshness {
+  /** 산 지 며칠째 (오늘 산 것 = 0) */
+  elapsed: number;
+  /** 기한까지 남은 날 (지났으면 음수) */
+  remaining: number;
+  /** 산 날부터 기한까지 전체 일수 (최소 1) */
+  total: number;
+  /** 0(산 날) ~ 1(기한 날·지남) */
+  ratio: number;
+}
+
+export function freshness(purchasedAt: string, expiresAt: string | null): Freshness | null {
+  const remaining = daysLeft(expiresAt);
+  const sincePurchase = daysLeft(purchasedAt);
+  if (remaining === null || sincePurchase === null) return null;
+  const elapsed = Math.max(0, -sincePurchase);
+  const total = Math.max(1, elapsed + remaining);
+  return { elapsed, remaining, total, ratio: Math.min(1, Math.max(0, elapsed / total)) };
+}
+
 export type ExpiryLevel = "expired" | "urgent" | "soon" | "ok" | "unknown";
 
 /**

@@ -17,7 +17,8 @@ import {
   History,
   UserRound,
 } from "lucide-react";
-import { useStore } from "@/lib/store";
+import { useFridge, useStore } from "@/lib/store";
+import { daysLeft } from "@/lib/expiry-calculator";
 import { useNotifications } from "@/lib/notifications";
 import ToastHost from "./ToastHost";
 import LiveClock from "./LiveClock";
@@ -98,6 +99,19 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const notifications = useNotifications();
   // 저장된 데이터를 불러온 뒤에만 배지를 그린다 (서버/클라이언트 불일치 방지)
   const unread = ready ? notifications.filter((n) => !n.read).length : 0;
+  const fridge = useFridge();
+  // 사이드바 숫자: 급한 재료(3일 안·지남) · 살 것 — 들어가 보지 않아도 할 일이 보이게
+  const urgentCount = ready
+    ? fridge.filter((i) => {
+        const d = daysLeft(i.expiresAt);
+        return d !== null && d <= 3;
+      }).length
+    : 0;
+  const toBuy = ready ? state.shopping.filter((s) => !s.checked).length : 0;
+  const badges: Record<string, { n: number; tone: string; sr: string } | undefined> = {
+    "/priority": urgentCount > 0 ? { n: urgentCount, tone: "bg-coral-50 text-coral-700", sr: "급한 재료" } : undefined,
+    "/shopping": toBuy > 0 ? { n: toBuy, tone: "bg-ink-900/[0.06] text-ink-700", sr: "살 것" } : undefined,
+  };
 
   return (
     <div className="min-h-dvh">
@@ -139,7 +153,17 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     className={active ? "text-fresh-700" : "text-ink-400"}
                     aria-hidden
                   />
-                  {label}
+                  <span className="min-w-0 flex-1">{label}</span>
+                  {badges[href] && (
+                    <span
+                      className={`grid h-6 min-w-6 place-items-center rounded-full px-1.5 text-[13.5px] font-semibold tabular-nums ${badges[href]!.tone}`}
+                    >
+                      <span aria-hidden>{badges[href]!.n}</span>
+                      <span className="sr-only">
+                        {badges[href]!.sr} {badges[href]!.n}개
+                      </span>
+                    </span>
+                  )}
                 </Link>
               );
             })}

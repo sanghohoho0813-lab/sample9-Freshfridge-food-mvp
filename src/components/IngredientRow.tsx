@@ -9,6 +9,7 @@ import { formatAmount } from "@/lib/quantity";
 import { isRunningLow, remainingRatio } from "@/lib/insights";
 import ExpiryBadge from "./ExpiryBadge";
 import IngredientThumb from "./IngredientThumb";
+import Highlight from "./Highlight";
 
 const TILE_BG: Record<string, string> = {
   expired: "bg-coral-50",
@@ -65,6 +66,7 @@ export default function IngredientRow({
   onEat,
   highlight = false,
   showStorage = true,
+  query,
 }: {
   ingredient: Ingredient;
   onEat?: (ingredient: Ingredient) => void;
@@ -72,6 +74,8 @@ export default function IngredientRow({
   highlight?: boolean;
   /** 보관위치 탭으로 이미 걸러 보는 화면에서는 끄고, 그 자리에 날짜를 보여준다 */
   showStorage?: boolean;
+  /** 검색 화면 — 이름에서 검색어와 맞는 부분 표시 */
+  query?: string;
 }) {
   const level = expiryLevel(ingredient.expiresAt);
   const hint = shortExpiry(ingredient.expiresAt);
@@ -93,7 +97,9 @@ export default function IngredientRow({
           sizes="56px"
         />
         <div className="min-w-0 flex-1">
-          <p className="line-clamp-2 text-[18px] font-semibold leading-snug text-ink-900">{ingredient.name}</p>
+          <p className="line-clamp-2 text-[18px] font-semibold leading-snug text-ink-900">
+            <Highlight text={ingredient.name} query={query} />
+          </p>
           <div className="mt-1 flex min-w-0 items-center gap-1.5">
             <ExpiryBadge expiresAt={ingredient.expiresAt} size="sm" />
             <p className="min-w-0 text-[15.5px] tabular-nums leading-snug text-ink-500">
